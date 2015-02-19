@@ -1,0 +1,118 @@
+<resources>
+
+    <!-- Base application the  - Base application theme.     me.  -->
+    <style name="AppTheme" parent="Theme.AppCompat.Light">
+        <!-- Customize your theme here. -->
+    </style>
+
+
+
+    <style name="Theme.Transparent" parent="android:Theme">
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowIsFloating">true</item>
+
+    </style>
+
+
+    <style name="DialogCustomTheme" parent="android:Theme.Holo.Dialog.NoActionBar">
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:colorBackgroundCacheHint">@null</item>
+    </style>
+
+
+
+
+
+    <style name="Divider">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">1.5dp</item>
+        <item name="android:layout_marginBottom">5dp</item>
+        <item name="android:layout_marginTop">5dp</item>
+        <item name="android:background">#cfc6cd</item>
+
+
+
+    </style>
+
+
+    <style name="SectionDiver">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">8dp</item>
+        <item name="android:layout_marginBottom">5dp</item>
+        <item name="android:layout_marginTop">5dp</item>
+        <item name="android:background">#cfc6cd</item>
+
+
+    </style>
+
+
+    <style name="Buttom_Devider">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">40dp</item>
+        <item name="android:layout_marginBottom">5dp</item>
+        <item name="android:layout_marginTop">5dp</item>
+
+    </style>
+
+
+    <style name="profile_setting_left_text_field_names">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textSize">@dimen/profile_setting_field_name_text_size</item>
+        <item name="android:layout_gravity">center</item>
+        <item name="android:padding">@dimen/profile_setting_text_padding</item>
+        <item name="android:gravity">left</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:layout_weight">1</item>
+    </style>
+
+    <style name="profile_setting_right_text">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textSize">@dimen/profile_setting_field_name_text_size</item>
+        <item name="android:layout_gravity">center</item>
+        <item name="android:padding">@dimen/profile_setting_text_padding</item>
+        <item name="android:gravity">right</item>
+        <item name="android:textStyle">italic</item>
+        <item name="android:layout_weight">1</item>
+    </style>
+
+    <style name="profile_setting_right_edit_image_icon">
+        <item name="android:layout_width">@dimen/profile_setting_profile_edit_icon_width</item>
+        <item name="android:layout_height">@dimen/profile_setting_profile_edit_icon_height</item>
+        <item name="android:src">@drawable/ic_edit</item>
+        <item name="android:padding">5dp</item>
+        <item name="android:layout_gravity">center</item>
+    </style>
+
+    <style name="profile_setting_subLinearLayout">
+        <item name="android:orientation">horizontal</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_gravity">center</item>
+
+
+    </style>
+
+
+    <!--NumberPicker style-->
+    <style name="my_number_picker">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_weight">1</item>
+
+
+    </style>
+
+    <style name="spinner_style">
+
+        <item name="android:textColor">#040404</item>
+        <item name="android:typeface">monospace</item>
+        <item name="android:background">#FFFFFF</item>
+    </style>
+
+
+</resources>

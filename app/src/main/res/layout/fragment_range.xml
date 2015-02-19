@@ -1,0 +1,102 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".MainActivity"
+    android:weightSum="1">
+
+    <RelativeLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginLeft="@dimen/activity_vertical_margin"
+        android:layout_marginRight="@dimen/activity_vertical_margin">
+
+        <Button
+            android:id="@+id/locate_address_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/button_find_address"
+            android:layout_alignParentRight="true" />
+
+        <AutoCompleteTextView
+            android:id="@+id/auto_complete_text_view"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/hint_enter_location"
+            android:inputType="text"
+            android:layout_toLeftOf="@id/locate_address_button"
+            android:layout_alignBaseline="@+id/locate_address_button" />
+
+        <!--
+        <EditText
+            android:id="@+id/et_location"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:inputType="text"
+            android:hint="@string/hnt_et_location"
+            android:layout_toLeftOf="@id/button_locate_address" />
+        -->
+
+    </RelativeLayout>
+
+    <fragment
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/range_map"
+        android:name="com.google.android.gms.maps.SupportMapFragment"
+        android:layout_weight="0.97" />
+
+    <RelativeLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginLeft="@dimen/activity_vertical_margin"
+        android:layout_marginRight="@dimen/activity_vertical_margin">
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:id="@+id/query_button_linear_layout"
+            android:layout_marginBottom="@dimen/query_button_linear_layout_bottom_margin">
+
+            <Button
+                android:id="@+id/range_query_button"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/button_range_query"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:layout_gravity="top" />
+
+            <!--
+            <Button
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/route_jump_button"
+                android:id="@+id/path_query_jump_button"
+                android:layout_alignParentRight="true"
+                android:layout_gravity="top" />
+            -->
+        </LinearLayout>
+
+
+        <TextView
+            android:id="@+id/map_bottom_text_view"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="@string/hint_map_bottom"
+            android:layout_toLeftOf="@id/query_button_linear_layout"
+            android:layout_marginBottom="@dimen/bottom_text_view"
+            android:gravity="center"
+            android:layout_centerVertical="true" />
+
+    </RelativeLayout>
+
+</LinearLayout>

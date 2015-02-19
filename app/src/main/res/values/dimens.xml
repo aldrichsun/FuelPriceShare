@@ -1,0 +1,29 @@
+<resources>
+    <!-- Default screen margins, per the Android Design guidelines. -->
+    <dimen name="activity_horizontal_margin">16dp</dimen>
+    <dimen name="activity_vertical_margin">16dp</dimen>
+
+    <dimen name="title">17dp</dimen>
+    <dimen name="rating">15dip</dimen>
+    <dimen name="genre">13dip</dimen>
+    <dimen name="year">12dip</dimen>
+
+
+    <dimen name="profile_setting_field_name_text_size">15dp</dimen>
+    <dimen name="profile_setting_profile_image_width">150dp</dimen>
+    <dimen name="profile_setting_profile_image_height">150dp</dimen>
+    <dimen name="profile_setting_profile_edit_icon_width">20dp</dimen>
+    <dimen name="profile_setting_profile_edit_icon_height">30dp</dimen>
+    <dimen name="profile_setting_text_padding">10dp</dimen>
+
+
+    <!--NumberPicker  -->
+    <dimen name="mynumberpicker_left_right_margin">10dp</dimen>
+    <dimen name="mynumberpicker_top_bottom_margin">10dp</dimen>
+
+    <!-- Default screen margins, per the Android Design guidelines. -->
+    <dimen name="bottom_text_view">8dp</dimen>
+    <dimen name="Route_top_padding">8dp</dimen>
+    <dimen name="query_button_linear_layout_bottom_margin">8dp</dimen>
+
+</resources>
