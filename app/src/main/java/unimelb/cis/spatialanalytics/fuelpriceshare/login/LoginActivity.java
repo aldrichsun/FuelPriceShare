@@ -36,7 +36,7 @@ import unimelb.cis.spatialanalytics.fuelpriceshare.config.ConfigConstant;
 import unimelb.cis.spatialanalytics.fuelpriceshare.config.ConfigURL;
 import unimelb.cis.spatialanalytics.fuelpriceshare.data.UserCookie;
 import unimelb.cis.spatialanalytics.fuelpriceshare.data.Users;
-import unimelb.cis.spatialanalytics.fuelpriceshare.help.RandomGenerateUniqueIDs;
+import unimelb.cis.spatialanalytics.fuelpriceshare.others.RandomGenerateUniqueIDs;
 import unimelb.cis.spatialanalytics.fuelpriceshare.http.AppController;
 import unimelb.cis.spatialanalytics.fuelpriceshare.http.CustomRequest;
 import unimelb.cis.spatialanalytics.fuelpriceshare.http.ImageUploader;

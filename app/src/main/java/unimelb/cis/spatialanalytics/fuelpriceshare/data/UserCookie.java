@@ -8,7 +8,7 @@ import com.facebook.Session;
 
 import org.json.JSONObject;
 
-import unimelb.cis.spatialanalytics.fuelpriceshare.activities.LoginActivity;
+import unimelb.cis.spatialanalytics.fuelpriceshare.login.LoginActivity;
 import unimelb.cis.spatialanalytics.fuelpriceshare.config.ConfigConstant;
 
 

@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<android.support.v4.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent">
+
+    <ScrollView
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:fillViewport="false"
+        android:id="@+id/profile_setting_scroll_view">
+
+        <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:background="#ffffff"
+            android:layout_height="match_parent">
+
+            <LinearLayout
+                style="@style/profile_setting_subLinearLayout"
+                android:id="@+id/profile_setting_linear_layout_profile_photo">
+
+                <TextView
+                    android:text="Profile Photo"
+                    style="@style/profile_setting_left_text_field_names"
+
+                    />
+
+                <ImageView
+                    android:layout_width="@dimen/profile_setting_profile_image_width"
+                    android:layout_height="@dimen/profile_setting_profile_image_height"
+                    android:src="@drawable/ic_action_picture"
+                    android:layout_gravity="center"
+
+                    android:id="@+id/profile_setting_profile_image" />
+
+
+            </LinearLayout>
+
+
+            <View style="@style/Divider" />
+
+            <LinearLayout
+                style="@style/profile_setting_subLinearLayout"
+                android:id="@+id/profile_setting_linear_layout_userid">
+
+                <TextView
+                    android:text="User ID"
+                    style="@style/profile_setting_left_text_field_names" />
+
+                <TextView
+                    android:text="User ID"
+                    android:id="@+id/profile_setting_userid"
+                    style="@style/profile_setting_right_text" />
+
+
+            </LinearLayout>
+
+            <View style="@style/Divider" />
+
+            <LinearLayout
+                style="@style/profile_setting_subLinearLayout"
+                android:id="@+id/profile_setting_linear_layout_username">
+
+                <TextView
+                    android:text="Username"
+                    style="@style/profile_setting_left_text_field_names" />
+
+                <TextView
+                    android:text="Name"
+                    style="@style/profile_setting_right_text"
+                    android:id="@+id/profile_setting_username" />
+
+                <ImageView style="@style/profile_setting_right_edit_image_icon" />
+
+
+            </LinearLayout>
+
+
+            <View style="@style/SectionDiver" />
+
+            <LinearLayout
+                style="@style/profile_setting_subLinearLayout"
+                android:id="@+id/profile_setting_linear_layout_fristname">
+
+                <TextView
+                    android:text="First Name"
+                    style="@style/profile_setting_left_text_field_names" />
+
+                <TextView
+                    android:text="First Name"
+                    android:id="@+id/profile_setting_firstname"
+                    style="@style/profile_setting_right_text" />
+
+                <ImageView style="@style/profile_setting_right_edit_image_icon" />
+
+            </LinearLayout>
+
+            <View style="@style/Divider" />
+
+            <LinearLayout
+                style="@style/profile_setting_subLinearLayout"
+                android:id="@+id/profile_setting_linear_layout_lastname">
+
+                <TextView
+                    android:text="Last Name"
+                    style="@style/profile_setting_left_text_field_names" />
+
+                <TextView
+                    android:text="Last Name"
+                    android:id="@+id/profile_setting_lastname"
+                    style="@style/profile_setting_right_text" />
+
+                <ImageView style="@style/profile_setting_right_edit_image_icon" />
+
+            </LinearLayout>
+
+
+            <View style="@style/Divider" />
+
+            <LinearLayout
+                style="@style/profile_setting_subLinearLayout"
+                android:id="@+id/profile_setting_linear_layout_gender">
+
+                <TextView
+                    android:text="Gender"
+                    style="@style/profile_setting_left_text_field_names" />
+
+                <TextView
+                    android:text="male"
+                    android:id="@+id/profile_setting_gender"
+                    style="@style/profile_setting_right_text" />
+
+                <ImageView style="@style/profile_setting_right_edit_image_icon" />
+
+            </LinearLayout>
+
+            <View style="@style/Divider" />
+
+            <LinearLayout
+                style="@style/profile_setting_subLinearLayout"
+                android:id="@+id/profile_setting_linear_layout_birth">
+
+                <TextView
+                    android:text="Birth"
+                    style="@style/profile_setting_left_text_field_names" />
+
+                <TextView
+                    android:text="Birth Day"
+                    android:id="@+id/profile_setting_birth"
+                    style="@style/profile_setting_right_text" />
+
+                <ImageView style="@style/profile_setting_right_edit_image_icon" />
+
+            </LinearLayout>
+
+
+            <View style="@style/Divider" />
+
+            <LinearLayout
+                style="@style/profile_setting_subLinearLayout"
+                android:id="@+id/profile_setting_linear_layout_whatup">
+
+                <TextView
+                    android:text="What's Up"
+                    style="@style/profile_setting_left_text_field_names" />
+
+                <TextView
+                    android:text="What's Up"
+                    android:id="@+id/profile_setting_whatup"
+                    style="@style/profile_setting_right_text" />
+
+                <ImageView style="@style/profile_setting_right_edit_image_icon" />
+
+            </LinearLayout>
+
+            <View style="@style/Buttom_Devider" />
+
+            <LinearLayout
+                style="@style/profile_setting_subLinearLayout"
+                android:orientation="vertical">
+
+
+                <Button
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Logout Me"
+                    android:textSize="20dip"
+                    android:textColor="#21dbd4"
+                    android:textStyle="bold"
+                    android:id="@+id/btnLogout"
+                    android:layout_marginTop="80dip"
+                    android:background="@color/material_blue_grey_800" />
+
+
+            </LinearLayout>
+
+            <View style="@style/Buttom_Devider"></View>
+        </LinearLayout>
+    </ScrollView>
+
+</android.support.v4.widget.DrawerLayout>

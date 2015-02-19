@@ -9,7 +9,7 @@ import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
 
-import com.example.spatialanalytics.fuelpricesharing.R;
+import unimelb.cis.spatialanalytics.fuelpriceshare.R;
 
 /**
  * A {@link android.preference.PreferenceActivity} that presents a set of application settings. On
