@@ -35,6 +35,8 @@ import unimelb.cis.spatialanalytics.fuelpriceshare.settings.SettingsActivity;
  */
 public class MainActivity extends ActionBarActivity {
 
+    private final String LOG_TAG = MainActivity.class.getSimpleName();
+
     private ActionBar actionBar;
     private DrawerLayout mDrawerLayout;
     private ListView mDrawerList;
@@ -49,17 +51,16 @@ public class MainActivity extends ActionBarActivity {
     private static final int FRAGMENT_PATH_SEARCH = 1;
     private static final int FRAGMENT_PROFILE = 2;
     private static final int FRAGMENT_CONTRIBUTE = 3;
-    private static final int FRAGMENT_SETTING = 4;
+
+    private static final int ACTIVITY_SETTING = 4;
 
     Fragment fragment = null;
     private int PRESENT_FRAGMENT_ID;
-    private final String TAG = "MainActivity";
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_navigate);
+        setContentView(R.layout.activity_main);
 
         mTitle = mDrawerTitle = getTitle();
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -152,7 +153,7 @@ public class MainActivity extends ActionBarActivity {
 
                 break;
             default:
-                Log.e(TAG, "No such case id");
+                Log.e(LOG_TAG, "No such case id");
                 break;
         }
         return super.onPrepareOptionsMenu(menu);
@@ -198,14 +199,14 @@ public class MainActivity extends ActionBarActivity {
             case FRAGMENT_PATH_SEARCH:
                 fragment = new PathFragment();
                 break;
-            case FRAGMENT_SETTING:
-                startActivity(new Intent(this, SettingsActivity.class));
-                break;
             case FRAGMENT_PROFILE:
                 fragment = new ProfileFragment();
                 break;
             case FRAGMENT_CONTRIBUTE:
                 fragment = new ModifyPricelFragment();
+                break;
+            case ACTIVITY_SETTING:
+                startActivity(new Intent(this, SettingsActivity.class));
                 break;
             default:
                 break;

@@ -41,59 +41,8 @@
 
     <!-- for intent passing between activities -->
     <string name="intent_pathActivity_text">intent_pathActivity_lat##lng##addr</string>
-    <string name="hello_blank_fragment">Hello blank fragment</string>
 
-    <string name="hello_world">Hello world!</string>
-
-    <!--
-    <string-array name="planets_array">
-        <item>Home</item>
-        <item>Profile Setting</item>
-        <item>Contribute Price</item>
-        <item>Others</item>
-
-    </string-array>
-
-    <string name="drawer_open">Open navigation drawer</string>
-    <string name="drawer_close">Close navigation drawer</string>
-    <string name="action_websearch">Web search</string>
-    -->
-
-    <string name="title_activity_test">TestActivity</string>
-    <string name="title_activity_register">RegisterActivity</string>
-    <string name="title_activity_login">LoginActivity</string>
-    <string name="title_activity_dashboard">DashboardActivity</string>
-    <string name="title_activity_upload_image">UploadImageActivity</string>
-    <string name="title_activity_main">MainActivity</string>
-    <string name="title_activity_upload">UploadActivity</string>
-    <string name="title_activity_add_content">AddContentActivity</string>
-    <string name="title_activity_list_view_test">ListViewTestActivity</string>
-    <string name="title_activity_canvas_activity_test">CanvasActivityTest</string>
+    <!-- for facebook login -->
     <string name="APP_ID">1589475934622660</string>
-
-    <drawable name="blue">#b0e0e6</drawable>
-    <drawable name="white">#ffffff</drawable>
-    <drawable name="black">#000000</drawable>
-    <drawable name="green">#347C2C</drawable>
-    <drawable name="pink">#FF00FF</drawable>
-    <drawable name="violet">#a020f0</drawable>
-    <drawable name="grey">#cccccc</drawable>
-    <drawable name="red">#C11B17</drawable>
-    <drawable name="yellow">#FFFF8C</drawable>
-    <drawable name="PowderBlue">#b0e0e6</drawable>
-    <drawable name="brown">#2F1700</drawable>
-
-    <string name="select_Category">Select Company</string>
-
-    <drawable name="darkgrey">#606060</drawable>
-
-    <string name="title_activity_user_profile_panel">UserProfilePanelActivity</string>
-    <string name="title_activity_login_control_acontrol">LoginControlAcontrolActivity</string>
-    <string name="title_activity_side_menu">SideMenuActivity</string>
-
-    <!-- Content Description -->
-    <string name="desc_list_item_icon">Item Icon</string>
-    <string name="title_activity_profile_setting">ProfileSettingActivity</string>
-    <string name="title_activity_do_refine">DoRefineActivity</string>
 
 </resources>
