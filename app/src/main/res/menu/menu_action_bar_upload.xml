@@ -6,6 +6,7 @@
     <!-- Single menu item 
          Set id, icon and Title for each menu item
     -->
+    <!--
 <group android:id="@+id/menu_group_1">
 
 
@@ -23,5 +24,6 @@
 
         android:title="Confirm" />
 </group>
+-->
 
 </menu>

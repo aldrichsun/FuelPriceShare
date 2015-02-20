@@ -131,14 +131,14 @@ public class ModifyPricelFragment extends Fragment implements ImageUploader.Imag
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        View rootView = inflater.inflate(R.layout.activity_do_refine, container, false);
+        View rootView = inflater.inflate(R.layout.fragment_do_refine, container, false);
         activity = getActivity();
         setHasOptionsMenu(true);
 
 
         actionBar = ((ActionBarActivity)getActivity()).getSupportActionBar();
         actionBar.setTitle(actionBarTitles[0]);
-        actionBar.setDisplayHomeAsUpEnabled(false);
+        //actionBar.setDisplayHomeAsUpEnabled(false);
 
 
         imageViewTakePhoto = (ImageView) rootView.findViewById(R.id.do_refine_take_photo);
@@ -661,7 +661,7 @@ public class ModifyPricelFragment extends Fragment implements ImageUploader.Imag
         } else {
 
             /**
-             * After finishing editing or withdrawing the refinement, back to main panel, and set everything
+             * After finishing uploading or withdrawing the refinement, back to main panel, and set everything
              * to initial status.
              */
 

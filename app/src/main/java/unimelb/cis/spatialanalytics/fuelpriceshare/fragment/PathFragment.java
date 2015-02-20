@@ -45,6 +45,7 @@ import java.util.List;
 
 import unimelb.cis.spatialanalytics.fuelpriceshare.maps.autoComplete.AutoCompleteAdapter;
 import unimelb.cis.spatialanalytics.fuelpriceshare.maps.query.PathQuery;
+import unimelb.cis.spatialanalytics.fuelpriceshare.others.CustomizeMapMarker;
 
 /**
  * Created by Yu Sun on 19/02/2015.
@@ -603,7 +604,23 @@ public class PathFragment extends Fragment {
                                 .position(location)
                                 .title(stationName)
                                 .snippet(sb.toString())
-                                .icon(BitmapDescriptorFactory.fromResource(R.drawable.fuel_icon));
+//                                  .icon(BitmapDescriptorFactory.fromBitmap(
+//                                          CustomizeMapMarker.writeTextOnDrawable(
+//                                                (android.support.v7.app.ActionBarActivity) getActivity(),
+//                                                getActivity().getApplicationContext(),
+//                                                //R.drawable.blue_rect,
+//                                                R.drawable.rounded_rect,
+//                                                sb.toString(),
+//                                                Color.RED
+//                                          )
+//                                  ));
+                                .icon(BitmapDescriptorFactory.fromBitmap(
+                                        CustomizeMapMarker.generateBitmapFromText(
+                                                getActivity().getApplicationContext(),
+                                                sb.toString(),
+                                                Color.RED
+                                        )
+                                ));
                         // We display the marker's info window after place it in the map
                         Marker marker = pathMap.addMarker(markerOptions);
                         //marker.showInfoWindow();

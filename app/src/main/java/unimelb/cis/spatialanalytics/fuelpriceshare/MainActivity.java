@@ -116,7 +116,7 @@ public class MainActivity extends ActionBarActivity {
 
         // Inflate the menu items for use in the action bar
         // TODO may check it: 20/02/2015
-      //  MenuInflater inflater = getMenuInflater();
+     // MenuInflater inflater = getMenuInflater();
      //   inflater.inflate(R.menu.menu_navdrawer, menu);
         return super.onCreateOptionsMenu(menu);
     }
@@ -191,6 +191,8 @@ public class MainActivity extends ActionBarActivity {
         // update the main content by replacing fragments
 
         PRESENT_FRAGMENT_ID = position;
+        if(position!=FRAGMENT_CONTRIBUTE)
+            ModifyPricelFragment.isMenuVisible=false;
 
         switch (position){
             case FRAGMENT_RANGE_SEARCH:
