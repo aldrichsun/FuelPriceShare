@@ -46,6 +46,7 @@ import java.util.List;
 import unimelb.cis.spatialanalytics.fuelpriceshare.maps.autoComplete.AutoCompleteAdapter;
 import unimelb.cis.spatialanalytics.fuelpriceshare.maps.query.PathQuery;
 import unimelb.cis.spatialanalytics.fuelpriceshare.others.CustomizeMapMarker;
+import unimelb.cis.spatialanalytics.fuelpriceshare.others.DrawMarkersOnMap;
 
 /**
  * Created by Yu Sun on 19/02/2015.
@@ -575,63 +576,69 @@ public class PathFragment extends Fragment {
                 stations = result.getJSONArray(RESULT_STATION_KEY);
 
                 //Else show all the stations
-                for(int i = 0; i < stations.length(); i++){
-
-                    JSONObject station = null;
-                    try {
-                        station = stations.getJSONObject(i);
-
-                        Log.v(LOG_TAG, "Station " + i + " :" + station.toString());
-
-                        LatLng location = new LatLng(
-                                station.getDouble( getString(R.string.column_latitude) ),
-                                station.getDouble( getString(R.string.column_longitude) )
-                        );
-
-                        String stationName = station.getString(getString(R.string.column_station_name));
-                        StringBuilder sb = new StringBuilder();
-                        JSONArray fuelAndPriceList = station.getJSONArray( getString(R.string.column_fuel_provided) );
-                        for(int j = 0; j < fuelAndPriceList.length(); j++){
-                            JSONObject fuelAndPrice = fuelAndPriceList.getJSONObject(j);
-                            sb.append(
-                                    fuelAndPrice.getString( getString(R.string.column_fuel) ) + ": " +
-                                            fuelAndPrice.getString( getString(R.string.column_price) ) + " "
-                            );
-                        }
-
-                        // Add a corresponding marker in the map
-                        MarkerOptions markerOptions = new MarkerOptions()
-                                .position(location)
-                                .title(stationName)
-                                .snippet(sb.toString())
-//                                  .icon(BitmapDescriptorFactory.fromBitmap(
-//                                          CustomizeMapMarker.writeTextOnDrawable(
-//                                                (android.support.v7.app.ActionBarActivity) getActivity(),
+//                for(int i = 0; i < stations.length(); i++){
+//
+//                    JSONObject station = null;
+//                    try {
+//                        station = stations.getJSONObject(i);
+//
+//                        Log.v(LOG_TAG, "Station " + i + " :" + station.toString());
+//
+//                        LatLng location = new LatLng(
+//                                station.getDouble( getString(R.string.column_latitude) ),
+//                                station.getDouble( getString(R.string.column_longitude) )
+//                        );
+//
+//                        String stationName = station.getString(getString(R.string.column_station_name));
+//                        StringBuilder sb = new StringBuilder();
+//                        JSONArray fuelAndPriceList = station.getJSONArray( getString(R.string.column_fuel_provided) );
+//                        for(int j = 0; j < fuelAndPriceList.length(); j++){
+//                            JSONObject fuelAndPrice = fuelAndPriceList.getJSONObject(j);
+//                            sb.append(
+//                                    fuelAndPrice.getString( getString(R.string.column_fuel) ) + ": " +
+//                                            fuelAndPrice.getString( getString(R.string.column_price) ) + " "
+//                            );
+//                        }
+//
+//                        // Add a corresponding marker in the map
+//                        MarkerOptions markerOptions = new MarkerOptions()
+//                                .position(location)
+//                                .title(stationName)
+//                                .snippet(sb.toString())
+////                                  .icon(BitmapDescriptorFactory.fromBitmap(
+////                                          CustomizeMapMarker.writeTextOnDrawable(
+////                                                (android.support.v7.app.ActionBarActivity) getActivity(),
+////                                                getActivity().getApplicationContext(),
+////                                                //R.drawable.blue_rect,
+////                                                R.drawable.rounded_rect,
+////                                                sb.toString(),
+////                                                Color.RED
+////                                          )
+////                                  ));
+//                                .icon(BitmapDescriptorFactory.fromBitmap(
+//                                        CustomizeMapMarker.generateBitmapFromText(
 //                                                getActivity().getApplicationContext(),
-//                                                //R.drawable.blue_rect,
-//                                                R.drawable.rounded_rect,
 //                                                sb.toString(),
 //                                                Color.RED
-//                                          )
-//                                  ));
-                                .icon(BitmapDescriptorFactory.fromBitmap(
-                                        CustomizeMapMarker.generateBitmapFromText(
-                                                getActivity().getApplicationContext(),
-                                                sb.toString(),
-                                                Color.RED
-                                        )
-                                ));
-                        // We display the marker's info window after place it in the map
-                        Marker marker = pathMap.addMarker(markerOptions);
-                        //marker.showInfoWindow();
+//                                        )
+//                                ));
+//                        // We display the marker's info window after place it in the map
+//                        Marker marker = pathMap.addMarker(markerOptions);
+//                        //marker.showInfoWindow();
+//
+//                    } catch (JSONException e) {
+//                        if( station != null )
+//                            Log.e(LOG_TAG, "Error when parsing the json object:" + station.toString(), e);
+//                        else
+//                            Log.e(LOG_TAG, "Error when getting json object form json array", e);
+//                    }
+//                } // end for all stations
 
-                    } catch (JSONException e) {
-                        if( station != null )
-                            Log.e(LOG_TAG, "Error when parsing the json object:" + station.toString(), e);
-                        else
-                            Log.e(LOG_TAG, "Error when getting json object form json array", e);
-                    }
-                } // end for all stations
+                DrawMarkersOnMap.drawOnMap(
+                        (android.support.v7.app.ActionBarActivity) getActivity(),
+                        pathMap,
+                        stations
+                );
 
                 return;
             } catch (JSONException e){

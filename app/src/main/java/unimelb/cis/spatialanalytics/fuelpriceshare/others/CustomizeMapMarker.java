@@ -16,13 +16,21 @@ import android.support.v7.app.ActionBarActivity;
 
 /**
  * Created by Yu Sun on 20/02/2015.
- * This class creates the customized markers to show on Google Map.
+ * This 'functional class' creates the customized markers to show on Google Map.
  * The customized marker shows the fuel price directly without any clicking.
  * Thanks to: http://stackoverflow.com/questions/13763545/android-maps-api-v2-with-custom-markers
  */
 public class CustomizeMapMarker {
 
 
+    /**
+     * This function generates a bitmap using the given text (with a transparent rectangle
+     * background), or for better understanding converts the text into a bitmap image.
+     * @param context -- the context (or activity) we do the conversion
+     * @param text -- the text to be converted
+     * @param color -- the color of the text in the generated image
+     * @return a bitmap with a transparent background showing the given text in the given color
+     */
     public static Bitmap generateBitmapFromText( Context context, String text, int color ){
 
         Typeface tf = Typeface.create("Helvetica", Typeface.BOLD);
@@ -55,6 +63,18 @@ public class CustomizeMapMarker {
         return bm;
     }
 
+    /**
+     * This function generates a bitmap using the given text with the given background.
+     * In other words, it writes the text into the given image.
+     * The given background (image) is a drawable file, which is either a Shape Drawable (xml file)
+     * or a Bitmap file.
+     * @param actionBarActivity -- the activity we perform the generation
+     * @param context -- the context (or activity) we perform the generation
+     * @param drawableId -- the id of the drawable file
+     * @param text -- the text to be written into the background
+     * @param color -- the color of the text in the generated image
+     * @return a bitmap with the given background showing the given text in the given color
+     */
     public static Bitmap writeTextOnDrawable(ActionBarActivity actionBarActivity,
               Context context, int drawableId, String text, int color) {
 
@@ -89,6 +109,10 @@ public class CustomizeMapMarker {
         return bm;
     }
 
+    /**
+     * This function converts the metrics DP into pixel.
+     * Increase the given nDP if need a larger text.
+     */
     private static int convertToPixels(Context context, int nDP){
 
         final float conversionScale = context.getResources().getDisplayMetrics().density;
@@ -97,6 +121,8 @@ public class CustomizeMapMarker {
     }
 
 
+    /** This function converts a Shape drawable into a bitmap or creates a copy of a Btimap,
+     * depending on the given drawable resource type. */
     // Yu Sun 20/02/2015:
     // Thanks to:
     // http://stackoverflow.com/questions/24389043/bitmapfactory-decoderesourse-returns-null-for-shape-defined-in-xml-drawable

@@ -1,6 +1,7 @@
 package unimelb.cis.spatialanalytics.fuelpriceshare.others;
 
 import android.graphics.Color;
+import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 
@@ -20,22 +21,28 @@ import unimelb.cis.spatialanalytics.fuelpriceshare.R;
 
 /**
  * Created by Yu Sun on 20/02/2015.
+ * This 'functional class' draws the points (fuel stations) stored in a json array on the given map.
  */
 public class DrawMarkersOnMap {
 
     private static final String LOG_TAG = DrawMarkersOnMap.class.getSimpleName();
 
     /**
-     * Created by Yu Sun on 21/02/2015
-     * @param actionBarActivity
-     * @param mMap
-     * @param jsonArray
-     * @param preferredFuelType
+     * Created by Yu Sun on 21/02/2015:
+     * This function draws the points (fuel stations) stored in a json array on the given map.
+     * @param actionBarActivity -- the activity the map will be presented
+     * @param mMap -- the map we draw markers on
+     * @param jsonArray -- the json array storing the points (fuel stations)
      */
     public static void drawOnMap( ActionBarActivity actionBarActivity,
                                   GoogleMap mMap,
-                                  JSONArray jsonArray,
-                                  String preferredFuelType){
+                                  JSONArray jsonArray){
+
+        String preferredFuelType = PreferenceManager.getDefaultSharedPreferences(actionBarActivity)
+                .getString(
+                        actionBarActivity.getString(R.string.pref_key_preferred_fuel),
+                        "Unleaded"
+                );
 
         double minPrice = Double.MAX_VALUE;
         int minStationIndex = 0;
@@ -48,7 +55,7 @@ public class DrawMarkersOnMap {
             try {
                 station = jsonArray.getJSONObject(i);
 
-                Log.v(LOG_TAG, "Station " + i + " :" + station.toString());
+                //Log.v(LOG_TAG, "Station " + i + " :" + station.toString());
 
                 LatLng location = new LatLng(
                         station.getDouble( actionBarActivity.getString(R.string.column_latitude) ),
@@ -66,7 +73,7 @@ public class DrawMarkersOnMap {
                     JSONObject fuelAndPrice = fuelAndPriceList.getJSONObject(j);
                     String fuelType = fuelAndPrice.getString(actionBarActivity.getString(R.string.column_fuel));
 
-                    if( !fuelType.equals( preferredFuelType ) )
+                     if( !fuelType.equals( preferredFuelType ) )
                         continue;
 
                     fuelPrice = fuelAndPrice.getString( actionBarActivity.getString(R.string.column_price) );
@@ -81,12 +88,12 @@ public class DrawMarkersOnMap {
                         .snippet(sb.toString())
 //                            .icon(BitmapDescriptorFactory.fromBitmap(
 //                                    CustomizeMapMarker.writeTextOnDrawable(
-//                                            (android.support.v7.app.ActionBarActivity) getActivity(),
-//                                            getActivity().getApplicationContext(),
+//                                            actionBarActivity,
+//                                            actionBarActivity.getApplicationContext(),
 //                                            //R.drawable.blue_rect,
 //                                            R.drawable.rounded_rect,
 //                                            sb.toString(),
-//                                            Color.RED
+//                                            Color.BLUE
 //                                    )));
                         .icon(BitmapDescriptorFactory.fromBitmap(
                                 CustomizeMapMarker.generateBitmapFromText(
@@ -117,7 +124,7 @@ public class DrawMarkersOnMap {
             }
         } // end for all stations
 
-        Log.v(LOG_TAG, "Station " + minStationIndex + " " + "has the lowest price: " + fuelPrice);
+        //Log.v(LOG_TAG, "Station " + minStationIndex + " " + "has the lowest price: " + fuelPrice);
 
         // change the color of the marker representing the fuel station with the minimum price
         focusMarker.remove();
@@ -128,20 +135,19 @@ public class DrawMarkersOnMap {
                 .snippet(focusMarker.getSnippet())
 //                            .icon(BitmapDescriptorFactory.fromBitmap(
 //                                    CustomizeMapMarker.writeTextOnDrawable(
-//                                            (android.support.v7.app.ActionBarActivity) getActivity(),
-//                                            getActivity().getApplicationContext(),
+//                                            actionBarActivity,
+//                                            actionBarActivity.getApplicationContext(),
 //                                            //R.drawable.blue_rect,
 //                                            R.drawable.rounded_rect,
-//                                            sb.toString(),
+//                                            focusMarker.getSnippet(),
 //                                            Color.RED
 //                                    )));
-                .icon(BitmapDescriptorFactory.fromBitmap(
-                        CustomizeMapMarker.generateBitmapFromText(
-                                actionBarActivity.getApplicationContext(),
-                                focusMarker.getSnippet(),
-                                Color.RED
-                        )
-                ));
+                          .icon(BitmapDescriptorFactory.fromBitmap(
+                                  CustomizeMapMarker.generateBitmapFromText(
+                                          actionBarActivity.getApplicationContext(),
+                                          focusMarker.getSnippet(),
+                                          Color.RED
+                                  )));
         focusMarker = mMap.addMarker(focusMarkerOptions);
 
         //////// 14/02/2015 Yu Sun: zoom out the map for one level and move the focus to a fuel station ////////////
@@ -157,9 +163,12 @@ public class DrawMarkersOnMap {
     }
 
     /**
-     * TODO add comments
-     * @param jsonArray
-     * @param focusMarker
+     * Yu Sun 21/02/2015: Given the returned stations and the station we need to move
+     * the focus, this methods determines the zoom level of the map camera.
+     * Currently, the implementation of this class is very straightforward. To customized
+     * the camera view after the query results, modify this method at your will.
+     * @param jsonArray -- the stations json array
+     * @param focusMarker -- the station we focus on
      * @return
      */
     private static int determineZoomLevel( JSONArray jsonArray, Marker focusMarker ){

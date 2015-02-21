@@ -499,7 +499,7 @@ public class RangeFragment extends Fragment {
             MarkerOptions current_markerOptions = new MarkerOptions();
             current_markerOptions.position(latLng);
             current_markerOptions.title(addressText);
-            Marker focus_marker = mMap.addMarker(current_markerOptions);
+            mMap.addMarker(current_markerOptions);
 
             //Else show all the station markers
 //            Marker marker = focus_marker;
@@ -576,9 +576,8 @@ public class RangeFragment extends Fragment {
             DrawMarkersOnMap.drawOnMap(
                     (android.support.v7.app.ActionBarActivity) getActivity(),
                     mMap,
-                    jsonArray,
-                    "LPG" 
-                    );
+                    jsonArray
+            );
 
         } // end post execute
     }// end range query task

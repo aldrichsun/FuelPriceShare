@@ -83,8 +83,9 @@ public class SettingsActivity extends PreferenceActivity {
         // Bind the summaries of EditText/List/Dialog/Ringtone preferences to
         // their values. When their values change, their summaries are updated
         // to reflect the new value, per the Android Design guidelines.
-        bindPreferenceSummaryToValue(findPreference("range_distance_list"));
-        bindPreferenceSummaryToValue(findPreference("path_distance_list"));
+        bindPreferenceSummaryToValue(findPreference(getString(R.string.pref_key_range_distance)));
+        bindPreferenceSummaryToValue(findPreference(getString(R.string.pref_key_path_distance)));
+        bindPreferenceSummaryToValue(findPreference(getString(R.string.pref_key_preferred_fuel)));
     }
 
     /**

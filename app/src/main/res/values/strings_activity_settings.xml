@@ -53,6 +53,34 @@
         <item>50.0</item>
     </string-array>
 
+    <string name="pref_key_preferred_fuel">preferred_fuel_list</string>
+    <string name="pref_default_preferred_fuel">Unleaded</string>
+    <string name="pref_title_preferred_fuel">Preferred fuel</string>
+
+    <string-array name="pref_fuel_list_titles">
+        <item>Unleaded</item>
+        <item>E10</item>
+        <item>Unleaded 95</item>
+        <item>Unleaded 98</item>
+        <item>LPG</item>
+        <item>Diesel</item>
+        <item>Bio-diesel</item>
+        <item>Premium Diesel</item>
+        <item>E85</item>
+    </string-array>
+
+    <string-array name="pref_fuel_list_values">
+        <item>Unleaded</item>
+        <item>E10</item>
+        <item>Unleaded 95</item>
+        <item>Unleaded 98</item>
+        <item>LPG</item>
+        <item>Diesel</item>
+        <item>Bio-diesel</item>
+        <item>Premium Diesel</item>
+        <item>E85</item>
+    </string-array>
+
     <!-- Example General settings -->
     <!--
     <string name="pref_header_general">General</string>

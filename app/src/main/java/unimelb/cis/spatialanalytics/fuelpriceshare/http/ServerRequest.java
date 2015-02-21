@@ -49,24 +49,24 @@ public class ServerRequest {
             urlConnection = (HttpURLConnection) url.openConnection();
 
             urlConnection.setRequestMethod("GET");
-            Log.v(LOG_TAG, "Connecting to the URL...");
+            //Log.v(LOG_TAG, "Connecting to the URL...");
             urlConnection.connect();
 
-            Log.v(LOG_TAG, "The response code is: " + String.valueOf(urlConnection.getResponseCode()));
-            Log.v(LOG_TAG, "The response message is: " + urlConnection.getResponseMessage());
+            //Log.v(LOG_TAG, "The response code is: " + String.valueOf(urlConnection.getResponseCode()));
+            //Log.v(LOG_TAG, "The response message is: " + urlConnection.getResponseMessage());
 
             // Read the input stream into a String
             InputStream inputStream = urlConnection.getInputStream();
             StringBuffer buffer = new StringBuffer();
             if ( inputStream == null ) {
-                Log.v(LOG_TAG, "The obtained input stream is empty");
+                Log.e(LOG_TAG, "The obtained input stream is empty");
                 // Nothing to do
                 return null;
             }
             reader = new BufferedReader(new InputStreamReader(inputStream));
 
             String line;
-            Log.v(LOG_TAG, "Reading from the URL...");
+            //Log.v(LOG_TAG, "Reading from the URL...");
             while ((line = reader.readLine()) != null){
                 // Since it's JSON, adding a newline isn't necessary (it won't
                 // affect parsing). But it does make debugging a lot easier if you
@@ -74,14 +74,14 @@ public class ServerRequest {
                 buffer.append(line + "\n");
             }
 
-            Log.v(LOG_TAG, "The returned content length is: " + String.valueOf(buffer.length()));
+            //Log.v(LOG_TAG, "The returned content length is: " + String.valueOf(buffer.length()));
 
             if (buffer.length() == 0) {
                 // Stream was empty.
                 return null;
             }
             resStr = buffer.toString();
-            Log.v(LOG_TAG, "The returned string is: " + resStr);
+            //Log.v(LOG_TAG, "The returned string is: " + resStr);
 
         } catch (IOException e) {
 
