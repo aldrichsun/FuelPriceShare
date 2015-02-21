@@ -33,6 +33,7 @@ import unimelb.cis.spatialanalytics.fuelpriceshare.data.UserCookie;
 import unimelb.cis.spatialanalytics.fuelpriceshare.data.Users;
 import unimelb.cis.spatialanalytics.fuelpriceshare.http.AppController;
 import unimelb.cis.spatialanalytics.fuelpriceshare.http.CustomRequest;
+import unimelb.cis.spatialanalytics.fuelpriceshare.http.MyExceptionHandler;
 
 
 public class RegisterActivity extends Activity  {
@@ -148,7 +149,8 @@ public class RegisterActivity extends Activity  {
 
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        Log.e(TAG, "Error: " + error.getMessage());
+
+                        MyExceptionHandler.presentError(TAG,"Register failed",getApplicationContext(),error);
                     }
                 });
                // Adding request to request queue

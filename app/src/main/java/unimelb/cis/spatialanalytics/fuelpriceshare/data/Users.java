@@ -36,6 +36,8 @@ public class Users {
     public static String whatup = "";
     public static String password = "";
 
+    public static String tempProfielImageName="";
+
     private static final String TAG = "Users";
 
     /*
@@ -109,6 +111,11 @@ public class Users {
     }
 
 
+    /**
+     * Get user JSONObject
+     * @return
+     */
+
     public static JSONObject getUserJSON() {
         JSONObject json = new JSONObject();
         try {
@@ -134,6 +141,42 @@ public class Users {
         return json;
 
     }
+
+
+    /**
+     * Get user JSONObject for uploading image to the server
+     * @param profileImageTemp profile image name
+     * @return JSONObject
+     */
+    public static JSONObject getUserJSONForImageUpload(String profileImageTemp) {
+
+        tempProfielImageName=profileImageTemp;
+
+        JSONObject json = new JSONObject();
+        try {
+            json.put(KEY_ID, id);
+            json.put(KEY_FBID, fbId);
+            json.put(KEY_FIRST_NAME, firstName);
+            json.put(KEY_LAST_NAME, lastName);
+            json.put(KEY_MIDDLE_NAME, middleName);
+            json.put(KEY_USERNAME, userName);
+            json.put(KEY_EMAIL, email);
+            json.put(KEY_PHONE, phone);
+            json.put(KEY_GENDER, gender);
+            json.put(KEY_BIRTH, birth);
+            json.put(KEY_PROFILEIMAGE, profileImageTemp);
+            json.put(KEY_WHATUP, whatup);
+            json.put(KEY_PASSWORD, password);
+
+            //     json.put(KEY_BITMAP,bitmap);
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return json;
+
+    }
+
 
 
     /**

@@ -7,14 +7,12 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBar;
+import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBarDrawerToggle;
-
 import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
@@ -22,9 +20,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
-import unimelb.cis.spatialanalytics.fuelpriceshare.R;
-import unimelb.cis.spatialanalytics.fuelpriceshare.config.ConfigConstant;
-import unimelb.cis.spatialanalytics.fuelpriceshare.fragment.ModifyPricelFragment;
+import unimelb.cis.spatialanalytics.fuelpriceshare.fragment.ContributePriceFragment;
 import unimelb.cis.spatialanalytics.fuelpriceshare.fragment.PathFragment;
 import unimelb.cis.spatialanalytics.fuelpriceshare.fragment.ProfileFragment;
 import unimelb.cis.spatialanalytics.fuelpriceshare.fragment.RangeFragment;
@@ -139,17 +135,19 @@ public class MainActivity extends ActionBarActivity {
          * Handle Fragment Menu if special requirements are needed
          */
         switch (PRESENT_FRAGMENT_ID) {
-            case ConfigConstant.KEY_FRAGMENT_HOME:
+            case FRAGMENT_RANGE_SEARCH:
                 break;
-            case ConfigConstant.KEY_FRAGMENT_PROFILE:
+            case FRAGMENT_PATH_SEARCH:
                 break;
-            case ConfigConstant.KEY_FRAGMENT_REFINE_PRICE:
+            case FRAGMENT_PROFILE:
+                break;
+            case FRAGMENT_CONTRIBUTE:
                 if (drawerOpen)
                     menu.setGroupVisible(R.id.menu_group, false);
                 else // TODO discuss with Han
-                    menu.setGroupVisible(R.id.menu_group, ModifyPricelFragment.isMenuVisible);
+                    menu.setGroupVisible(R.id.menu_group, ContributePriceFragment.isMenuVisible);
                 break;
-            case ConfigConstant.KEY_FRAGMENT_OTHER:
+            case ACTIVITY_SETTING:
 
                 break;
             default:
@@ -203,7 +201,7 @@ public class MainActivity extends ActionBarActivity {
                 fragment = new ProfileFragment();
                 break;
             case FRAGMENT_CONTRIBUTE:
-                fragment = new ModifyPricelFragment();
+                fragment = new ContributePriceFragment();
                 break;
             case ACTIVITY_SETTING:
                 startActivity(new Intent(this, SettingsActivity.class));

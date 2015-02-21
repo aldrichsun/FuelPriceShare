@@ -26,7 +26,6 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.ImageLoader;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
@@ -43,16 +42,17 @@ import unimelb.cis.spatialanalytics.fuelpriceshare.config.ConfigConstant;
 import unimelb.cis.spatialanalytics.fuelpriceshare.config.ConfigURL;
 import unimelb.cis.spatialanalytics.fuelpriceshare.data.UserCookie;
 import unimelb.cis.spatialanalytics.fuelpriceshare.data.Users;
-import unimelb.cis.spatialanalytics.fuelpriceshare.others.ImagePicker;
-import unimelb.cis.spatialanalytics.fuelpriceshare.others.RandomGenerateUniqueIDs;
 import unimelb.cis.spatialanalytics.fuelpriceshare.http.AppController;
 import unimelb.cis.spatialanalytics.fuelpriceshare.http.CustomRequest;
-import unimelb.cis.spatialanalytics.fuelpriceshare.http.ImageUploader;
+import unimelb.cis.spatialanalytics.fuelpriceshare.http.MultiPartRequest;
+import unimelb.cis.spatialanalytics.fuelpriceshare.http.MyExceptionHandler;
+import unimelb.cis.spatialanalytics.fuelpriceshare.others.ImagePicker;
+import unimelb.cis.spatialanalytics.fuelpriceshare.others.RandomGenerateUniqueIDs;
 
 /**
  * Created by hanl4 on 17/02/2015.
  */
-public class ProfileFragment extends Fragment implements ImageUploader.ImageUploaderReply {
+public class ProfileFragment extends Fragment {
 
 
      /*
@@ -93,17 +93,11 @@ public class ProfileFragment extends Fragment implements ImageUploader.ImageUplo
     private final int SELECT_FILE = ConfigConstant.SELECT_FILE;
 
 
-    /**
-     * For HTTP Request interface return code
-     */
-    private final int REQUEST_CODE_IMAGE_UPLOAD = ConfigConstant.REQUEST_CODE_IMAGE_UPLOAD;
-    private final int REQUEST_CODE_COUCHDB = ConfigConstant.REQUEST_CODE_COUCHDB;
 
 
     /**
      * HTTP Request Interface
      */
-    private final ImageUploader.ImageUploaderReply imageUploaderReply = this;
 
     private final String KEY_ERROR = ConfigConstant.KEY_ERROR;
 
@@ -328,6 +322,7 @@ public class ProfileFragment extends Fragment implements ImageUploader.ImageUplo
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         Log.e(TAG, "Image Load Error: " + error.getMessage());
+                       // MyExceptionHandler.presentError(TAG,"Can not show profile image",getActivity(),error);
                     }
 
                     @Override
@@ -627,6 +622,57 @@ public class ProfileFragment extends Fragment implements ImageUploader.ImageUplo
 
 
     /**
+     * Upload profile image to the server
+     *
+     * @param fileName   new image name with unique id
+     * @param stringData string data to upload as well
+     */
+
+    public void uploadProfileImage2Server(String fileName, String stringData) {
+        // Tag used to cancel the request
+        String tag_json_obj = TAG;
+
+        /**
+         * Use google Volley lib to upload an image
+         */
+        MultiPartRequest multiPartRequest = new MultiPartRequest(ConfigURL.getUploadImageServlet(), new File(profileImagePath), fileName, stringData, new Response.Listener<JSONObject>() {
+
+            @Override
+            public void onResponse(JSONObject response) {
+                Log.d(TAG, response.toString());
+                if (response.has(KEY_ERROR)) {
+                    Log.e(TAG, "profile image upload failed!"+response.toString());
+
+                } else {
+                    //if upload success, update local session
+                    imageViewProfiePhoto.setImageBitmap(bitmapProfileImage);
+                    Users.profileImage = Users.tempProfielImageName;
+                    Users.tempProfielImageName = "";
+
+                    //Profile Image was successfully uploaded to the server
+                    isModify = false;
+                    Users.bitmap = bitmapProfileImage;
+                    UserCookie.storeUserLocal(pref);//update local session
+                }
+            }
+        }, new Response.ErrorListener() {
+
+            @Override
+            public void onErrorResponse(VolleyError error) {
+
+
+                MyExceptionHandler.presentError(TAG, "Update profile image failed!", getActivity(), error);
+
+
+            }
+        });
+        // Adding request to request queue
+        AppController.getInstance().addToRequestQueue(multiPartRequest, tag_json_obj);
+
+    }
+
+
+    /**
      * Receive all the returning results of children activities. Detailed information please refer to the
      * official android programming document
      *
@@ -654,11 +700,15 @@ public class ProfileFragment extends Fragment implements ImageUploader.ImageUplo
                     imageViewProfiePhoto.setImageBitmap(bitmapProfileImage);
                     fileName = RandomGenerateUniqueIDs.getFileName("png");
 
-                    Users.profileImage = ConfigURL.getImagePathBase() + fileName;
-                    data = Users.getUserJSON().toString();
+                    data = Users.getUserJSONForImageUpload(ConfigURL.getImagePathBase() + fileName).toString();
+                    uploadProfileImage2Server(fileName, data);
 
-                    new ImageUploader(imageUploaderReply, bitmapProfileImage, data, REQUEST_CODE_IMAGE_UPLOAD, fileName, null);
-
+                       /*
+                       //Another method defined by Han. Not encourage to use.
+                        Users.profileImage = ConfigURL.getImagePathBase() + fileName;
+                        data = Users.getUserJSON().toString();
+                        new ImageUploader(imageUploaderReply, bitmapProfileImage, data, REQUEST_CODE_IMAGE_UPLOAD, fileName, null);
+                        */
 
                     break;
                 case SELECT_FILE:
@@ -669,13 +719,20 @@ public class ProfileFragment extends Fragment implements ImageUploader.ImageUplo
                         profileImagePath = imagePicker.getImagePath(intent.getData());
                         bitmapProfileImage = BitmapFactory.decodeFile(profileImagePath);
                         imageViewProfiePhoto.setImageBitmap(bitmapProfileImage);
+
                         fileName = RandomGenerateUniqueIDs.getFileName("png");
 
+                        data = Users.getUserJSONForImageUpload(ConfigURL.getImagePathBase() + fileName).toString();
+                        uploadProfileImage2Server(fileName, data);
+
+
+
+                       /*
+                       //Another method defined by Han. Not encourage to use.
                         Users.profileImage = ConfigURL.getImagePathBase() + fileName;
                         data = Users.getUserJSON().toString();
                         new ImageUploader(imageUploaderReply, bitmapProfileImage, data, REQUEST_CODE_IMAGE_UPLOAD, fileName, null);
-
-
+                        */
                     } else {
                         Log.e(TAG, "No image file is selected");
                     }
@@ -689,45 +746,7 @@ public class ProfileFragment extends Fragment implements ImageUploader.ImageUplo
         }
     }
 
-    /**
-     * Interface implementation. Receive the response from the server of which the request was usually made by new ImageUploader
-     *
-     * @param reply       reply message from the server, known as response
-     * @param requestCode for the switch case when multiple requests are made
-     */
 
-    @Override
-    public void imageUploaderReply(Object reply, int requestCode) {
-
-        try {
-            JSONObject replyJson = new JSONObject(reply.toString());
-            if (replyJson == null) {
-                Log.e(TAG, "reply can not be null");
-                return;
-            }
-
-
-            switch (requestCode) {
-                case REQUEST_CODE_IMAGE_UPLOAD:
-                    if (!replyJson.has(ConfigConstant.KEY_ERROR)) {
-                        //Profile Image was successfully uploaded to the server
-                        isModify = false;
-                        Users.bitmap = bitmapProfileImage;
-                        UserCookie.storeUserLocal(pref);//update local session
-
-                    } else {
-                        Log.e(TAG, "Upload profile image error! " + reply.toString());
-                    }
-
-                    break;
-            }
-
-        } catch (JSONException e) {
-            e.printStackTrace();
-            Log.e(TAG, e.toString());
-        }
-
-    }
 
     /**
      * Modify user information
@@ -768,6 +787,7 @@ public class ProfileFragment extends Fragment implements ImageUploader.ImageUplo
                 @Override
                 public void onErrorResponse(VolleyError error) {
                     Log.e(TAG, "Error: " + error.getMessage());
+                    MyExceptionHandler.presentError(TAG,"Update profile information failed!",getActivity(),error);
                 }
             });
             // Adding request to request queue

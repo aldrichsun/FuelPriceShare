@@ -36,6 +36,7 @@ import unimelb.cis.spatialanalytics.fuelpriceshare.config.ConfigConstant;
 import unimelb.cis.spatialanalytics.fuelpriceshare.config.ConfigURL;
 import unimelb.cis.spatialanalytics.fuelpriceshare.data.UserCookie;
 import unimelb.cis.spatialanalytics.fuelpriceshare.data.Users;
+import unimelb.cis.spatialanalytics.fuelpriceshare.http.MyExceptionHandler;
 import unimelb.cis.spatialanalytics.fuelpriceshare.others.RandomGenerateUniqueIDs;
 import unimelb.cis.spatialanalytics.fuelpriceshare.http.AppController;
 import unimelb.cis.spatialanalytics.fuelpriceshare.http.CustomRequest;
@@ -152,7 +153,8 @@ public class LoginActivity extends Activity implements ImageUploader.ImageUpload
 
                 @Override
                 public void onErrorResponse(VolleyError error) {
-                    Log.e(TAG, "Error: " + error.getMessage());
+                    MyExceptionHandler.presentError(TAG, "read user table from server failed!", getApplicationContext(), error);
+
                 }
             });
             // Adding request to request queue
@@ -259,7 +261,9 @@ public class LoginActivity extends Activity implements ImageUploader.ImageUpload
 
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        Log.e(TAG, "Error: " + error.getMessage());
+
+                        MyExceptionHandler.presentError(TAG, "login failed",getApplicationContext(), error);
+
                     }
                 });
                 // Adding request to request queue
@@ -396,6 +400,8 @@ public class LoginActivity extends Activity implements ImageUploader.ImageUpload
                             @Override
                             public void onErrorResponse(VolleyError error) {
                                 Log.e(TAG, "Error: " + error.getMessage());
+                                MyExceptionHandler.presentError(TAG, "mapping facebook user information failed", getApplicationContext(), error);
+
                             }
                         });
                         // Adding request to request queue
