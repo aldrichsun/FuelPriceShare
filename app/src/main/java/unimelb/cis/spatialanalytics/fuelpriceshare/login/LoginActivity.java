@@ -103,8 +103,7 @@ public class LoginActivity extends Activity{
             Users.mapSharedPreference(pref);
 
             //Start the main activity
-            Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-            startActivity(intent);
+            launchMainActivity();
 
             /**
              * User Volley API developed by Google to handle the request!
@@ -215,10 +214,8 @@ public class LoginActivity extends Activity{
 
 
                                         //Launch MainActivity Screen
-                                        Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-                                        // Close all views before launching Dashboard
-                                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                                        startActivity(intent);
+
+                                        launchMainActivity();
 
                                         // Close Login Screen
                                         finish();
@@ -374,9 +371,8 @@ public class LoginActivity extends Activity{
                                     UserCookie.storeUserLocal(pref, json);
                                     UserCookie.setLoginStatus(pref, true);
                                     //Start the main activity
-                                    Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-                                    startActivity(intent);
 
+                                 launchMainActivity();
                                 }
                                 Log.d(TAG, json.toString());
 
@@ -394,6 +390,8 @@ public class LoginActivity extends Activity{
                         // Adding request to request queue
                         AppController.getInstance().addToRequestQueue(customRequest, tag_json_obj);
 
+                        launchMainActivity();
+
 
                     }
                 } else {
@@ -406,6 +404,17 @@ public class LoginActivity extends Activity{
 
     }
 
+    /**
+     * launch main activity after successfully log in
+     */
+    private void launchMainActivity() {
+        Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+       // intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TOP|Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        finish();//close login view.
+
+    }
 
 
     /**
@@ -441,8 +450,7 @@ public class LoginActivity extends Activity{
                     Users.profileImage = Users.tempProfielImageName;
                     Users.tempProfielImageName = "";
                     //Start the main activity
-                    Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-                    startActivity(intent);
+                 //   launchMainActivity();
 
 
 

@@ -146,7 +146,7 @@ public class ProfileFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        View rootView = inflater.inflate(R.layout.activity_user_profile_panel, container, false);
+        View rootView = inflater.inflate(R.layout.fragment_user_profilel, container, false);
 
 
         pref = PreferenceManager.getDefaultSharedPreferences(getActivity());
@@ -420,7 +420,7 @@ public class ProfileFragment extends Fragment {
         /*
         Initialize the UI component within the layout
          */
-        LinearLayout layout = (LinearLayout) inflater.inflate(R.layout.profile_update_edittext, null);
+        LinearLayout layout = (LinearLayout) inflater.inflate(R.layout.dialog_profile_update_edittext, null);
         final EditText editText = (EditText) layout.findViewById(R.id.profile_setting_edit_text);
         Button buttonCancel = (Button) layout.findViewById(R.id.profile_setting_edit_button_cancel);
         Button buttonUpdate = (Button) layout.findViewById(R.id.profile_setting_edit_button_update);
@@ -528,7 +528,7 @@ public class ProfileFragment extends Fragment {
         /*
         Initialize UI components within layout
          */
-        LinearLayout layout = (LinearLayout) inflater.inflate(R.layout.profile_update_gender, null);
+        LinearLayout layout = (LinearLayout) inflater.inflate(R.layout.dialog_profile_update_gender, null);
         final TextView textViewMale = (TextView) layout.findViewById(R.id.profile_setting_edit_male);
         final TextView textViewFemale = (TextView) layout.findViewById(R.id.profile_setting_edit_female);
         ImageView iconMale = (ImageView) layout.findViewById(R.id.profile_setting_edit_icon_male);

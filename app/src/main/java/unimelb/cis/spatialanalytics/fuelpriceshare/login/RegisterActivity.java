@@ -176,9 +176,11 @@ public class RegisterActivity extends Activity {
         if (!response.has(ConfigConstant.KEY_ERROR)) {
 
 
-            Intent dashboard = new Intent(getApplicationContext(), MainActivity.class);
-            // Close all views before launching Dashboard
-            startActivity(dashboard);
+            Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+            // intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TOP|Intent.FLAG_ACTIVITY_CLEAR_TASK);
+
+            startActivity(intent);
             /**
              * Mapping some basic information and store the user locally
              */
@@ -190,7 +192,7 @@ public class RegisterActivity extends Activity {
         } else {
 
             registerErrorMsg.setText("User name has been taken, please try another one.");
-            Log.e(TAG, "Fail in registration:" + response.toString());
+            Log.w(TAG, "Fail in registration ( doesn't mean coding is wrong ; feasible reason: username has been taken, etc. :" + response.toString());
 
 
         }

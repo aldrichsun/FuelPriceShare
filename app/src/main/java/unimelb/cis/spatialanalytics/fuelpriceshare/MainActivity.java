@@ -261,7 +261,8 @@ public class MainActivity extends ActionBarActivity {
         /**
          * Directly call the present fragment to handle onActivityResult
          */
-        fragment.onActivityResult(requestCode, resultCode, intent);
+        if(fragment!=null)
+         fragment.onActivityResult(requestCode, resultCode, intent);
 
     }
 }

@@ -138,7 +138,7 @@ public class ContributePriceFragment extends Fragment implements DialogInterface
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        View rootView = inflater.inflate(R.layout.activity_do_refine, container, false);
+        View rootView = inflater.inflate(R.layout.fragment_contribute_price, container, false);
         activity = getActivity();
         setHasOptionsMenu(true);
 
@@ -302,7 +302,7 @@ public class ContributePriceFragment extends Fragment implements DialogInterface
 
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                System.out.println("Selecting : " + which);
+                                Log.d(TAG,"Selecting : " + which);
                                 selectedStationID = which;
 
                             }
@@ -393,7 +393,7 @@ public class ContributePriceFragment extends Fragment implements DialogInterface
         menu.clear();//remove host activity menu
         super.onCreateOptionsMenu(menu, inflater);
 
-        inflater.inflate(R.menu.menu_do_refine, menu);
+        inflater.inflate(R.menu.menu_contribute_price, menu);
 
 
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -785,9 +785,8 @@ public class ContributePriceFragment extends Fragment implements DialogInterface
             final Dialog dialog = new Dialog(getActivity(), R.style.DialogCustomTheme);
 
             final MyNumberPicker myNumberPicker = new MyNumberPicker(getActivity());
-            myNumberPicker.setValue(price, null);//set numberPicker default values
 
-            LinearLayout linearLayout = (LinearLayout) ((LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.modify_fuel_price, null);
+            LinearLayout linearLayout = (LinearLayout) ((LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.dialog_modify_fuel_price, null);
             linearLayout.setOrientation(LinearLayout.VERTICAL);
             LinearLayout linearLayoutNumberPicker = (LinearLayout) linearLayout.findViewById(R.id.linearLayoutNumberPicker);
 
@@ -885,7 +884,7 @@ public class ContributePriceFragment extends Fragment implements DialogInterface
     public void showModifyFuelTypeDialog(int index) {
         final Dialog dialog = new Dialog(getActivity(), R.style.DialogCustomTheme);
 
-        LinearLayout linearLayout = (LinearLayout) ((LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.modify_fuel_type, null);
+        LinearLayout linearLayout = (LinearLayout) ((LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.dialog_modify_fuel_type, null);
         linearLayout.setOrientation(LinearLayout.VERTICAL);
 
         final NumberPicker numberPicker = (NumberPicker) linearLayout.findViewById(R.id.numberPicker);
@@ -1001,7 +1000,6 @@ public class ContributePriceFragment extends Fragment implements DialogInterface
 
     @Override
     public void onDismiss(DialogInterface dialog) {
-        System.out.println("we are in dismiss!!");
         //update canvas view
         updateCanvasView(true);
         //set the visibility of bottom menu to be visible to the user

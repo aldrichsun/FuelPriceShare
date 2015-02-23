@@ -121,8 +121,13 @@ public class ConfigConstant {
      */
 
     public static final String KEY_FUEL_IMAGE_FOLDER="/fuel_image/";//Folder that stores uploaded fuel image. Need to be reset
-
     public static final String KEY_PROFILE_IMAGE_FOLDER="/user_profile_photo/";//Folder that stores uploaded profile image. Need to be reset
+
+
+    /**
+     * DecimalFormat for NumberPicker
+     */
+    public static final String KEY_DecimalFormat="000.0";
 
 
 }
