@@ -45,6 +45,7 @@ public class MyNumberPicker {
             nps[i].setScaleX(1f);//set 0.0-1.0
             nps[i].setScaleY(1f);//set 0.0-1.0
 
+
         }
 
         /**
