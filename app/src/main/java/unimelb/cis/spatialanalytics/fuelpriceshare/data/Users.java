@@ -267,7 +267,7 @@ public class Users {
         phone = "";
         gender = "";
         birth = "";
-        profileImage = "http://128.250.26.83:8080/GasSharing/ic_action_picture.png";
+        profileImage ="";
         bitmap = null;
         fbId = "";
         whatup = "";

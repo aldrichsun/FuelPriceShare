@@ -51,6 +51,8 @@ import unimelb.cis.spatialanalytics.fuelpriceshare.others.RandomGenerateUniqueID
 
 /**
  * Created by hanl4 on 17/02/2015.
+ * modify user profile information including: birth, gender, first name, last name, what's up status, profile image.
+ * Log out function is implemented.
  */
 public class ProfileFragment extends Fragment {
 
@@ -95,11 +97,7 @@ public class ProfileFragment extends Fragment {
 
 
 
-    /**
-     * HTTP Request Interface
-     */
 
-    private final String KEY_ERROR = ConfigConstant.KEY_ERROR;
 
 
     /**
@@ -640,7 +638,7 @@ public class ProfileFragment extends Fragment {
             @Override
             public void onResponse(JSONObject response) {
                 Log.d(TAG, response.toString());
-                if (response.has(KEY_ERROR)) {
+                if (response.has(ConfigConstant.KEY_ERROR)) {
                     Log.e(TAG, "profile image upload failed!"+response.toString());
 
                 } else {
@@ -700,7 +698,7 @@ public class ProfileFragment extends Fragment {
                     imageViewProfiePhoto.setImageBitmap(bitmapProfileImage);
                     fileName = RandomGenerateUniqueIDs.getFileName("png");
 
-                    data = Users.getUserJSONForImageUpload(ConfigURL.getImagePathBase() + fileName).toString();
+                    data = Users.getUserJSONForImageUpload(ConfigURL.getServerProfileImageFolderBase() + fileName).toString();
                     uploadProfileImage2Server(fileName, data);
 
                        /*
@@ -722,7 +720,7 @@ public class ProfileFragment extends Fragment {
 
                         fileName = RandomGenerateUniqueIDs.getFileName("png");
 
-                        data = Users.getUserJSONForImageUpload(ConfigURL.getImagePathBase() + fileName).toString();
+                        data = Users.getUserJSONForImageUpload(ConfigURL.getServerProfileImageFolderBase() + fileName).toString();
                         uploadProfileImage2Server(fileName, data);
 
 
@@ -773,7 +771,7 @@ public class ProfileFragment extends Fragment {
                 @Override
                 public void onResponse(JSONObject response) {
                     Log.d(TAG, response.toString());
-                    if (response.has(KEY_ERROR)) {
+                    if (response.has(ConfigConstant.KEY_ERROR)) {
                         Log.e(TAG, response.toString());
                     } else {
                         //if upload success, update local session

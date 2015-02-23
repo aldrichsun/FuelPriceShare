@@ -8,11 +8,11 @@ package unimelb.cis.spatialanalytics.fuelpriceshare.config;
 public class ConfigURL {
 
 
-    private static String ip = "http://128.250.26.223";//server IP address
-    private static String tomPort = "8080";//Tomcat port number
+ /*   private static String ip = "http://128.250.26.228";//server IP address
+    private static String tomPort = "8080";//Tomcat port number*/
 
-/*	private  static String ip="http://spatialanalytics.cis.unimelb.edu.au";
-    private static String tomPort="8082";*/
+	private  static String ip="http://spatialanalytics.cis.unimelb.edu.au";
+    private static String tomPort="8082";
 
     private static String serverProject = "FuelPriceShare";//server project name
 
@@ -27,28 +27,42 @@ public class ConfigURL {
     private static String uploadRefinedResultServlet = "UploadRefinedResultServlet";//upload refined fuel information servlet
 
 
+    /**
+     * get upload refined fuel information servlet
+     * @return
+     */
     public static String getUploadRefinedResultServlet() {
         return ip + ":" + tomPort + "/" + serverProject + "/" + uploadRefinedResultServlet;
 
     }
 
 
-    public static String getDefaultProfileImageURL() {
-        return ip + ":" + tomPort + "/" + serverProject + "/" + "ic_action_picture.png";
 
 
-    }
-
+    /**
+     * get login activity servlet
+     * @return
+     */
 
     public static String getLoginURL() {
         return ip + ":" + tomPort + "/" + serverProject + "/" + loginServlet;
 
     }
 
+    /**
+     * get register activity servlet
+     * @return
+     */
+
     public static String getRegisterURL() {
         return ip + ":" + tomPort + "/" + serverProject + "/" + registerServlet;
 
     }
+
+    /**
+     * get couchDB servlet
+     * @return
+     */
 
     public static String getCouchDBURL() {
         return ip + ":" + tomPort + "/" + serverProject + "/" + couchDBServlet;
@@ -56,18 +70,30 @@ public class ConfigURL {
 
     }
 
+    /**
+     * get image upload servlet
+     * @return
+     */
     public static String getUploadImageServlet() {
         return ip + ":" + tomPort + "/" + serverProject + "/" + uploadImageServlet;
 
     }
 
 
-    public static String getImagePathBase() {
-        return ip + ":" + tomPort + "/" + serverProject + "/" + "user_profile_photo/";
+    /**
+     * get the path of profile image stored at the server side
+     * @return
+     */
+    public static String getServerProfileImageFolderBase() {
+        return ip + ":" + tomPort + "/" + serverProject + ConfigConstant.KEY_PROFILE_IMAGE_FOLDER;
 
     }
 
 
+    /**
+     * get the fuel image process servlet
+     * @return
+     */
     public static String getFuelPriceImageProcessServlet() {
         return ip + ":" + tomPort + "/" + serverProject + "/" + fuelPriceImageProcessServlet;
 

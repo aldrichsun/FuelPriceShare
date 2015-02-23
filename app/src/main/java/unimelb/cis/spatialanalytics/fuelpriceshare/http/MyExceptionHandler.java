@@ -44,6 +44,7 @@ public class MyExceptionHandler {
 
         Log.e(TAG,errorMsg);
 
+        //TODO change to other way to deal with error to make it more custermized
         Toast.makeText(context, errorMsg, Toast.LENGTH_SHORT).show();
 
 

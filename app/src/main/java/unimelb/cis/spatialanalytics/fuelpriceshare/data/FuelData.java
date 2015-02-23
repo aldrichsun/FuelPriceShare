@@ -12,7 +12,8 @@ import unimelb.cis.spatialanalytics.fuelpriceshare.config.ConfigConstant;
 
 /**
  * Created by hanl4 on 29/01/2015.
- * handle all fuel information
+ * handle all fuel information (parsing the fuel information : fuel price, type, petro station info, etc from the
+ * response of the server.
  */
 public class FuelData {
 
@@ -60,10 +61,10 @@ public class FuelData {
         try {
             final String KEY_ID = "id";
             JSONObject json = new JSONObject();
-            json.put("transaction_id", transactionID);
-            json.put("user_id", Users.id);
-            json.put("latitude", 1d);
-            json.put("longitude", 1d);
+            json.put(ConfigConstant.KEY_CONTRIBUTE_PRICE_TRANSACTION_ID, transactionID);
+            json.put(ConfigConstant.KEY_UID, Users.id);
+            json.put(ConfigConstant.KEY_LATITUDE, 1d);
+            json.put(ConfigConstant.KEY_LONGITUDE, 1d);
             return json.toString();
         } catch (JSONException e) {
             Log.e(TAG, e.toString());
@@ -87,7 +88,7 @@ public class FuelData {
             /*
             parse petro station information
              */
-            JSONArray petroStationJsonArray = replyJson.getJSONArray("petro_station");
+            JSONArray petroStationJsonArray = replyJson.getJSONArray(ConfigConstant.KEY_PETRO_STATION);
 
             for (int i = 0; i < petroStationJsonArray.length(); i++) {
                 petroStationsJsonList.add(petroStationJsonArray.getJSONObject(i));
@@ -99,7 +100,7 @@ public class FuelData {
             /*
             parse fuel information
              */
-            JSONArray fuelJsonArray = replyJson.getJSONArray("fuel");
+            JSONArray fuelJsonArray = replyJson.getJSONArray(ConfigConstant.KEY_FUEL);
             for (int i = 0; i < fuelJsonArray.length(); i++) {
                 fuelJsonList.add(fuelJsonArray.getJSONObject(i));
             }
@@ -107,7 +108,7 @@ public class FuelData {
             /*
             parse all fuel type information
              */
-            JSONArray allFuelTypeJsonArray = replyJson.getJSONArray("fuel_type");
+            JSONArray allFuelTypeJsonArray = replyJson.getJSONArray(ConfigConstant.KEY_ALL_FUEL_BRAND);
 
             for (int i = 0; i < allFuelTypeJsonArray.length(); i++) {
                 allFuelTypeList.add(allFuelTypeJsonArray.getString(i));

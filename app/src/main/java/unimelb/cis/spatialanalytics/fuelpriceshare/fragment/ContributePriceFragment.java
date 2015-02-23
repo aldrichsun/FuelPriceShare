@@ -32,7 +32,9 @@ import android.widget.NumberPicker;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Response;
+import com.android.volley.RetryPolicy;
 import com.android.volley.VolleyError;
 import com.soundcloud.android.crop.Crop;
 
@@ -61,8 +63,15 @@ import unimelb.cis.spatialanalytics.fuelpriceshare.views.MyNumberPicker;
 
 /**
  * Created by hanl4 on 17/02/2015.
+ * the action of contributing fuel price to the server including:
+ * 1) take or select a fuel price image
+ * 2) upload fuel image to the server
+ * 3) extract fuel information from the image and return the information in text
+ * 4) retrieve current user petro location
+ * 5) user is able to modify the returned fuel information returned from the server manually
+ * 6) upload the refined result to the server to make contribution
  */
-public class ContributePriceFragment extends Fragment implements  DialogInterface.OnDismissListener {
+public class ContributePriceFragment extends Fragment implements DialogInterface.OnDismissListener {
 
     private ImagePicker imagePicker;// Pick up image from camera, library, etc. Defined by Han
     private final int REQUEST_CAMERA = ConfigConstant.REQUEST_CAMERA;//Image captured by camera call back code
@@ -247,7 +256,6 @@ public class ContributePriceFragment extends Fragment implements  DialogInterfac
                         Toast.makeText(getActivity(), "Upload Success!", Toast.LENGTH_SHORT).show();
 
 
-
                     }
                     pDialog.hide();
                 }
@@ -256,7 +264,7 @@ public class ContributePriceFragment extends Fragment implements  DialogInterfac
                 @Override
                 public void onErrorResponse(VolleyError error) {
                     pDialog.hide();
-                    MyExceptionHandler.presentError(TAG,"upload refined result to server failed!",getActivity(),error);
+                    MyExceptionHandler.presentError(TAG, "upload refined result to server failed!", getActivity(), error);
 
                 }
             });
@@ -282,7 +290,7 @@ public class ContributePriceFragment extends Fragment implements  DialogInterfac
      * 3) handle the condition of multiple petro stations
      */
 
-    public void handleConfirm() {
+    public void handleUpload() {
         {
             if (fuelData.getPetroStationsJsonList().size() > 1) {
 
@@ -417,7 +425,7 @@ public class ContributePriceFragment extends Fragment implements  DialogInterfac
                 /**
                  * upload the editing to the server
                  */
-                handleConfirm();
+                handleUpload();
                 return true;
 
             case R.id.menu_cancel:
@@ -513,7 +521,7 @@ public class ContributePriceFragment extends Fragment implements  DialogInterfac
                              * Use google Volley lib to upload an image
                              */
                             final ProgressDialog pDialog = new ProgressDialog(getActivity());
-                            pDialog.setMessage("Uploading image to server......");
+                            pDialog.setMessage("Processing fuel image......");
                             pDialog.show();
                             MultiPartRequest multiPartRequest = new MultiPartRequest(ConfigURL.getFuelPriceImageProcessServlet(), new File(imageUri.getPath()), filename, data, new Response.Listener<JSONObject>() {
 
@@ -522,24 +530,28 @@ public class ContributePriceFragment extends Fragment implements  DialogInterfac
                                     Log.d(TAG, response.toString());
 
                                     if (!response.has(ConfigConstant.KEY_ERROR)) {
-                                        pDialog.hide();
-                                        //Image was successfully uploaded to the server
-                                        fuelData.parseFuelPriceImageReplyData(response);
-                                        isEditingView = true;
-                                        switchViews(true);
-                                        //The view image might be scaled up to fill the entire view. for more detailed info, please refer
-                                        //the website: https://guides.codepath.com/android/Working-with-the-ImageView
-                                        //imageViewFuel.setImageBitmap(bitmapUpload);
 
-                                        /**
-                                         * Initialize canvas view and update current view
-                                         */
-                                        canvasView = new CustermizedCanvasView(getActivity(), bitmapUpload);
-                                        updateCanvasView();
+                                            pDialog.hide();
+                                            //Image was successfully uploaded to the server
+                                            fuelData.parseFuelPriceImageReplyData(response);
+                                            isEditingView = true;
+                                            switchViews(true);
+                                            //The view image might be scaled up to fill the entire view. for more detailed info, please refer
+                                            //the website: https://guides.codepath.com/android/Working-with-the-ImageView
+                                            //imageViewFuel.setImageBitmap(bitmapUpload);
+
+                                            /**
+                                             * Initialize canvas view and update current view
+                                             */
+                                            canvasView = new CustermizedCanvasView(getActivity(), bitmapUpload);
+                                            updateCanvasView();
+
 
 
                                     } else {
+                                        pDialog.setMessage(response.toString());
                                         Log.e(TAG, response.toString());
+                                        //pDialog.hide();
                                     }
                                 }
                             }, new Response.ErrorListener() {
@@ -553,9 +565,18 @@ public class ContributePriceFragment extends Fragment implements  DialogInterfac
 
                                 }
                             });
+
+                            /**
+                             * Set the timeout
+                             */
+
+                            int socketTimeout = 60000;//60 seconds - change to what you want
+                            RetryPolicy policy = new DefaultRetryPolicy(socketTimeout, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT);
+                            multiPartRequest.setRetryPolicy(policy);
+
+
                             // Adding request to request queue
                             AppController.getInstance().addToRequestQueue(multiPartRequest, tag_json_obj);
-
 
 
                         } catch (IOException e) {
@@ -602,8 +623,6 @@ public class ContributePriceFragment extends Fragment implements  DialogInterfac
 
         // new Crop(source).output(outputUri).withMaxSize(1000, 2000).start(getActivity());
     }
-
-
 
 
     /**
@@ -752,6 +771,10 @@ public class ContributePriceFragment extends Fragment implements  DialogInterfac
 
     }
 
+
+    /**
+     * present the dialog for editing fuel information
+     */
     public void showModifyFuelPriceDialog() {
         //get the price of the corresponding json object
 

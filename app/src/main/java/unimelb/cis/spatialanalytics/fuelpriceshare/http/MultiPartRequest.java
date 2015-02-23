@@ -1,5 +1,7 @@
 package unimelb.cis.spatialanalytics.fuelpriceshare.http;
 
+import android.graphics.Bitmap;
+
 import com.android.volley.AuthFailureError;
 import com.android.volley.NetworkResponse;
 import com.android.volley.ParseError;
@@ -13,6 +15,7 @@ import com.android.volley.toolbox.HttpHeaderParser;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
+import org.apache.http.entity.mime.content.ByteArrayBody;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -36,9 +39,52 @@ public class MultiPartRequest  extends Request<JSONObject> {
 
     private MultipartEntityBuilder mBuilder = MultipartEntityBuilder.create();
     private final Response.Listener<JSONObject> mListener;
-    private final File mImageFile;//File part mainly image
+    private File mImageFile=null;//File part mainly image
     private String uniqeIDName;//File name at the server side (unique generated name)
     private String mStringPart;//String data
+
+
+
+
+    /**
+     *
+     * @param url URL e.g., www.facebook.com
+     * @param bitmap image to upload
+     * @param mStringPart String data to upload
+     * @param reponseListener listener for server or internet connection response
+     * @param errorListener error listener
+     */
+    public MultiPartRequest(String url,
+                            Bitmap bitmap,
+                            String uniqeIDName,
+                            Integer quality,
+                            String mStringPart,
+                            Listener<JSONObject> reponseListener,
+                            ErrorListener errorListener
+    )
+    {
+        //default use POST for security
+        super(Method.POST, url, errorListener);
+
+        this.mListener = reponseListener;
+        this.mStringPart=mStringPart;
+
+        if(quality==null)
+            quality=100;
+        this.uniqeIDName= uniqeIDName;
+
+
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.PNG, quality, bos);//compress the image
+        byte[] imageData = bos.toByteArray();
+        ByteArrayBody byteArrayBody = new ByteArrayBody(imageData, uniqeIDName);
+
+
+        mBuilder.addPart(ConfigConstant.KEY_FILE_UPLOAD_FILE_DATA, byteArrayBody);
+        buildMultipartEntity();
+
+
+    }
 
 
 
@@ -66,6 +112,8 @@ public class MultiPartRequest  extends Request<JSONObject> {
         this.mStringPart=mStringPart;
         this.uniqeIDName= uniqeIDName;
 
+        mBuilder.addBinaryBody(ConfigConstant.KEY_FILE_UPLOAD_FILE_DATA, mImageFile, ContentType.create("image/png"), this.uniqeIDName);
+
         buildMultipartEntity();
     }
 
@@ -91,7 +139,6 @@ public class MultiPartRequest  extends Request<JSONObject> {
      */
     private void buildMultipartEntity()
     {
-        mBuilder.addBinaryBody(ConfigConstant.KEY_FILE_UPLOAD_FILE_DATA, mImageFile, ContentType.create("image/png"), this.uniqeIDName);
 
 
 
