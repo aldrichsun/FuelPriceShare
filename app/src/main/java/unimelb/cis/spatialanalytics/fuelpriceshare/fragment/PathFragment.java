@@ -22,6 +22,8 @@ import android.widget.Button;
 import android.widget.Toast;
 
 import unimelb.cis.spatialanalytics.fuelpriceshare.R;
+
+import com.gc.materialdesign.views.ButtonRectangle;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -42,6 +44,9 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+import com.software.shell.fab.ActionButton;
+import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
 import unimelb.cis.spatialanalytics.fuelpriceshare.maps.autoComplete.AutoCompleteAdapter;
 import unimelb.cis.spatialanalytics.fuelpriceshare.maps.query.PathQuery;
@@ -66,6 +71,9 @@ public class PathFragment extends Fragment {
     private GoogleMap pathMap; // Might be null if Google Play services APK is not available.
 
     private SupportMapFragment pathMapFragment;
+    private SlidingUpPanelLayout mLayout;
+    private ActionButton wayPointButton;
+    private ActionButton closePanelButton;
 
     public PathFragment(){
         // Required empty public constructor
@@ -96,6 +104,7 @@ public class PathFragment extends Fragment {
                 fm.beginTransaction().replace(R.id.path_map, pathMapFragment).commit();
 
                 setUpMap();
+                setUpSlidingUpPanel();
             }
         }
         else{
@@ -142,6 +151,7 @@ public class PathFragment extends Fragment {
             if(status == ConnectionResult.SUCCESS) {
                 pathMap = pathMapFragment.getMap();
                 setUpMap();
+                setUpSlidingUpPanel();
             }
             else{
                 Log.e(LOG_TAG, "Google Play service is not enabled on this device.");
@@ -243,7 +253,7 @@ public class PathFragment extends Fragment {
         /////////////////////////////////////////////////////////
 
         /////////// Set the route button listener //////////////
-        Button pathQueryButton = (Button) getActivity().findViewById(R.id.path_query_button);
+        ButtonRectangle pathQueryButton = (ButtonRectangle) getActivity().findViewById(R.id.path_query_button);
         pathQueryButton.setOnClickListener(new View.OnClickListener() {
 
             /**
@@ -268,12 +278,60 @@ public class PathFragment extends Fragment {
                 // Call the PathQueryTask
                 PathQueryTask pathQueryTask = new PathQueryTask();
                 pathQueryTask.execute(origin, destination); //Note the order of the params
+                mLayout.setPanelState(SlidingUpPanelLayout.PanelState.EXPANDED);
             }
         });
 
         ///////// Set the swap button listener ////////////
         // TODO add it
         ///////////////////////////////////////////////////
+    }
+
+    private void setUpSlidingUpPanel(){
+
+        mLayout = (SlidingUpPanelLayout) getActivity().findViewById(R.id.path_sliding_layout);
+        mLayout.setPanelSlideListener(new SlidingUpPanelLayout.PanelSlideListener() {
+            @Override
+            public void onPanelSlide(View panel, float slideOffset) {
+                //Log.i(LOG_TAG, "onPanelSlide, offset " + slideOffset);
+            }
+
+            @Override
+            public void onPanelExpanded(View panel) {
+            }
+
+            @Override
+            public void onPanelCollapsed(View panel) {
+            }
+
+            @Override
+            public void onPanelAnchored(View panel) {
+
+            }
+
+            @Override
+            public void onPanelHidden(View panel) {
+            }
+        });
+        mLayout.setTouchEnabled(false);
+
+        wayPointButton = (ActionButton) getActivity().findViewById(R.id.way_point_button);
+        wayPointButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // TODO issue the way point path query and redraw the route
+                // User must select a marker
+            }
+        });
+
+        closePanelButton = (ActionButton) getActivity().findViewById(R.id.close_panel_button);
+        closePanelButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                mLayout.setPanelState(SlidingUpPanelLayout.PanelState.HIDDEN);
+            }
+        });
     }
 
 
@@ -363,6 +421,8 @@ public class PathFragment extends Fragment {
             // Call the PathQueryTask
             PathQueryTask pathQueryTask = new PathQueryTask();
             pathQueryTask.execute(origin, destination); //Note the order of the params
+
+            mLayout.setPanelState(SlidingUpPanelLayout.PanelState.EXPANDED);
         }
     }
 
@@ -377,6 +437,7 @@ public class PathFragment extends Fragment {
      * each time as 1) it's difficult to keep track of a LatLng object for the origin
      * or destination since the user behaviour is unpredictable and 2) it's easier later for
      * us to move the geocode task to the server.
+     * TODO !!!!! the app crashes when the server is shut down
      */
     private class PathQueryTask extends AsyncTask<String, Void, JSONObject> {
 
@@ -505,6 +566,8 @@ public class PathFragment extends Fragment {
          */
         @Override
         protected void onPostExecute(JSONObject result) {
+
+            if(result == null )
 
             ///////// first check the validness of the geocoding result /////////////
             if (result.optString(ORIGIN_ERROR_KEY).equals(ERROR)) {

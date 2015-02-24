@@ -92,7 +92,6 @@ public class RangeFragment extends Fragment {
     private ActionButton rangeQueryButton;
     private ActionButton directionJumpButton;
 
-
     public RangeFragment() {
         // Required empty public constructor
     }

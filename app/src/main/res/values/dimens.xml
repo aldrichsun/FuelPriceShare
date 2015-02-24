@@ -29,5 +29,6 @@
     <!-- Floating action button -->
     <dimen name="direction_fab_margin">96dp</dimen>
     <dimen name="my_fab_margin">32dp</dimen>
+    <dimen name="close_fab_margin">16dp</dimen>
 
 </resources>
