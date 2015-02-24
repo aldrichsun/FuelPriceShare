@@ -27,9 +27,14 @@ public class DrawMarkersOnMap {
 
     private static final String LOG_TAG = DrawMarkersOnMap.class.getSimpleName();
 
+    // TODO display only 10 markers with lowest price, each of which use a different color
     /**
      * Created by Yu Sun on 21/02/2015:
      * This function draws the points (fuel stations) stored in a json array on the given map.
+     * The marker's title is (and must be) the station's name, and it's snippet is (must be)
+     * the list of the provided fuels and prices.
+     * NOTE: If this is changed, other places using the marker's title or snippet for switch
+     * (e.g., if-else) must be changed accordingly.
      * @param actionBarActivity -- the activity the map will be presented
      * @param mMap -- the map we draw markers on
      * @param jsonArray -- the json array storing the points (fuel stations)

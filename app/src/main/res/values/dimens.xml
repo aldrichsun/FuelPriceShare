@@ -8,7 +8,6 @@
     <dimen name="genre">13dip</dimen>
     <dimen name="year">12dip</dimen>
 
-
     <dimen name="profile_setting_field_name_text_size">15dp</dimen>
     <dimen name="profile_setting_profile_image_width">150dp</dimen>
     <dimen name="profile_setting_profile_image_height">150dp</dimen>
@@ -26,5 +25,9 @@
     <dimen name="Route_top_padding">8dp</dimen>
     <dimen name="query_button_linear_layout_bottom_margin">8dp</dimen>
     <dimen name="auto_complete_text_size">20dp</dimen>
+
+    <!-- Floating action button -->
+    <dimen name="direction_fab_margin">96dp</dimen>
+    <dimen name="my_fab_margin">32dp</dimen>
 
 </resources>

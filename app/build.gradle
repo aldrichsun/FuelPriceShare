@@ -6,7 +6,7 @@ android {
 
     defaultConfig {
         applicationId "unimelb.cis.spatialanalytics.fuelpriceshare"
-        minSdkVersion 11
+        minSdkVersion 14
         targetSdkVersion 21
         versionCode 1
         versionName "1.0"
@@ -26,4 +26,7 @@ dependencies {
     compile 'com.soundcloud.android:android-crop:0.9.10@aar'
     compile 'com.google.android.gms:play-services:6.5.87'
     compile 'com.android.support:support-v4:21.0.3'
+    compile 'com.sothree.slidinguppanel:library:3.0.0'
+    compile 'com.github.shell-software:fab:1.0.4'
+    compile 'com.github.navasmdc:MaterialDesign:1.+@aar'
 }

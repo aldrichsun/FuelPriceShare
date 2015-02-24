@@ -1,102 +1,140 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<RelativeLayout
+    xmlns:sothree="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    tools:context=".MainActivity"
-    android:weightSum="1">
+    >
 
-    <RelativeLayout
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_marginLeft="@dimen/activity_vertical_margin"
-        android:layout_marginRight="@dimen/activity_vertical_margin">
-
-        <Button
-            android:id="@+id/locate_address_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/button_find_address"
-            android:layout_alignParentRight="true" />
-
-        <AutoCompleteTextView
-            android:id="@+id/auto_complete_text_view"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:hint="@string/hint_enter_location"
-            android:inputType="text"
-            android:layout_toLeftOf="@id/locate_address_button"
-            android:layout_alignBaseline="@+id/locate_address_button" />
-
-        <!--
-        <EditText
-            android:id="@+id/et_location"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:inputType="text"
-            android:hint="@string/hnt_et_location"
-            android:layout_toLeftOf="@id/button_locate_address" />
-        -->
-
-    </RelativeLayout>
-
-    <fragment
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:tools="http://schemas.android.com/tools"
+    <com.sothree.slidinguppanel.SlidingUpPanelLayout
+        xmlns:sothree="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/sliding_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/range_map"
-        android:name="com.google.android.gms.maps.SupportMapFragment"
-        android:layout_weight="0.97" />
+        android:gravity="bottom"
+        sothree:umanoPanelHeight="0dp"
+        sothree:umanoShadowHeight="0dp"
+        sothree:umanoParalaxOffset="100dp"
+        sothree:umanoDragView="@+id/dragView">
 
-    <RelativeLayout
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_marginLeft="@dimen/activity_vertical_margin"
-        android:layout_marginRight="@dimen/activity_vertical_margin">
-
-        <LinearLayout
+        <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:tools="http://schemas.android.com/tools"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             android:orientation="vertical"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:id="@+id/query_button_linear_layout"
-            android:layout_marginBottom="@dimen/query_button_linear_layout_bottom_margin">
+            tools:context=".MainActivity"
+            android:weightSum="1">
 
-            <Button
-                android:id="@+id/range_query_button"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/button_range_query"
-                android:layout_alignParentRight="true"
-                android:layout_centerVertical="true"
-                android:layout_gravity="top" />
 
-            <!--
-            <Button
+            <RelativeLayout
                 android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/route_jump_button"
-                android:id="@+id/path_query_jump_button"
-                android:layout_alignParentRight="true"
-                android:layout_gravity="top" />
-            -->
+                android:layout_height="48dp"
+                android:orientation="horizontal"
+                android:layout_marginLeft="@dimen/activity_vertical_margin"
+                android:layout_marginRight="@dimen/activity_vertical_margin">
+
+                <com.gc.materialdesign.views.ButtonRectangle
+                    android:id="@+id/locate_address_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="48dp"
+                    android:background="@color/orange"
+                    android:text="@string/button_find_address"
+                    android:layout_alignParentRight="true" />
+
+                <AutoCompleteTextView
+                    android:id="@+id/auto_complete_text_view"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/hint_enter_location"
+                    android:inputType="text"
+                    android:layout_toLeftOf="@id/locate_address_button"
+                    android:layout_alignParentBottom="true" />
+
+            </RelativeLayout>
+
+            <fragment
+                xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:tools="http://schemas.android.com/tools"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:id="@+id/range_map"
+                android:name="com.google.android.gms.maps.SupportMapFragment"
+                android:layout_weight="0.97" />
+
         </LinearLayout>
 
-
-        <TextView
-            android:id="@+id/map_bottom_text_view"
+        <RelativeLayout
             android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:text="@string/hint_map_bottom"
-            android:layout_toLeftOf="@id/query_button_linear_layout"
-            android:layout_marginBottom="@dimen/bottom_text_view"
-            android:gravity="center"
-            android:layout_centerVertical="true" />
+            android:layout_height="fill_parent"
+            android:layout_gravity="top"
+            android:orientation="horizontal"
+            android:layout_marginLeft="@dimen/activity_vertical_margin"
+            android:layout_marginRight="@dimen/activity_vertical_margin">
 
-    </RelativeLayout>
+            <com.gc.materialdesign.views.ButtonRectangle
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/route_button"
+                android:id="@+id/obtain_direction_button"
+                android:background="@color/orange"
+                android:layout_alignParentRight="true"
+                />
 
-</LinearLayout>
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_toLeftOf="@id/obtain_direction_button">
+
+                <AutoCompleteTextView
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/direction_origin_autoCompleteTextView"
+                    android:hint="@string/origin_autoComplete_hint"
+                    android:inputType="textAutoComplete"/>
+
+                <AutoCompleteTextView
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/direction_destination_autoCompleteTextView"
+                    android:hint="@string/destination_autoComplete_hint"
+                    android:inputType="textAutoComplete"/>
+
+            </LinearLayout>
+
+        </RelativeLayout>
+
+    </com.sothree.slidinguppanel.SlidingUpPanelLayout>
+
+    <com.software.shell.fab.ActionButton
+        xmlns:fab="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/range_query_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom = "true"
+        android:layout_alignParentRight = "true"
+        android:layout_marginRight="@dimen/my_fab_margin"
+        android:layout_marginBottom="@dimen/my_fab_margin"
+        fab:type="DEFAULT"
+        fab:button_color="@color/darkGreen"
+        fab:button_colorPressed="@color/fab_material_light_green_900"
+        fab:image="@drawable/ic_local_gas_station_24px_white"
+        fab:image_size="16dp"
+        />
+
+    <com.software.shell.fab.ActionButton
+        xmlns:fab="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/direction_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom = "true"
+        android:layout_alignParentRight = "true"
+        android:layout_marginRight="@dimen/my_fab_margin"
+        android:layout_marginBottom="@dimen/my_fab_margin"
+        fab:type="DEFAULT"
+        fab:button_color="@color/darkGreen"
+        fab:button_colorPressed="@color/fab_material_light_green_900"
+        fab:image="@drawable/ic_directions_car_24px_white"
+        fab:image_size="16dp"
+        />
+
+</RelativeLayout>

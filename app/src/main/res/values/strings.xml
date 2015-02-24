@@ -45,4 +45,7 @@
     <!-- for facebook login -->
     <string name="APP_ID">1589475934622660</string>
 
+    <!-- for my location -->
+    <string name="Your_location">Your location</string>
+
 </resources>

@@ -5,6 +5,7 @@ import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
@@ -54,7 +55,11 @@ public class MainActivity extends ActionBarActivity {
 
     private static final int ACTIVITY_SETTING = 4;
 
-    Fragment fragment = null;
+    private Fragment rangeFragment = null;
+    private Fragment pathFragment = null;
+    private Fragment profileFragment = null;
+    private Fragment contributeFragment = null;
+
     private int PRESENT_FRAGMENT_ID;
 
     @Override
@@ -104,11 +109,21 @@ public class MainActivity extends ActionBarActivity {
         // Yu Sun: always close the soft key-pad after launch
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
 
+        setUpFragments();
+
         if (savedInstanceState == null) {
             selectItem(0);
             mDrawerLayout.openDrawer(Gravity.LEFT);
         }
+    }
 
+    private void setUpFragments(){
+
+        /////////// Create all the fragments to be used ////////////
+        rangeFragment = new RangeFragment();
+        pathFragment = new PathFragment();
+        profileFragment = new ProfileFragment();
+        contributeFragment = new ModifyPricelFragment();
     }
 
     @Override
@@ -194,30 +209,67 @@ public class MainActivity extends ActionBarActivity {
         if(position!=FRAGMENT_CONTRIBUTE)
             ModifyPricelFragment.isMenuVisible=false;
 
-        switch (position){
-            case FRAGMENT_RANGE_SEARCH:
-                fragment = new RangeFragment();
-                break;
-            case FRAGMENT_PATH_SEARCH:
-                fragment = new PathFragment();
-                break;
-            case FRAGMENT_PROFILE:
-                fragment = new ProfileFragment();
-                break;
-            case FRAGMENT_CONTRIBUTE:
-                fragment = new ModifyPricelFragment();
-                break;
-            case ACTIVITY_SETTING:
-                startActivity(new Intent(this, SettingsActivity.class));
-                break;
-            default:
-                break;
-        }
-        if (fragment != null) {
+        if (rangeFragment != null && pathFragment != null
+                && contributeFragment != null && profileFragment != null ) {
 
-            FragmentManager fragmentManager = getSupportFragmentManager();
-            fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
+            //FragmentManager fragmentManager = getSupportFragmentManager();
+            FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+            //fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
 
+            // update selected item and title, then close the drawer
+            mDrawerList.setItemChecked(position, true);
+            setTitle(mDrawerItemStrings[position]);
+            mDrawerLayout.closeDrawer(mDrawerList);
+
+            switch (position) {
+                case FRAGMENT_RANGE_SEARCH:
+                    if( rangeFragment.isAdded() ){
+                        fragmentTransaction.show(rangeFragment);
+                    }else{
+                        fragmentTransaction.add(R.id.content_frame, rangeFragment);
+                    }
+                    if(pathFragment.isAdded()){fragmentTransaction.hide(pathFragment);}
+                    if(profileFragment.isAdded()){fragmentTransaction.hide(profileFragment);}
+                    if(contributeFragment.isAdded()){fragmentTransaction.hide(contributeFragment);}
+                    break;
+                case FRAGMENT_PATH_SEARCH:
+                    if( pathFragment.isAdded() ){
+                        fragmentTransaction.show(pathFragment);
+                    }else{
+                        fragmentTransaction.add(R.id.content_frame, pathFragment);
+                    }
+                    if(rangeFragment.isAdded()){fragmentTransaction.hide(rangeFragment);}
+                    if(profileFragment.isAdded()){fragmentTransaction.hide(profileFragment);}
+                    if(contributeFragment.isAdded()){fragmentTransaction.hide(contributeFragment);}
+                    break;
+                case FRAGMENT_PROFILE:
+                    if(profileFragment.isAdded()){
+                        fragmentTransaction.show(profileFragment);
+                    }else{
+                        fragmentTransaction.add(R.id.content_frame, profileFragment);
+                    }
+                    if(rangeFragment.isAdded()){fragmentTransaction.hide(rangeFragment);}
+                    if(pathFragment.isAdded()){fragmentTransaction.hide(pathFragment);}
+                    if(contributeFragment.isAdded()){fragmentTransaction.hide(contributeFragment);}
+                    break;
+                case FRAGMENT_CONTRIBUTE:
+                    if(contributeFragment.isAdded()){
+                        fragmentTransaction.show(contributeFragment);
+                    }else{
+                        fragmentTransaction.add(R.id.content_frame, contributeFragment);
+                    }
+                    if(rangeFragment.isAdded()){fragmentTransaction.hide(rangeFragment);}
+                    if(pathFragment.isAdded()){fragmentTransaction.hide(pathFragment);}
+                    if(profileFragment.isAdded()){fragmentTransaction.hide(profileFragment);}
+                    break;
+                case ACTIVITY_SETTING:
+                    startActivity(new Intent(this, SettingsActivity.class));
+                    break;
+                default:
+                    break;
+            }
+
+            fragmentTransaction.commit();
             // update selected item and title, then close the drawer
             mDrawerList.setItemChecked(position, true);
             setTitle(mDrawerItemStrings[position]);
@@ -265,7 +317,8 @@ public class MainActivity extends ActionBarActivity {
         /**
          * Directly call the present fragment to handle onActivityResult
          */
-        fragment.onActivityResult(requestCode, resultCode, intent);
+        contributeFragment.onActivityResult(requestCode, resultCode, intent);
+        //fragment.onActivityResult(requestCode, resultCode, intent);
 
     }
 }
