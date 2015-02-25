@@ -42,6 +42,8 @@ public class MyExceptionHandler {
 
         }
 
+        errorMsg=errorMsg+" ; "+error.toString();
+
         Log.e(TAG,errorMsg);
 
         //TODO change to other way to deal with error to make it more custermized

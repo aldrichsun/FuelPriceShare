@@ -67,7 +67,7 @@ import unimelb.cis.spatialanalytics.fuelpriceshare.views.MyNumberPicker;
  * 1) take or select a fuel price image
  * 2) upload fuel image to the server
  * 3) extract fuel information from the image and return the information in text
- * 4) retrieve current user petro location
+ * 4) retrieve current user petrol location
  * 5) user is able to modify the returned fuel information returned from the server manually
  * 6) upload the refined result to the server to make contribution
  */
@@ -79,13 +79,9 @@ public class ContributePriceFragment extends Fragment implements DialogInterface
     private Bitmap bitmapUpload;//Captured fuel image to be uploaded
     private String transactionID;//The ID of the action of contributing price.
 
-    /**
-     * For HTTP Request interface return code
-     */
-    private final int REQUEST_CODE_IMAGE_UPLOAD = ConfigConstant.REQUEST_CODE_IMAGE_UPLOAD;
 
     /**
-     * Petro Station and Fuel Information parameters
+     * Petrol Station and Fuel Information parameters
      */
 
     private FuelData fuelData = new FuelData();
@@ -119,7 +115,7 @@ public class ContributePriceFragment extends Fragment implements DialogInterface
      */
     private int selectedID;
 
-    //The selected petro station id
+    //The selected petrol station id
     private int selectedStationID;
 
 
@@ -210,16 +206,16 @@ public class ContributePriceFragment extends Fragment implements DialogInterface
      * Upload the final refined fuel information data to the central server. The information includes:
      * 1) User profile, e.g., id, username, etc.
      * 2) Fuel price & type
-     * 3) Petro station
+     * 3) Petrol station
      */
     public void updateData2Server() {
         JSONObject json = new JSONObject();
         JSONObject userJson = Users.getUserJSONWithoutPassword();
         try {
-            json.put("transaction_id", transactionID);
-            json.put("user", userJson);
-            json.put("fuel", fuelData.getFuelJsonList());
-            json.put("petro_station", fuelData.getPetroStationsJsonList().size() > 0 ? fuelData.getPetroStationsJsonList().get(selectedStationID) : fuelData.getPetroStationsJsonList());
+            json.put(ConfigConstant.KEY_CONTRIBUTE_PRICE_TRANSACTION_ID, transactionID);
+            json.put(ConfigConstant.KEY_USER, userJson);
+            json.put(ConfigConstant.KEY_FUEL, fuelData.getFuelJsonList());
+            json.put(ConfigConstant.KEY_PETROL_STATION, fuelData.getPetrolStationsJsonList().size() > 0 ? fuelData.getPetrolStationsJsonList().get(selectedStationID) : fuelData.getPetrolStationsJsonList());
 
             /**
              * User Volley API developed by Google to handle the request!
@@ -244,7 +240,11 @@ public class ContributePriceFragment extends Fragment implements DialogInterface
                 public void onResponse(JSONObject response) {
                     Log.d(TAG, response.toString());
                     if (response.has(ConfigConstant.KEY_ERROR))
-                        Log.e(TAG, "Failed to upload refined fuel price data to the server!");
+                    {
+                        Log.e(TAG, "Upload Failed!"+response.toString());
+                        Toast.makeText(getActivity(), "Upload Failed!"+response.toString(), Toast.LENGTH_SHORT).show();
+
+                    }
                     else {
                         Log.d(TAG, "Upload Refined Result to Server : Success");
                         /**
@@ -264,6 +264,7 @@ public class ContributePriceFragment extends Fragment implements DialogInterface
                 @Override
                 public void onErrorResponse(VolleyError error) {
                     pDialog.hide();
+
                     MyExceptionHandler.presentError(TAG, "upload refined result to server failed!", getActivity(), error);
 
                 }
@@ -287,18 +288,18 @@ public class ContributePriceFragment extends Fragment implements DialogInterface
      * It needs to process couple things
      * 1) send the refined fuel information results to the server
      * 2) update views presented to the user
-     * 3) handle the condition of multiple petro stations
+     * 3) handle the condition of multiple petrol stations
      */
 
     public void handleUpload() {
         {
-            if (fuelData.getPetroStationsJsonList().size() > 1) {
+            if (fuelData.getPetrolStationsJsonList().size() > 1) {
 
                 AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-                builder.setTitle("Which of the following petro station are you currently at?")
+                builder.setTitle("Which of the following petrol station are you currently at?")
 
                         //choose the fuel station if multiple stations are detected
-                        .setSingleChoiceItems(fuelData.convertPetroStationNameList2CharSequence(), selectedStationID, new DialogInterface.OnClickListener() {
+                        .setSingleChoiceItems(fuelData.convertPetrolStationNameList2CharSequence(), selectedStationID, new DialogInterface.OnClickListener() {
 
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
@@ -333,9 +334,9 @@ public class ContributePriceFragment extends Fragment implements DialogInterface
                 dialog.show();
 
             } else {
-                if (fuelData.getPetroStationsJsonList().size() == 0)
+                if (fuelData.getPetrolStationsJsonList().size() == 0)
 
-                    Log.e(TAG, "No petro station was detected around!");
+                    Log.e(TAG, "No petrol station was detected around!");
 
                 updateData2Server();
 
@@ -551,7 +552,7 @@ public class ContributePriceFragment extends Fragment implements DialogInterface
                                     } else {
                                         pDialog.setMessage(response.toString());
                                         Log.e(TAG, response.toString());
-                                        //pDialog.hide();
+                                        pDialog.hide();
                                     }
                                 }
                             }, new Response.ErrorListener() {

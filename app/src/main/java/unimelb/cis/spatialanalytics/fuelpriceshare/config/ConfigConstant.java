@@ -26,12 +26,12 @@ public class ConfigConstant {
 
 
     /**
-     * petro stations
+     * petrol stations
      */
 
-    public final static String KEY_PETRO_STATION="fuel_station";
-    public static final  String KEY_PETRO_STATION_ID="_id";
-    public final static String KEY_PETRO_STATION_NAME="name";
+    public final static String KEY_PETROL_STATION="fuel_station";
+    public static final  String KEY_PETROL_STATION_ID="_id";
+    public final static String KEY_PETROL_STATION_NAME="name";
 
 
     /**
@@ -47,7 +47,7 @@ public class ConfigConstant {
      */
 
     public static final String KEY_CONTRIBUTE_PRICE_PROCESS_STATUS="status";
-    public static final String KEY_CONTRIBUTE_PRICE_STATUS_RETRIEVE_PETRO_STATION="retrieve_petro_station";
+    public static final String KEY_CONTRIBUTE_PRICE_STATUS_RETRIEVE_PETROL_STATION="retrieve_petrol_station";
     public static final String KEY_CONTRIBUTE_PRICE_STATUS_PROCESS_FUEL_IMAGE="process_fuel_image";
 
 
@@ -70,6 +70,8 @@ public class ConfigConstant {
     /**
      * User information field
      */
+    public static final String KEY_USER="user";
+
     public static final String KEY_ERROR_MSG = "error_msg";
     public static final String KEY_UID = "_id";
     public static final String KEY_USERNAME = "username";
@@ -85,11 +87,7 @@ public class ConfigConstant {
     public static final int SELECT_FILE=2; //select image from gallery.
 
 
-    /**
-     * HTTP Request return code for interface
-     */
-    public static final int REQUEST_CODE_COUCHDB=1;
-    public static final int REQUEST_CODE_IMAGE_UPLOAD=2;
+
 
 
     /**

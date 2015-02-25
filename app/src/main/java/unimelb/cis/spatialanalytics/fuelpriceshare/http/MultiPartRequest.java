@@ -43,9 +43,6 @@ public class MultiPartRequest  extends Request<JSONObject> {
     private String uniqeIDName;//File name at the server side (unique generated name)
     private String mStringPart;//String data
 
-
-
-
     /**
      *
      * @param url URL e.g., www.facebook.com
@@ -79,14 +76,11 @@ public class MultiPartRequest  extends Request<JSONObject> {
         byte[] imageData = bos.toByteArray();
         ByteArrayBody byteArrayBody = new ByteArrayBody(imageData, uniqeIDName);
 
-
         mBuilder.addPart(ConfigConstant.KEY_FILE_UPLOAD_FILE_DATA, byteArrayBody);
         buildMultipartEntity();
 
 
     }
-
-
 
     /**
      *
@@ -118,7 +112,6 @@ public class MultiPartRequest  extends Request<JSONObject> {
     }
 
 
-
     @Override
     public Map<String, String> getHeaders() throws AuthFailureError {
         Map<String, String> headers = super.getHeaders();
@@ -133,14 +126,11 @@ public class MultiPartRequest  extends Request<JSONObject> {
         return headers;
     }
 
-
     /**
      * build the multipart entity.
      */
     private void buildMultipartEntity()
     {
-
-
 
         if (mStringPart != null && !mStringPart.equals(""))
             mBuilder.addTextBody(ConfigConstant.KEY_FILE_UPLOAD_STRING_DATA, mStringPart);
