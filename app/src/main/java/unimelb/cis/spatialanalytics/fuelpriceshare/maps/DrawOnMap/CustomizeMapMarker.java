@@ -1,4 +1,4 @@
-package unimelb.cis.spatialanalytics.fuelpriceshare.others;
+package unimelb.cis.spatialanalytics.fuelpriceshare.maps.DrawOnMap;
 
 import android.content.Context;
 import android.graphics.Bitmap;

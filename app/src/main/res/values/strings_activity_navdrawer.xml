@@ -6,7 +6,6 @@
         <item>Get Directions</item>
         <item>Profile Setting</item>
         <item>Contribute Price</item>
-        <item>Settings</item>
     </string-array>
 
     <string name="drawer_open">Open navigation drawer</string>

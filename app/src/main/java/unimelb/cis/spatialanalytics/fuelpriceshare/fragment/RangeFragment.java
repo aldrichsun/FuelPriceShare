@@ -2,12 +2,13 @@ package unimelb.cis.spatialanalytics.fuelpriceshare.fragment;
 
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
-import android.graphics.Path;
 import android.location.Address;
 import android.location.Criteria;
 import android.location.Geocoder;
 import android.location.Location;
+import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -17,13 +18,14 @@ import android.support.v4.app.FragmentManager;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AutoCompleteTextView;
-import android.widget.Button;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import unimelb.cis.spatialanalytics.fuelpriceshare.R;
@@ -32,7 +34,6 @@ import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
@@ -49,16 +50,15 @@ import java.util.List;
 import unimelb.cis.spatialanalytics.fuelpriceshare.maps.autoComplete.AutoCompleteAdapter;
 import unimelb.cis.spatialanalytics.fuelpriceshare.maps.query.PathQuery;
 import unimelb.cis.spatialanalytics.fuelpriceshare.maps.query.RangeQuery;
-import unimelb.cis.spatialanalytics.fuelpriceshare.others.CustomizeMapMarker;
-import unimelb.cis.spatialanalytics.fuelpriceshare.others.DecodeDirection;
-import unimelb.cis.spatialanalytics.fuelpriceshare.others.DrawMarkersOnMap;
+import unimelb.cis.spatialanalytics.fuelpriceshare.maps.DrawOnMap.DecodeDirection;
+import unimelb.cis.spatialanalytics.fuelpriceshare.maps.DrawOnMap.DrawMarkersOnMap;
+import unimelb.cis.spatialanalytics.fuelpriceshare.settings.SettingsActivity;
 
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.software.shell.fab.ActionButton;
 
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
-import com.sothree.slidinguppanel.SlidingUpPanelLayout.PanelSlideListener;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout.PanelState;
 
 import com.gc.materialdesign.views.ButtonRectangle;
@@ -222,17 +222,7 @@ public class RangeFragment extends Fragment {
     private void setUpMap() {
 
         /////////////// Set up the initial focus of the map, which is the user current location ////////////////
-        /////// TODO implement onMyLocationChangeListener
-        mMap.setMyLocationEnabled(true);
-        // Get LocationManager object from System Service LOCATION_SERVICE
-        LocationManager locationManager = (LocationManager)
-                getActivity().getSystemService(Context.LOCATION_SERVICE);
-        // Create a criteria object to retrieve provider
-        Criteria criteria = new Criteria();
-        // Get the name of the best provider
-        String provider = locationManager.getBestProvider(criteria, true);
-        // Get Current Location
-        Location myLocation = locationManager.getLastKnownLocation(provider);
+        final Location myLocation = setUpMyLocation();
         if( myLocation != null ){
             currentLocationName = getString(R.string.Your_location);
             currentLocation = new LatLng(myLocation.getLatitude(), myLocation.getLongitude());
@@ -241,7 +231,6 @@ public class RangeFragment extends Fragment {
         else {
             latLng = new LatLng(-37.7963, 144.9614); // Melbourne Uni
         }
-
         ////mMap.addMarker(new MarkerOptions().position(latLng).title("Melbourne Uni"));
         CameraPosition cameraPosition = new CameraPosition.Builder()
                 .target(latLng)
@@ -395,6 +384,23 @@ public class RangeFragment extends Fragment {
                 return true;
             }
         });
+
+        mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+            @Override
+            public void onMapClick(LatLng latLng) {
+
+                if(mLayout.getPanelState() == PanelState.ANCHORED ){
+                    mLayout.setPanelState(PanelState.HIDDEN);
+                }
+                else {  // !!!! if( mLayout.getPanelState() == PanelState.HIDDEN ) {
+                    directionJumpButton.setHideAnimation(ActionButton.Animations.JUMP_TO_DOWN);
+                    directionJumpButton.hide();
+                    rangeQueryButton.setShowAnimation(ActionButton.Animations.JUMP_FROM_RIGHT);
+                    rangeQueryButton.show();
+                }
+            }
+        });
+
         ////////////////////////////////////////////////////////////////////////
 
         /////////////// Set the direction jump button listener //////////////////
@@ -480,8 +486,8 @@ public class RangeFragment extends Fragment {
         /////////////////////////////////////////////////////////
 
         /////////// Set the route button listener //////////////
-        ButtonRectangle pathQueryButton = (ButtonRectangle) getActivity().findViewById(R.id.obtain_direction_button);
-        pathQueryButton.setOnClickListener(new View.OnClickListener() {
+        ButtonRectangle directionButton = (ButtonRectangle) getActivity().findViewById(R.id.obtain_direction_button);
+        directionButton.setOnClickListener(new View.OnClickListener() {
 
             /**
              * TODO add comments
@@ -513,6 +519,101 @@ public class RangeFragment extends Fragment {
 
     }
 
+    /**
+     * TODO add comments
+     * @return
+     */
+    private Location setUpMyLocation(){
+
+        mMap.setMyLocationEnabled(true);
+        // Get LocationManager object from System Service LOCATION_SERVICE
+        LocationManager locationManager = (LocationManager)
+                getActivity().getSystemService(Context.LOCATION_SERVICE);
+        // Create a criteria object to retrieve provider
+        Criteria criteria = new Criteria();
+        // Get the name of the best provider
+        String provider = locationManager.getBestProvider(criteria, true);
+
+        ////// set up the current location change listener /////////
+        setUpLocationChangeListener();
+        ////////////////////////////////////////////////////////////
+
+        // Get the initial Current Location
+        Location myLocation = locationManager.getLastKnownLocation(provider);
+        return myLocation;
+    }
+
+    // TODO Untested code: test it
+    private void setUpLocationChangeListener(){
+
+        // The minimum time (in miliseconds) the system will wait until checking if the location changed
+        int minTime = 60000; // 1 min
+        // The minimum distance (in meters) traveled until you will be notified
+        float minDistance = 15;
+        // Create a new instance of the location listener
+        MyLocationListener myLocListener = new MyLocationListener();
+        // Get the location manager from the system
+        LocationManager locationManager = (LocationManager)
+                getActivity().getSystemService(Context.LOCATION_SERVICE);
+        // Get the criteria you would like to use
+        Criteria criteria = new Criteria();
+        criteria.setPowerRequirement(Criteria.POWER_LOW);
+        criteria.setAccuracy(Criteria.ACCURACY_FINE);
+        criteria.setAltitudeRequired(false);
+        criteria.setBearingRequired(false);
+        criteria.setCostAllowed(true);  // may require data transformation from ISP
+        criteria.setSpeedRequired(false);
+        // Get the best provider from the criteria specified, and false to say it can turn the provider on if it isn't already
+        String bestProvider = locationManager.getBestProvider(criteria, false);
+        // Request location updates
+        locationManager.requestLocationUpdates(bestProvider, minTime, minDistance, myLocListener);
+    }
+
+    private class MyLocationListener implements LocationListener{
+
+        @Override
+        public void onLocationChanged(Location location){
+            if (location != null){
+                // Do something knowing the location changed by the distance you requested
+                currentLocation = null;
+                currentLocation = new LatLng(location.getLatitude(), location.getLongitude());
+            }
+        }
+
+        @Override
+        public void onProviderDisabled(String arg0){
+            // Do something here if you would like to know when the provider is disabled by the user
+        }
+
+        @Override
+        public void onProviderEnabled(String arg0){
+            // Do something here if you would like to know when the provider is enabled by the user
+        }
+
+        @Override
+        public void onStatusChanged(String arg0, int arg1, Bundle arg2){
+            // Do something here if you would like to know when the provider status changes
+        }
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.menu_range, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.action_settings) {
+            startActivity(new Intent(getActivity(), SettingsActivity.class));
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
 
     //////////////////////////////// AsyncTasks ////////////////////////////////////////
     /**
@@ -638,8 +739,8 @@ public class RangeFragment extends Fragment {
             this.range_radius = Double.valueOf(range_radius);
             // progress dialog
             progressDialog = new ProgressDialog(getActivity());
-            progressDialog.setTitle("Retrieving fuel stations...");
-            progressDialog.setMessage("Please wait...");
+            progressDialog.setTitle("Please wait...");
+            progressDialog.setMessage("Retrieving fuel stations...");
             progressDialog.setCancelable(false);
             progressDialog.show();
         }
@@ -662,9 +763,10 @@ public class RangeFragment extends Fragment {
         @Override
         protected void onPostExecute(JSONArray jsonArray) {
 
+            progressDialog.dismiss();
             if( jsonArray == null ){
                 Toast toast = Toast.makeText(getActivity(), "Server request errors," +
-                        " please check the internet and try later", Toast.LENGTH_LONG);
+                        " please check the addresses or the internet connection and try later", Toast.LENGTH_LONG);
                 toast.setGravity(Gravity.CENTER, 0, 0);
                 toast.show();
                 return;
@@ -688,12 +790,12 @@ public class RangeFragment extends Fragment {
             mMap.addMarker(current_markerOptions);
 
             //Else show all the station markers
-            DrawMarkersOnMap.drawOnMap(
+            DrawMarkersOnMap.drawOnMapMaxTenDifferentColor(
                     (android.support.v7.app.ActionBarActivity) getActivity(),
                     mMap,
-                    jsonArray
+                    jsonArray,
+                    latLng
             );
-            progressDialog.dismiss();
 
         } // end post execute
     }// end range query task
@@ -839,6 +941,7 @@ public class RangeFragment extends Fragment {
                 /////// If any error occurs, we don't do the path query and return ///////
                 /////// the error object directly ////////////////////////////////////////
                 //////////////// For origin /////////////////
+                Log.v(LOG_TAG, "Geocoding the origin...");
                 if( origin_addr.equals( currentLocationName ) ){
                     if( currentLocation == null ){
                         try {
@@ -851,8 +954,19 @@ public class RangeFragment extends Fragment {
                     o_lat = currentLocation.latitude;
                     o_lng = currentLocation.longitude;
                 }
+                else if( origin_addr.equals( fuelStationClickedName ) ){
+                    if( fuelStationClickedLatLng == null ){
+                        try {
+                            errorObj.put(this.DESTIN_ERROR_KEY, this.ERROR);
+                        } catch (JSONException e) {
+                        }
+                        return errorObj;
+                    }
+                    //else
+                    o_lat = fuelStationClickedLatLng.latitude;
+                    o_lng = fuelStationClickedLatLng.longitude;
+                }
                 else {
-                    Log.v(LOG_TAG, "Geocoding the origin...");
                     List<Address> addresses_o = geocoder.getFromLocationName(origin_addr, 1);
                     if (addresses_o == null || addresses_o.size() == 0) {
                     /*13/03/2015 Yu Sun: this will cause Looper.prepare() problems
@@ -871,6 +985,7 @@ public class RangeFragment extends Fragment {
                     o_lng = addresses_o.get(0).getLongitude();
                 }
                 //////////////// For destination /////////////////
+                Log.v(LOG_TAG, "Geocoding the destination...");
                 if( destin_addr.equals( fuelStationClickedName ) ){
                     if( fuelStationClickedLatLng == null ){
                         try {
@@ -883,8 +998,19 @@ public class RangeFragment extends Fragment {
                     d_lat = fuelStationClickedLatLng.latitude;
                     d_lng = fuelStationClickedLatLng.longitude;
                 }
+                else if( destin_addr.equals( currentLocationName ) ){
+                    if( currentLocation == null ){
+                        try {
+                            errorObj.put(this.ORIGIN_ERROR_KEY, this.ERROR);
+                        } catch (JSONException e) {
+                        }
+                        return errorObj;
+                    }
+                    //else
+                    d_lat = currentLocation.latitude;
+                    d_lng = currentLocation.longitude;
+                }
                 else {
-                    Log.v(LOG_TAG, "Geocoding the destination...");
                     List<Address> addresses_d = geocoder.getFromLocationName(destin_addr, 1);
                     if (addresses_d == null || addresses_d.size() == 0) {
                     /*13/03/2015 Yu Sun: this will cause Looper.prepare() problems
@@ -914,6 +1040,16 @@ public class RangeFragment extends Fragment {
                         0.0     //getting the directions only
                 );
                 Log.v(LOG_TAG, "done!");
+                if( result == null ){
+                    try {
+                        errorObj.put(RESULT_DIRECTION_KEY, ERROR);
+                    } catch (JSONException json_e) {
+                        Log.e(LOG_TAG, "Error for errorObj json");
+                    }
+                    return errorObj;
+                }else{
+                    return result;
+                }
             } catch (IOException e) {
                 // This error is the same as result = pq.executeQuery returns null.
                 // In most cases, the error is caused by internet connection, i.e.,
@@ -927,7 +1063,6 @@ public class RangeFragment extends Fragment {
                 }
                 return errorObj;
             }
-            return result;
         }
 
         /**
@@ -998,4 +1133,6 @@ public class RangeFragment extends Fragment {
             /////////////////////////////////////////////////////////////////////////////////
         }
     }
+
+
 }

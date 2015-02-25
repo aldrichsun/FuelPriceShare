@@ -95,7 +95,7 @@ public class PathQuery {
         String response = sr.getResponse(url);
         Log.v(LOG_TAG, "done!");
         if( response == null || response.isEmpty() ){
-            Log.e(LOG_TAG, "Error getting results from server, check the internet");
+            Log.e(LOG_TAG, "Error getting results from server, check the internet or the server");
             return null;
         }
 

@@ -55,6 +55,7 @@ public class MainActivity extends ActionBarActivity {
 
     private static final int ACTIVITY_SETTING = 4;
 
+    private Fragment fragment = null;
     private Fragment rangeFragment = null;
     private Fragment pathFragment = null;
     private Fragment profileFragment = null;
@@ -133,6 +134,7 @@ public class MainActivity extends ActionBarActivity {
         // TODO may check it: 20/02/2015
      // MenuInflater inflater = getMenuInflater();
      //   inflater.inflate(R.menu.menu_navdrawer, menu);
+        getMenuInflater().inflate(R.menu.menu_main, menu);
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -221,6 +223,7 @@ public class MainActivity extends ActionBarActivity {
             setTitle(mDrawerItemStrings[position]);
             mDrawerLayout.closeDrawer(mDrawerList);
 
+            fragment = null;
             switch (position) {
                 case FRAGMENT_RANGE_SEARCH:
                     if( rangeFragment.isAdded() ){
@@ -231,6 +234,7 @@ public class MainActivity extends ActionBarActivity {
                     if(pathFragment.isAdded()){fragmentTransaction.hide(pathFragment);}
                     if(profileFragment.isAdded()){fragmentTransaction.hide(profileFragment);}
                     if(contributeFragment.isAdded()){fragmentTransaction.hide(contributeFragment);}
+                    fragment = rangeFragment;
                     break;
                 case FRAGMENT_PATH_SEARCH:
                     if( pathFragment.isAdded() ){
@@ -241,6 +245,7 @@ public class MainActivity extends ActionBarActivity {
                     if(rangeFragment.isAdded()){fragmentTransaction.hide(rangeFragment);}
                     if(profileFragment.isAdded()){fragmentTransaction.hide(profileFragment);}
                     if(contributeFragment.isAdded()){fragmentTransaction.hide(contributeFragment);}
+                    fragment = pathFragment;
                     break;
                 case FRAGMENT_PROFILE:
                     if(profileFragment.isAdded()){
@@ -251,6 +256,7 @@ public class MainActivity extends ActionBarActivity {
                     if(rangeFragment.isAdded()){fragmentTransaction.hide(rangeFragment);}
                     if(pathFragment.isAdded()){fragmentTransaction.hide(pathFragment);}
                     if(contributeFragment.isAdded()){fragmentTransaction.hide(contributeFragment);}
+                    fragment = profileFragment;
                     break;
                 case FRAGMENT_CONTRIBUTE:
                     if(contributeFragment.isAdded()){
@@ -261,10 +267,11 @@ public class MainActivity extends ActionBarActivity {
                     if(rangeFragment.isAdded()){fragmentTransaction.hide(rangeFragment);}
                     if(pathFragment.isAdded()){fragmentTransaction.hide(pathFragment);}
                     if(profileFragment.isAdded()){fragmentTransaction.hide(profileFragment);}
+                    fragment = contributeFragment;
                     break;
-                case ACTIVITY_SETTING:
-                    startActivity(new Intent(this, SettingsActivity.class));
-                    break;
+//                case ACTIVITY_SETTING:
+//                    //startActivity(new Intent(this, SettingsActivity.class));
+//                    break;
                 default:
                     break;
             }
@@ -317,8 +324,12 @@ public class MainActivity extends ActionBarActivity {
         /**
          * Directly call the present fragment to handle onActivityResult
          */
-        contributeFragment.onActivityResult(requestCode, resultCode, intent);
-        //fragment.onActivityResult(requestCode, resultCode, intent);
+//        if( contributeFragment.isAdded() )
+//            contributeFragment.onActivityResult(requestCode, resultCode, intent);
+//        if( profileFragment.isAdded() )
+//            profileFragment.onActivityResult(requestCode, resultCode, intent);
+        if( fragment != null )
+            fragment.onActivityResult(requestCode, resultCode, intent);
 
     }
 }
