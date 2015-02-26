@@ -61,7 +61,7 @@ public class ProfileFragment extends Fragment {
      /*
    UI component parameters
     */
-
+    /////////////////////////////////////
     private TextView textViewUserId;
     private TextView textViewUserName;
     private TextView textViewFirstName;
