@@ -1,6 +1,7 @@
 package unimelb.cis.spatialanalytics.fuelpriceshare.login;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
@@ -8,6 +9,8 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.View;
+import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -36,23 +39,24 @@ import unimelb.cis.spatialanalytics.fuelpriceshare.config.ConfigConstant;
 import unimelb.cis.spatialanalytics.fuelpriceshare.config.ConfigURL;
 import unimelb.cis.spatialanalytics.fuelpriceshare.data.UserCookie;
 import unimelb.cis.spatialanalytics.fuelpriceshare.data.Users;
-import unimelb.cis.spatialanalytics.fuelpriceshare.others.RandomGenerateUniqueIDs;
 import unimelb.cis.spatialanalytics.fuelpriceshare.http.AppController;
 import unimelb.cis.spatialanalytics.fuelpriceshare.http.CustomRequest;
-import unimelb.cis.spatialanalytics.fuelpriceshare.http.ImageUploader;
+import unimelb.cis.spatialanalytics.fuelpriceshare.http.MultiPartRequest;
+import unimelb.cis.spatialanalytics.fuelpriceshare.http.MyExceptionHandler;
+import unimelb.cis.spatialanalytics.fuelpriceshare.others.RandomGenerateUniqueIDs;
 
 /**
  * Created by hanl4 on 15/02/2015.
  * This function is used to do login. There are THREE available ways for logging into our system:
  * 1) Register in our system and then log in;
  * 2) use Facebook account. Please notice that, all the public information of FB account are stored into our own database
- * 3) session login. If the user has already logged into our system before, the system will store the informatino locally.
+ * 3) session login. If the user has already logged into our system before, the system will store the information locally.
  * Therefore, the user doesn't have to input the username and password to login again. However, if the user press the "LOG OUT"
  * button, the session will be erased from the local, and it will require input password and username again when the user is
  * opening the system.
  */
 
-public class LoginActivity extends Activity implements ImageUploader.ImageUploaderReply {
+public class LoginActivity extends Activity{
 
     /**
      * UI component definition
@@ -79,21 +83,6 @@ public class LoginActivity extends Activity implements ImageUploader.ImageUpload
     private UiLifecycleHelper uiHelper;
 
 
-    /**
-     * For HTTP Return Request Code (switch case)
-     */
-
-    private final int REQUEST_CODE_COUCHDB_FB_LOGIN = 1;
-    private final int REQUEST_CODE_COUCHDB_UPDATE_USER_INFO = 2;
-
-    private final int REQUEST_CODE_IMAGE_LOADER = 1;
-    private final int REQUEST_CODE_IMAGE_UPLOADER = 1;
-    private final int REQUEST_CODE_HTTP_URL = 1;
-
-    /**
-     * HTTP Request Interface to receive the returned results
-     */
-    private ImageUploader.ImageUploaderReply imageUploaderReply = this;
 
     /**
      * For Log
@@ -117,8 +106,7 @@ public class LoginActivity extends Activity implements ImageUploader.ImageUpload
             Users.mapSharedPreference(pref);
 
             //Start the main activity
-            Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-            startActivity(intent);
+            launchMainActivity();
 
             /**
              * User Volley API developed by Google to handle the request!
@@ -152,7 +140,9 @@ public class LoginActivity extends Activity implements ImageUploader.ImageUpload
 
                 @Override
                 public void onErrorResponse(VolleyError error) {
-                    Log.e(TAG, "Error: " + error.getMessage());
+
+                    MyExceptionHandler.presentError(TAG, "read user table from server failed!", getApplicationContext(), error);
+
                 }
             });
             // Adding request to request queue
@@ -169,6 +159,15 @@ public class LoginActivity extends Activity implements ImageUploader.ImageUpload
         loginErrorMsg = (TextView) findViewById(R.id.login_error);
         loginErrorMsg.setText("");
 
+        // close the soft key pad
+        // Han Li and Yu Sun 26/02/2015: not working
+//        InputMethodManager imm = (InputMethodManager)
+//                getSystemService(Context.INPUT_METHOD_SERVICE);
+//        imm.hideSoftInputFromWindow(inputUsername.getWindowToken(), 0);
+//        imm.hideSoftInputFromWindow(inputPassword.getWindowToken(), 0);
+        getWindow().setSoftInputMode(
+                WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN
+        );
 
         // Login button Click Event
         btnLogin.setOnClickListener(new View.OnClickListener() {
@@ -226,12 +225,17 @@ public class LoginActivity extends Activity implements ImageUploader.ImageUpload
                                         UserCookie.setLoginStatus(pref, true);
                                         Users.mapJson(json);
 
+                                        //Han Li and Yu Sun 26/02/2015: close the soft keypad for better user experience
+                                        //This InputMethodManager works when the soft keypad is shown after click, but is not
+                                        //shown without any click.
+                                        InputMethodManager imm = (InputMethodManager)
+                                                 getSystemService(Context.INPUT_METHOD_SERVICE);
+                                        imm.hideSoftInputFromWindow(inputUsername.getWindowToken(), 0);
+                                        imm.hideSoftInputFromWindow(inputPassword.getWindowToken(), 0);
 
                                         //Launch MainActivity Screen
-                                        Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-                                        // Close all views before launching Dashboard
-                                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                                        startActivity(intent);
+
+                                        launchMainActivity();
 
                                         // Close Login Screen
                                         finish();
@@ -259,7 +263,9 @@ public class LoginActivity extends Activity implements ImageUploader.ImageUpload
 
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        Log.e(TAG, "Error: " + error.getMessage());
+
+                        MyExceptionHandler.presentError(TAG, "login failed",getApplicationContext(), error);
+
                     }
                 });
                 // Adding request to request queue
@@ -358,10 +364,12 @@ public class LoginActivity extends Activity implements ImageUploader.ImageUpload
 
                                                 String fileName = RandomGenerateUniqueIDs.getFileName("png");
 
-                                                Users.profileImage = ConfigURL.getImagePathBase() + fileName;
-                                                String data = Users.getUserJSON().toString();
+                                                String data =  Users.getUserJSONForImageUpload(ConfigURL.getServerProfileImageFolderBase() + fileName).toString();
 
-                                                new ImageUploader(imageUploaderReply, bitmap, data, REQUEST_CODE_IMAGE_UPLOADER, fileName, null);
+                                                uploadProfileImage2Server(bitmap,fileName, data);
+
+
+
 
 
                                             } else {
@@ -383,9 +391,8 @@ public class LoginActivity extends Activity implements ImageUploader.ImageUpload
                                     UserCookie.storeUserLocal(pref, json);
                                     UserCookie.setLoginStatus(pref, true);
                                     //Start the main activity
-                                    Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-                                    startActivity(intent);
 
+                                 launchMainActivity();
                                 }
                                 Log.d(TAG, json.toString());
 
@@ -396,10 +403,14 @@ public class LoginActivity extends Activity implements ImageUploader.ImageUpload
                             @Override
                             public void onErrorResponse(VolleyError error) {
                                 Log.e(TAG, "Error: " + error.getMessage());
+                                MyExceptionHandler.presentError(TAG, "mapping facebook user information failed", getApplicationContext(), error);
+
                             }
                         });
                         // Adding request to request queue
                         AppController.getInstance().addToRequestQueue(customRequest, tag_json_obj);
+
+                        launchMainActivity();
 
 
                     }
@@ -412,6 +423,77 @@ public class LoginActivity extends Activity implements ImageUploader.ImageUpload
 
 
     }
+
+    /**
+     * launch main activity after successfully log in
+     */
+    private void launchMainActivity() {
+        Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+       // intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TOP|Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        finish();//close login view.
+
+    }
+
+
+    /**
+     * Upload profile image to the server
+     *
+     * @param fileName   new image name with unique id
+     * @param stringData string data to upload as well
+     */
+
+    public void uploadProfileImage2Server(Bitmap bitmap,String fileName, String stringData) {
+        // Tag used to cancel the request
+        String tag_json_obj = TAG;
+
+        /**
+         * Use google Volley lib to upload an image
+         */
+        MultiPartRequest multiPartRequest = new MultiPartRequest(ConfigURL.getUploadImageServlet(), bitmap, fileName,null, stringData, new Response.Listener<JSONObject>() {
+
+            @Override
+            public void onResponse(JSONObject response) {
+                Log.d(TAG, response.toString());
+                if (response.has(ConfigConstant.KEY_ERROR)) {
+                    Log.e(TAG, "profile image upload failed!"+response.toString());
+
+                } else {
+                    //if upload success, update local session
+                    /**
+                     * Response from writing the data to the server. Mapping the latest user information to Users, and update or
+                     * write local session if the user information was not stored locally before.                     */
+
+                    UserCookie.storeUserLocal(pref, Users.getUserJSON());
+                    UserCookie.setLoginStatus(pref, true);
+                    Users.profileImage = Users.tempProfielImageName;
+                    Users.tempProfielImageName = "";
+                    //Start the main activity
+                 //   launchMainActivity();
+
+
+
+
+                }
+            }
+        }, new Response.ErrorListener() {
+
+            @Override
+            public void onErrorResponse(VolleyError error) {
+
+
+                MyExceptionHandler.presentError(TAG, "Update profile image failed!", getApplicationContext(), error);
+
+
+            }
+        });
+        // Adding request to request queue
+        AppController.getInstance().addToRequestQueue(multiPartRequest, tag_json_obj);
+
+    }
+
+
 
 
     /**
@@ -460,42 +542,6 @@ public class LoginActivity extends Activity implements ImageUploader.ImageUpload
     }
 
 
-    /**
-     * Interface implementation. Receive the response from the server of which the request was usually made by new ImageUploader
-     *
-     * @param reply       reply message from the server, known as response
-     * @param requestCode for the switch case when multiple requests are made
-     */
-
-    @Override
-    public void imageUploaderReply(Object reply, int requestCode) {
-        try {
-            JSONObject json = new JSONObject(reply.toString());
-
-            switch (requestCode) {
-                case REQUEST_CODE_IMAGE_UPLOADER:
-                    /**
-                     * Response from writing the data to the server. Mapping the latest user information to Users, and update or
-                     * write local session if the user information was not stored locally before.                     */
-
-                    UserCookie.storeUserLocal(pref, Users.getUserJSON());
-                    UserCookie.setLoginStatus(pref, true);
-                    //Start the main activity
-                    Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-                    startActivity(intent);
-
-
-                    break;
-
-            }
-
-
-        } catch (JSONException e) {
-            e.printStackTrace();
-            Log.e(TAG, e.toString());
-        }
-
-    }
 
 
 }

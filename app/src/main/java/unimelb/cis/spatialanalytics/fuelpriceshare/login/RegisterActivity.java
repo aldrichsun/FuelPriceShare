@@ -33,9 +33,13 @@ import unimelb.cis.spatialanalytics.fuelpriceshare.data.UserCookie;
 import unimelb.cis.spatialanalytics.fuelpriceshare.data.Users;
 import unimelb.cis.spatialanalytics.fuelpriceshare.http.AppController;
 import unimelb.cis.spatialanalytics.fuelpriceshare.http.CustomRequest;
+import unimelb.cis.spatialanalytics.fuelpriceshare.http.MyExceptionHandler;
 
+/**
+ * Register user into our system. Currently only require phone number and password for input
+ */
 
-public class RegisterActivity extends Activity  {
+public class RegisterActivity extends Activity {
 
     /**
      * UI component definition
@@ -47,7 +51,6 @@ public class RegisterActivity extends Activity  {
     private TextView registerErrorMsg;
 
 
-
     private final String KEY_ACTION = "Register";//Define the action for http request (servlet)
 
     /**
@@ -56,15 +59,6 @@ public class RegisterActivity extends Activity  {
     private String phone;
     private String password;
 
-
-
-
-    /**
-     * HTTP Request Code
-     *
-     * */
-
-    private final int REQUEST_CODE_HTTP_REQUEST=1;
 
     /**
      * Local User Storage : Session
@@ -75,7 +69,7 @@ public class RegisterActivity extends Activity  {
      * For Log
      */
 
-    private final String TAG="RegisterActivity";
+    private final String TAG = "RegisterActivity";
 
 
     @Override
@@ -119,7 +113,6 @@ public class RegisterActivity extends Activity  {
                 Log.d(TAG, "Register");
 
 
-
                 /**
                  * User Volley API developed by Google to handle the request!
                  */
@@ -130,30 +123,30 @@ public class RegisterActivity extends Activity  {
                 Map<String, String> params = new HashMap<String, String>();
                 params.put("Action", KEY_ACTION);
                 params.put("phone", phone);
-                Users.id=phone;
-                Users.password=password;
-                JSONObject json= Users.getUserJSON();
+                Users.id = phone;
+                Users.password = password;
+                JSONObject json = Users.getUserJSON();
                 params.put("json", json.toString());
 
 
-                CustomRequest customRequest=new CustomRequest(Request.Method.POST, ConfigURL.getRegisterURL(),params, new Response.Listener<JSONObject>() {
+                CustomRequest customRequest = new CustomRequest(Request.Method.POST, ConfigURL.getRegisterURL(), params, new Response.Listener<JSONObject>() {
 
                     @Override
                     public void onResponse(JSONObject response) {
                         Log.d(TAG, response.toString());
 
-                       handleResponse(response);
+                        handleResponse(response);
                     }
                 }, new Response.ErrorListener() {
 
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        Log.e(TAG, "Error: " + error.getMessage());
+
+                        MyExceptionHandler.presentError(TAG, "Register failed", getApplicationContext(), error);
                     }
                 });
-               // Adding request to request queue
+                // Adding request to request queue
                 AppController.getInstance().addToRequestQueue(customRequest, tag_json_obj);
-
 
 
             }
@@ -175,29 +168,31 @@ public class RegisterActivity extends Activity  {
 
     /**
      * Handle the response from the server
+     *
      * @param response response from the server
      */
 
-    public void handleResponse(JSONObject response)
-    {
+    public void handleResponse(JSONObject response) {
         if (!response.has(ConfigConstant.KEY_ERROR)) {
 
 
-            Intent dashboard = new Intent(getApplicationContext(), MainActivity.class);
-            // Close all views before launching Dashboard
-            startActivity(dashboard);
+            Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+            // intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TOP|Intent.FLAG_ACTIVITY_CLEAR_TASK);
+
+            startActivity(intent);
             /**
              * Mapping some basic information and store the user locally
              */
-            Users.phone=phone;
-            Users.id=phone;
+            Users.phone = phone;
+            Users.id = phone;
             UserCookie.storeUserLocal(pref);
             finish();
 
         } else {
 
             registerErrorMsg.setText("User name has been taken, please try another one.");
-            Log.e(TAG, "Fail in registration:" + response.toString());
+            Log.w(TAG, "Fail in registration ( doesn't mean coding is wrong ; feasible reason: username has been taken, etc. :" + response.toString());
 
 
         }

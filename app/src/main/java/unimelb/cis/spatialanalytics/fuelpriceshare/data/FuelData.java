@@ -12,15 +12,16 @@ import unimelb.cis.spatialanalytics.fuelpriceshare.config.ConfigConstant;
 
 /**
  * Created by hanl4 on 29/01/2015.
- * handle all fuel information
+ * handle all fuel information (parsing the fuel information : fuel price, type, petrol station info, etc from the
+ * response of the server.
  */
 public class FuelData {
 
 
     private ArrayList<JSONObject> fuelJsonList = new ArrayList<JSONObject>();//store all the fuel information: price & type
-    private ArrayList<JSONObject> petroStationsJsonList = new ArrayList<JSONObject>();//store all the detected petro station info
+    private ArrayList<JSONObject> petrolStationsJsonList = new ArrayList<JSONObject>();//store all the detected petrol station info
     private ArrayList<String> allFuelTypeList = new ArrayList<String>();// all the fuel types
-    private ArrayList<String> petroStationsNameList = new ArrayList<String>();//only contain the name info of all the detected petro station
+    private ArrayList<String> petrolStationsNameList = new ArrayList<String>();//only contain the name info of all the detected petrol station
 
 
     private final String TAG = "FuelData";
@@ -32,9 +33,9 @@ public class FuelData {
     public void clearData() {
 
         fuelJsonList = new ArrayList<JSONObject>();
-        petroStationsJsonList = new ArrayList<JSONObject>();
+        petrolStationsJsonList = new ArrayList<JSONObject>();
         allFuelTypeList = new ArrayList<String>();
-        petroStationsNameList = new ArrayList<String>();
+        petrolStationsNameList = new ArrayList<String>();
 
     }
 
@@ -44,9 +45,9 @@ public class FuelData {
      *
      * @return CharSequence[]
      */
-    public CharSequence[] convertPetroStationNameList2CharSequence() {
+    public CharSequence[] convertPetrolStationNameList2CharSequence() {
 
-        final CharSequence[] items = petroStationsNameList.toArray(new CharSequence[petroStationsNameList.size()]);
+        final CharSequence[] items = petrolStationsNameList.toArray(new CharSequence[petrolStationsNameList.size()]);
         return items;
     }
 
@@ -60,10 +61,10 @@ public class FuelData {
         try {
             final String KEY_ID = "id";
             JSONObject json = new JSONObject();
-            json.put("transaction_id", transactionID);
-            json.put("user_id", Users.id);
-            json.put("latitude", 1d);
-            json.put("longitude", 1d);
+            json.put(ConfigConstant.KEY_CONTRIBUTE_PRICE_TRANSACTION_ID, transactionID);
+            json.put(ConfigConstant.KEY_UID, Users.id);
+            json.put(ConfigConstant.KEY_LATITUDE, 1d);
+            json.put(ConfigConstant.KEY_LONGITUDE, 1d);
             return json.toString();
         } catch (JSONException e) {
             Log.e(TAG, e.toString());
@@ -85,21 +86,21 @@ public class FuelData {
             Log.d(TAG, "parse fuel image response data from server");
             clearData();//reset data
             /*
-            parse petro station information
+            parse petrol station information
              */
-            JSONArray petroStationJsonArray = replyJson.getJSONArray("petro_station");
+            JSONArray petrolStationJsonArray = replyJson.getJSONArray(ConfigConstant.KEY_PETROL_STATION);
 
-            for (int i = 0; i < petroStationJsonArray.length(); i++) {
-                petroStationsJsonList.add(petroStationJsonArray.getJSONObject(i));
+            for (int i = 0; i < petrolStationJsonArray.length(); i++) {
+                petrolStationsJsonList.add(petrolStationJsonArray.getJSONObject(i));
 
-                petroStationsNameList.add(petroStationJsonArray.getJSONObject(i).getString(ConfigConstant.KEY_PETRO_STATION_NAME));
+                petrolStationsNameList.add(petrolStationJsonArray.getJSONObject(i).getString(ConfigConstant.KEY_PETROL_STATION_NAME));
             }
 
 
             /*
             parse fuel information
              */
-            JSONArray fuelJsonArray = replyJson.getJSONArray("fuel");
+            JSONArray fuelJsonArray = replyJson.getJSONArray(ConfigConstant.KEY_FUEL);
             for (int i = 0; i < fuelJsonArray.length(); i++) {
                 fuelJsonList.add(fuelJsonArray.getJSONObject(i));
             }
@@ -107,7 +108,7 @@ public class FuelData {
             /*
             parse all fuel type information
              */
-            JSONArray allFuelTypeJsonArray = replyJson.getJSONArray("fuel_type");
+            JSONArray allFuelTypeJsonArray = replyJson.getJSONArray(ConfigConstant.KEY_ALL_FUEL_BRAND);
 
             for (int i = 0; i < allFuelTypeJsonArray.length(); i++) {
                 allFuelTypeList.add(allFuelTypeJsonArray.getString(i));
@@ -123,20 +124,20 @@ public class FuelData {
     }
 
 
-    public ArrayList<JSONObject> getPetroStationsJsonList() {
-        return petroStationsJsonList;
+    public ArrayList<JSONObject> getPetrolStationsJsonList() {
+        return petrolStationsJsonList;
     }
 
-    public void setPetroStationsJsonList(ArrayList<JSONObject> petroStationsJsonList) {
-        this.petroStationsJsonList = petroStationsJsonList;
+    public void setPetrolStationsJsonList(ArrayList<JSONObject> petrolStationsJsonList) {
+        this.petrolStationsJsonList = petrolStationsJsonList;
     }
 
-    public ArrayList<String> getPetroStationsNameList() {
-        return petroStationsNameList;
+    public ArrayList<String> getPetrolStationsNameList() {
+        return petrolStationsNameList;
     }
 
-    public void setPetroStationsNameList(ArrayList<String> petroStationsNameList) {
-        this.petroStationsNameList = petroStationsNameList;
+    public void setPetrolStationsNameList(ArrayList<String> petrolStationsNameList) {
+        this.petrolStationsNameList = petrolStationsNameList;
     }
 
     public ArrayList<JSONObject> getFuelJsonList() {

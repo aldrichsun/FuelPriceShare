@@ -30,8 +30,11 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.NumberPicker;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Response;
+import com.android.volley.RetryPolicy;
 import com.android.volley.VolleyError;
 import com.soundcloud.android.crop.Crop;
 
@@ -49,36 +52,36 @@ import unimelb.cis.spatialanalytics.fuelpriceshare.config.ConfigConstant;
 import unimelb.cis.spatialanalytics.fuelpriceshare.config.ConfigURL;
 import unimelb.cis.spatialanalytics.fuelpriceshare.data.FuelData;
 import unimelb.cis.spatialanalytics.fuelpriceshare.data.Users;
-import unimelb.cis.spatialanalytics.fuelpriceshare.others.ImagePicker;
-import unimelb.cis.spatialanalytics.fuelpriceshare.others.RandomGenerateUniqueIDs;
 import unimelb.cis.spatialanalytics.fuelpriceshare.http.AppController;
 import unimelb.cis.spatialanalytics.fuelpriceshare.http.CustomRequest;
-import unimelb.cis.spatialanalytics.fuelpriceshare.http.ImageUploader;
+import unimelb.cis.spatialanalytics.fuelpriceshare.http.MultiPartRequest;
+import unimelb.cis.spatialanalytics.fuelpriceshare.http.MyExceptionHandler;
+import unimelb.cis.spatialanalytics.fuelpriceshare.others.ImagePicker;
+import unimelb.cis.spatialanalytics.fuelpriceshare.others.RandomGenerateUniqueIDs;
 import unimelb.cis.spatialanalytics.fuelpriceshare.views.CustermizedCanvasView;
 import unimelb.cis.spatialanalytics.fuelpriceshare.views.MyNumberPicker;
 
 /**
  * Created by hanl4 on 17/02/2015.
+ * the action of contributing fuel price to the server including:
+ * 1) take or select a fuel price image
+ * 2) upload fuel image to the server
+ * 3) extract fuel information from the image and return the information in text
+ * 4) retrieve current user petrol location
+ * 5) user is able to modify the returned fuel information returned from the server manually
+ * 6) upload the refined result to the server to make contribution
  */
-public class ModifyPricelFragment extends Fragment implements ImageUploader.ImageUploaderReply, DialogInterface.OnDismissListener {
+public class ContributePriceFragment extends Fragment implements DialogInterface.OnDismissListener {
 
     private ImagePicker imagePicker;// Pick up image from camera, library, etc. Defined by Han
     private final int REQUEST_CAMERA = ConfigConstant.REQUEST_CAMERA;//Image captured by camera call back code
     private final int SELECT_FILE = ConfigConstant.SELECT_FILE;//Image captured by selecting call back code
     private Bitmap bitmapUpload;//Captured fuel image to be uploaded
     private String transactionID;//The ID of the action of contributing price.
-    /**
-     * HTTP Request Interface
-     */
-    private final ImageUploader.ImageUploaderReply imageUploaderReply = this;
-    /**
-     * For HTTP Request interface return code
-     */
-    private final int REQUEST_CODE_IMAGE_UPLOAD = ConfigConstant.REQUEST_CODE_IMAGE_UPLOAD;
-    private final int REQUEST_CODE_HTTP_URL = 1;
+
 
     /**
-     * Petro Station and Fuel Information parameters
+     * Petrol Station and Fuel Information parameters
      */
 
     private FuelData fuelData = new FuelData();
@@ -112,7 +115,7 @@ public class ModifyPricelFragment extends Fragment implements ImageUploader.Imag
      */
     private int selectedID;
 
-    //The selected petro station id
+    //The selected petrol station id
     private int selectedStationID;
 
 
@@ -124,19 +127,19 @@ public class ModifyPricelFragment extends Fragment implements ImageUploader.Imag
 
     public static boolean isMenuVisible = false;
 
-    public ModifyPricelFragment() {
+    public ContributePriceFragment() {
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        View rootView = inflater.inflate(R.layout.fragment_do_refine, container, false);
+        View rootView = inflater.inflate(R.layout.fragment_contribute_price, container, false);
         activity = getActivity();
         setHasOptionsMenu(true);
 
 
-        actionBar = ((ActionBarActivity)getActivity()).getSupportActionBar();
+        actionBar = ((ActionBarActivity) getActivity()).getSupportActionBar();
         actionBar.setTitle(actionBarTitles[0]);
         //actionBar.setDisplayHomeAsUpEnabled(false);
 
@@ -203,16 +206,16 @@ public class ModifyPricelFragment extends Fragment implements ImageUploader.Imag
      * Upload the final refined fuel information data to the central server. The information includes:
      * 1) User profile, e.g., id, username, etc.
      * 2) Fuel price & type
-     * 3) Petro station
+     * 3) Petrol station
      */
     public void updateData2Server() {
         JSONObject json = new JSONObject();
         JSONObject userJson = Users.getUserJSONWithoutPassword();
         try {
-            json.put("transaction_id", transactionID);
-            json.put("user", userJson);
-            json.put("fuel", fuelData.getFuelJsonList());
-            json.put("petro_station", fuelData.getPetroStationsJsonList().size() > 0 ? fuelData.getPetroStationsJsonList().get(selectedStationID) : fuelData.getPetroStationsJsonList());
+            json.put(ConfigConstant.KEY_CONTRIBUTE_PRICE_TRANSACTION_ID, transactionID);
+            json.put(ConfigConstant.KEY_USER, userJson);
+            json.put(ConfigConstant.KEY_FUEL, fuelData.getFuelJsonList());
+            json.put(ConfigConstant.KEY_PETROL_STATION, fuelData.getPetrolStationsJsonList().size() > 0 ? fuelData.getPetrolStationsJsonList().get(selectedStationID) : fuelData.getPetrolStationsJsonList());
 
             /**
              * User Volley API developed by Google to handle the request!
@@ -223,7 +226,8 @@ public class ModifyPricelFragment extends Fragment implements ImageUploader.Imag
             String tag_json_obj = TAG;
 
             final ProgressDialog pDialog = new ProgressDialog(getActivity());
-            pDialog.setMessage("Registering......");
+            pDialog.setMessage("Uploading to the server......");
+            pDialog.setCancelable(false);
             pDialog.show();
 
             Map<String, String> params = new HashMap<String, String>();
@@ -237,7 +241,11 @@ public class ModifyPricelFragment extends Fragment implements ImageUploader.Imag
                 public void onResponse(JSONObject response) {
                     Log.d(TAG, response.toString());
                     if (response.has(ConfigConstant.KEY_ERROR))
-                        Log.e(TAG, "Failed to upload refined fuel price data to the server!");
+                    {
+                        Log.e(TAG, "Upload Failed!"+response.toString());
+                        Toast.makeText(getActivity(), "Upload Failed!"+response.toString(), Toast.LENGTH_SHORT).show();
+
+                    }
                     else {
                         Log.d(TAG, "Upload Refined Result to Server : Success");
                         /**
@@ -246,16 +254,20 @@ public class ModifyPricelFragment extends Fragment implements ImageUploader.Imag
                         isEditingView = false;
                         switchViews(false);
 
+                        Toast.makeText(getActivity(), "Upload Success!", Toast.LENGTH_SHORT).show();
+
 
                     }
-                    pDialog.hide();
+                    pDialog.dismiss();
                 }
             }, new Response.ErrorListener() {
 
                 @Override
                 public void onErrorResponse(VolleyError error) {
-                    Log.e(TAG, "Error: " + error.getMessage());
-                    pDialog.hide();
+                    pDialog.dismiss();
+
+                    MyExceptionHandler.presentError(TAG, "upload refined result to server failed!", getActivity(), error);
+
                 }
             });
             // Adding request to request queue
@@ -277,22 +289,22 @@ public class ModifyPricelFragment extends Fragment implements ImageUploader.Imag
      * It needs to process couple things
      * 1) send the refined fuel information results to the server
      * 2) update views presented to the user
-     * 3) handle the condition of multiple petro stations
+     * 3) handle the condition of multiple petrol stations
      */
 
-    public void handleConfirm() {
+    public void handleUpload() {
         {
-            if (fuelData.getPetroStationsJsonList().size() > 1) {
+            if (fuelData.getPetrolStationsJsonList().size() > 1) {
 
                 AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-                builder.setTitle("Which of the following petro station are you currently at?")
+                builder.setTitle("Which of the following petrol station are you currently at?")
 
                         //choose the fuel station if multiple stations are detected
-                        .setSingleChoiceItems(fuelData.convertPetroStationNameList2CharSequence(), selectedStationID, new DialogInterface.OnClickListener() {
+                        .setSingleChoiceItems(fuelData.convertPetrolStationNameList2CharSequence(), selectedStationID, new DialogInterface.OnClickListener() {
 
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                System.out.println("Selecting : " + which);
+                                Log.d(TAG,"Selecting : " + which);
                                 selectedStationID = which;
 
                             }
@@ -323,9 +335,9 @@ public class ModifyPricelFragment extends Fragment implements ImageUploader.Imag
                 dialog.show();
 
             } else {
-                if (fuelData.getPetroStationsJsonList().size() == 0)
+                if (fuelData.getPetrolStationsJsonList().size() == 0)
 
-                    Log.e(TAG, "No petro station was detected around!");
+                    Log.e(TAG, "No petrol station was detected around!");
 
                 updateData2Server();
 
@@ -383,7 +395,7 @@ public class ModifyPricelFragment extends Fragment implements ImageUploader.Imag
         menu.clear();//remove host activity menu
         super.onCreateOptionsMenu(menu, inflater);
 
-        inflater.inflate(R.menu.menu_do_refine, menu);
+        inflater.inflate(R.menu.menu_contribute_price, menu);
 
 
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -415,7 +427,7 @@ public class ModifyPricelFragment extends Fragment implements ImageUploader.Imag
                 /**
                  * upload the editing to the server
                  */
-                handleConfirm();
+                handleUpload();
                 return true;
 
             case R.id.menu_cancel:
@@ -500,8 +512,75 @@ public class ModifyPricelFragment extends Fragment implements ImageUploader.Imag
                             transactionID = RandomGenerateUniqueIDs.getUniqueID();
                             data = fuelData.getUploadDataInfo(transactionID);
 
-                            //upload the image to the server to process
-                            new ImageUploader(imageUploaderReply, ConfigURL.getFuelPriceImageProcessServlet(), bitmapUpload, data, REQUEST_CODE_IMAGE_UPLOAD, filename, null);
+                            /*
+                            upload the image to the server to process
+                             */
+
+                            // Tag used to cancel the request
+                            String tag_json_obj = TAG;
+
+                            /**
+                             * Use google Volley lib to upload an image
+                             */
+                            final ProgressDialog pDialog = new ProgressDialog(getActivity());
+                            pDialog.setMessage("Processing fuel image......");
+                            pDialog.setCancelable(false);
+                            pDialog.show();
+                            MultiPartRequest multiPartRequest = new MultiPartRequest(ConfigURL.getFuelPriceImageProcessServlet(), new File(imageUri.getPath()), filename, data, new Response.Listener<JSONObject>() {
+
+                                @Override
+                                public void onResponse(JSONObject response) {
+                                    Log.d(TAG, response.toString());
+
+                                    if (!response.has(ConfigConstant.KEY_ERROR)) {
+
+                                            pDialog.dismiss();
+                                            //Image was successfully uploaded to the server
+                                            fuelData.parseFuelPriceImageReplyData(response);
+                                            isEditingView = true;
+                                            switchViews(true);
+                                            //The view image might be scaled up to fill the entire view. for more detailed info, please refer
+                                            //the website: https://guides.codepath.com/android/Working-with-the-ImageView
+                                            //imageViewFuel.setImageBitmap(bitmapUpload);
+
+                                            /**
+                                             * Initialize canvas view and update current view
+                                             */
+                                            canvasView = new CustermizedCanvasView(getActivity(), bitmapUpload);
+                                            updateCanvasView();
+
+
+
+                                    } else {
+                                        pDialog.setMessage(response.toString());
+                                        Log.e(TAG, response.toString());
+                                        pDialog.dismiss();
+                                    }
+                                }
+                            }, new Response.ErrorListener() {
+
+                                @Override
+                                public void onErrorResponse(VolleyError error) {
+
+                                    pDialog.dismiss();
+                                    MyExceptionHandler.presentError(TAG, "Update profile image failed!", getActivity(), error);
+
+
+                                }
+                            });
+
+                            /**
+                             * Set the timeout
+                             */
+
+                            int socketTimeout = 60000;//60 seconds - change to what you want
+                            RetryPolicy policy = new DefaultRetryPolicy(socketTimeout, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT);
+                            multiPartRequest.setRetryPolicy(policy);
+
+
+                            // Adding request to request queue
+                            AppController.getInstance().addToRequestQueue(multiPartRequest, tag_json_obj);
+
 
                         } catch (IOException e) {
                             e.printStackTrace();
@@ -545,59 +624,7 @@ public class ModifyPricelFragment extends Fragment implements ImageUploader.Imag
         if (bitmap != null)
             new Crop(source).output(outputUri).withMaxSize(bitmap.getWidth(), bitmap.getHeight()).start(getActivity());
 
-           // new Crop(source).output(outputUri).withMaxSize(1000, 2000).start(getActivity());
-    }
-
-
-    /**
-     * Interface implementation. Receive the response from the server of which the request was usually made by new ImageUploader
-     *
-     * @param reply       reply message from the server, known as response
-     * @param requestCode for the switch case when multiple requests are made
-     */
-
-    @Override
-    public void imageUploaderReply(Object reply, int requestCode) {
-
-//        Log.e(TAG, "The reply is:" + reply.toString());
-
-        try {
-
-            JSONObject replyJson = new JSONObject(reply.toString());
-
-//            Log.e(TAG, "The json is: " + replyJson.toString());
-
-            switch (requestCode) {
-                case REQUEST_CODE_IMAGE_UPLOAD:
-                    if (!replyJson.has(ConfigConstant.KEY_ERROR)) {
-                        //Image was successfully uploaded to the server
-                        fuelData.parseFuelPriceImageReplyData(replyJson);
-                        isEditingView = true;
-                        switchViews(true);
-                        //The view image might be scaled up to fill the entire view. for more detailed info, please refer
-                        //the website: https://guides.codepath.com/android/Working-with-the-ImageView
-                        //imageViewFuel.setImageBitmap(bitmapUpload);
-
-                        /**
-                         * Initialize canvas view and update current view
-                         */
-                        canvasView = new CustermizedCanvasView(getActivity(), bitmapUpload);
-                        updateCanvasView();
-
-
-                    } else {
-                        Log.e(TAG, reply.toString());
-                    }
-
-                    break;
-            }
-
-        } catch (JSONException e) {
-            e.printStackTrace();
-            Log.e(TAG, e.toString());
-        }
-
-
+        // new Crop(source).output(outputUri).withMaxSize(1000, 2000).start(getActivity());
     }
 
 
@@ -661,7 +688,7 @@ public class ModifyPricelFragment extends Fragment implements ImageUploader.Imag
         } else {
 
             /**
-             * After finishing uploading or withdrawing the refinement, back to main panel, and set everything
+             * After finishing editing or withdrawing the refinement, back to main panel, and set everything
              * to initial status.
              */
 
@@ -747,6 +774,10 @@ public class ModifyPricelFragment extends Fragment implements ImageUploader.Imag
 
     }
 
+
+    /**
+     * present the dialog for editing fuel information
+     */
     public void showModifyFuelPriceDialog() {
         //get the price of the corresponding json object
 
@@ -757,9 +788,8 @@ public class ModifyPricelFragment extends Fragment implements ImageUploader.Imag
             final Dialog dialog = new Dialog(getActivity(), R.style.DialogCustomTheme);
 
             final MyNumberPicker myNumberPicker = new MyNumberPicker(getActivity());
-            myNumberPicker.setValue(price, null);//set numberPicker default values
 
-            LinearLayout linearLayout = (LinearLayout) ((LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.modify_fuel_price, null);
+            LinearLayout linearLayout = (LinearLayout) ((LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.dialog_modify_fuel_price, null);
             linearLayout.setOrientation(LinearLayout.VERTICAL);
             LinearLayout linearLayoutNumberPicker = (LinearLayout) linearLayout.findViewById(R.id.linearLayoutNumberPicker);
 
@@ -807,7 +837,7 @@ public class ModifyPricelFragment extends Fragment implements ImageUploader.Imag
 
             dialog.setContentView(linearLayout);
             dialog.setOnDismissListener(this);//override this method. when it is called, the canvas view will be updated.
-            dialog.setCancelable(true);
+            dialog.setCancelable(false);
             dialog.show();
 
         } catch (JSONException e) {
@@ -857,7 +887,7 @@ public class ModifyPricelFragment extends Fragment implements ImageUploader.Imag
     public void showModifyFuelTypeDialog(int index) {
         final Dialog dialog = new Dialog(getActivity(), R.style.DialogCustomTheme);
 
-        LinearLayout linearLayout = (LinearLayout) ((LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.modify_fuel_type, null);
+        LinearLayout linearLayout = (LinearLayout) ((LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.dialog_modify_fuel_type, null);
         linearLayout.setOrientation(LinearLayout.VERTICAL);
 
         final NumberPicker numberPicker = (NumberPicker) linearLayout.findViewById(R.id.numberPicker);
@@ -973,7 +1003,6 @@ public class ModifyPricelFragment extends Fragment implements ImageUploader.Imag
 
     @Override
     public void onDismiss(DialogInterface dialog) {
-        System.out.println("we are in dismiss!!");
         //update canvas view
         updateCanvasView(true);
         //set the visibility of bottom menu to be visible to the user

@@ -43,16 +43,19 @@ import unimelb.cis.spatialanalytics.fuelpriceshare.config.ConfigConstant;
 import unimelb.cis.spatialanalytics.fuelpriceshare.config.ConfigURL;
 import unimelb.cis.spatialanalytics.fuelpriceshare.data.UserCookie;
 import unimelb.cis.spatialanalytics.fuelpriceshare.data.Users;
-import unimelb.cis.spatialanalytics.fuelpriceshare.others.ImagePicker;
-import unimelb.cis.spatialanalytics.fuelpriceshare.others.RandomGenerateUniqueIDs;
 import unimelb.cis.spatialanalytics.fuelpriceshare.http.AppController;
 import unimelb.cis.spatialanalytics.fuelpriceshare.http.CustomRequest;
-import unimelb.cis.spatialanalytics.fuelpriceshare.http.ImageUploader;
+import unimelb.cis.spatialanalytics.fuelpriceshare.http.MultiPartRequest;
+import unimelb.cis.spatialanalytics.fuelpriceshare.http.MyExceptionHandler;
+import unimelb.cis.spatialanalytics.fuelpriceshare.others.ImagePicker;
+import unimelb.cis.spatialanalytics.fuelpriceshare.others.RandomGenerateUniqueIDs;
 
 /**
  * Created by hanl4 on 17/02/2015.
+ * modify user profile information including: birth, gender, first name, last name, what's up status, profile image.
+ * Log out function is implemented.
  */
-public class ProfileFragment extends Fragment implements ImageUploader.ImageUploaderReply {
+public class ProfileFragment extends Fragment {
 
 
      /*
@@ -94,21 +97,6 @@ public class ProfileFragment extends Fragment implements ImageUploader.ImageUplo
 
 
     /**
-     * For HTTP Request interface return code
-     */
-    private final int REQUEST_CODE_IMAGE_UPLOAD = ConfigConstant.REQUEST_CODE_IMAGE_UPLOAD;
-    private final int REQUEST_CODE_COUCHDB = ConfigConstant.REQUEST_CODE_COUCHDB;
-
-
-    /**
-     * HTTP Request Interface
-     */
-    private final ImageUploader.ImageUploaderReply imageUploaderReply = this;
-
-    private final String KEY_ERROR = ConfigConstant.KEY_ERROR;
-
-
-    /**
      * User attributes
      */
 
@@ -128,6 +116,7 @@ public class ProfileFragment extends Fragment implements ImageUploader.ImageUplo
 
     private boolean isModify = false;
     private boolean localFlag = true;
+    private boolean isImageUploading=false;//if we are uploading profile image to the server, it is set to be true.
 
     /**
      * Date picker
@@ -154,7 +143,7 @@ public class ProfileFragment extends Fragment implements ImageUploader.ImageUplo
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        View rootView = inflater.inflate(R.layout.fragment_user_profile_panel, container, false);
+        View rootView = inflater.inflate(R.layout.fragment_user_profilel, container, false);
 
 
         pref = PreferenceManager.getDefaultSharedPreferences(getActivity());
@@ -201,8 +190,8 @@ public class ProfileFragment extends Fragment implements ImageUploader.ImageUplo
         linearLayoutProfilePhoto.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                imagePicker.selectImageBoth();
+                if(!isImageUploading)
+                    imagePicker.selectImageBoth();
 
 
             }
@@ -328,6 +317,7 @@ public class ProfileFragment extends Fragment implements ImageUploader.ImageUplo
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         Log.e(TAG, "Image Load Error: " + error.getMessage());
+                        // MyExceptionHandler.presentError(TAG,"Can not show profile image",getActivity(),error);
                     }
 
                     @Override
@@ -394,12 +384,19 @@ public class ProfileFragment extends Fragment implements ImageUploader.ImageUplo
                         calender.set(Calendar.YEAR, year);
                         calender.set(Calendar.MONTH, month);
                         calender.set(Calendar.DAY_OF_MONTH, day);
+
                         String str = new SimpleDateFormat(BIRTH_FORMAT).format(calender.getTime());
-                        textViewBirth.setText(str);
-                        Users.birth = str;
                         isModify = true;
-                        //update user information after modification
-                        modifyUserProfile();
+                        JSONObject jsonObject = Users.getUserJSON();
+                        try {
+                            jsonObject.put(Users.KEY_BIRTH, str);
+
+                            //update user information after modification
+                            modifyUserProfile(R.id.profile_setting_birth, jsonObject);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                            Log.e(TAG, e.toString());
+                        }
                     }
                 });
         picker.setButton(DialogInterface.BUTTON_NEGATIVE, "Cancel",
@@ -427,7 +424,7 @@ public class ProfileFragment extends Fragment implements ImageUploader.ImageUplo
         /*
         Initialize the UI component within the layout
          */
-        LinearLayout layout = (LinearLayout) inflater.inflate(R.layout.profile_update_edittext, null);
+        LinearLayout layout = (LinearLayout) inflater.inflate(R.layout.dialog_profile_update_edittext, null);
         final EditText editText = (EditText) layout.findViewById(R.id.profile_setting_edit_text);
         Button buttonCancel = (Button) layout.findViewById(R.id.profile_setting_edit_button_cancel);
         Button buttonUpdate = (Button) layout.findViewById(R.id.profile_setting_edit_button_update);
@@ -473,34 +470,35 @@ public class ProfileFragment extends Fragment implements ImageUploader.ImageUplo
                     Get the modified information, re-set corresponding view values and update user information
                     by calling modifyUserProfile function.
                      */
-                    switch (resourceID) {
-                        case R.id.profile_setting_firstname:
-                            textViewFirstName.setText(str);
-                            Users.firstName = str;
-                            isModify = true;
-                            modifyUserProfile();
-                            break;
-                        case R.id.profile_setting_lastname:
-                            Users.lastName = str;
-                            textViewLastName.setText(str);
-                            isModify = true;
-                            modifyUserProfile();
-                            break;
-                        case R.id.profile_setting_whatup:
-                            Users.whatup = str;
-                            textViewWhatUp.setText(str);
-                            isModify = true;
-                            modifyUserProfile();
-                            break;
+                    try {
+                        JSONObject jsonObject = Users.getUserJSON();
+                        switch (resourceID) {
+                            case R.id.profile_setting_firstname:
+                                jsonObject.put(Users.KEY_FIRST_NAME, str);
+                                isModify = true;
+                                modifyUserProfile(resourceID, jsonObject);
+                                break;
+                            case R.id.profile_setting_lastname:
+                                jsonObject.put(Users.KEY_LAST_NAME, str);
+                                isModify = true;
+                                modifyUserProfile(resourceID, jsonObject);
+                                break;
+                            case R.id.profile_setting_whatup:
+                                jsonObject.put(Users.KEY_WHATUP, str);
+                                isModify = true;
+                                modifyUserProfile(resourceID, jsonObject);
+                                break;
 
-                        case R.id.profile_setting_username:
-                            Users.userName = str;
-                            textViewUserName.setText(str);
-                            isModify = true;
-                            modifyUserProfile();
-                            break;
+                            case R.id.profile_setting_username:
+                                jsonObject.put(Users.KEY_USERNAME, str);
+                                isModify = true;
+                                modifyUserProfile(resourceID, jsonObject);
+                                break;
 
-
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        Log.e(TAG, e.toString());
                     }
 
                     dialog.dismiss();
@@ -535,7 +533,7 @@ public class ProfileFragment extends Fragment implements ImageUploader.ImageUplo
         /*
         Initialize UI components within layout
          */
-        LinearLayout layout = (LinearLayout) inflater.inflate(R.layout.profile_update_gender, null);
+        LinearLayout layout = (LinearLayout) inflater.inflate(R.layout.dialog_profile_update_gender, null);
         final TextView textViewMale = (TextView) layout.findViewById(R.id.profile_setting_edit_male);
         final TextView textViewFemale = (TextView) layout.findViewById(R.id.profile_setting_edit_female);
         ImageView iconMale = (ImageView) layout.findViewById(R.id.profile_setting_edit_icon_male);
@@ -567,15 +565,18 @@ public class ProfileFragment extends Fragment implements ImageUploader.ImageUplo
                 Get the modified record and update both view and user information.
                  */
                 String str = ((TextView) v).getText().toString();
-                textViewGender.setText(str);
-                Users.gender = str;
-                dialog.dismiss();
-                if (!localFlag) {
-                    isModify = true;
-                    modifyUserProfile();
+                JSONObject jsonObject = Users.getUserJSON();
+                try {
+                    jsonObject.put(Users.KEY_GENDER, str);
+                    dialog.dismiss();
+                    if (!localFlag) {
+                        isModify = true;
+                        modifyUserProfile(R.id.profile_setting_gender, jsonObject);
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                    Log.e(TAG, e.toString());
                 }
-
-
             }
         });
 
@@ -587,12 +588,17 @@ public class ProfileFragment extends Fragment implements ImageUploader.ImageUplo
                 Get the modified record and update both view and user information.
                  */
                 String str = ((TextView) v).getText().toString();
-                textViewGender.setText(str);
-                Users.gender = str;
-                dialog.dismiss();
-                if (localFlag) {
-                    isModify = true;
-                    modifyUserProfile();
+                JSONObject jsonObject = Users.getUserJSON();
+                try {
+                    jsonObject.put(Users.KEY_GENDER, str);
+                    dialog.dismiss();
+                    if (localFlag) {
+                        isModify = true;
+                        modifyUserProfile(R.id.profile_setting_gender, jsonObject);
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                    Log.e(TAG, e.toString());
                 }
 
             }
@@ -627,6 +633,60 @@ public class ProfileFragment extends Fragment implements ImageUploader.ImageUplo
 
 
     /**
+     * Upload profile image to the server
+     *
+     * @param fileName   new image name with unique id
+     * @param stringData string data to upload as well
+     */
+
+    public void uploadProfileImage2Server(String fileName, String stringData) {
+        isImageUploading=true;
+        // Tag used to cancel the request
+        String tag_json_obj = TAG;
+
+        /**
+         * Use google Volley lib to upload an image
+         */
+
+        MultiPartRequest multiPartRequest = new MultiPartRequest(ConfigURL.getUploadImageServlet(), new File(profileImagePath), fileName, stringData, new Response.Listener<JSONObject>() {
+
+            @Override
+            public void onResponse(JSONObject response) {
+                Log.d(TAG, response.toString());
+                isImageUploading=false;
+                if (response.has(ConfigConstant.KEY_ERROR)) {
+                    Log.e(TAG, "profile image upload failed!" + response.toString());
+
+
+                } else {
+                    //if upload success, update local session
+                    imageViewProfiePhoto.setImageBitmap(bitmapProfileImage);
+                    Users.profileImage = Users.tempProfielImageName;
+                    Users.tempProfielImageName = "";
+
+                    //Profile Image was successfully uploaded to the server
+                    isModify = false;
+                    Users.bitmap = bitmapProfileImage;
+                    UserCookie.storeUserLocal(pref);//update local session
+                }
+
+            }
+        }, new Response.ErrorListener() {
+
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                isImageUploading=false;
+                MyExceptionHandler.presentError(TAG, "Update profile image failed!", getActivity(), error);
+
+            }
+        });
+        // Adding request to request queue
+        AppController.getInstance().addToRequestQueue(multiPartRequest, tag_json_obj);
+
+    }
+
+
+    /**
      * Receive all the returning results of children activities. Detailed information please refer to the
      * official android programming document
      *
@@ -651,14 +711,18 @@ public class ProfileFragment extends Fragment implements ImageUploader.ImageUplo
                     File imageFile = imagePicker.getImageFile();
                     profileImagePath = imageFile.getAbsolutePath();
                     bitmapProfileImage = BitmapFactory.decodeFile(profileImagePath);
-                    imageViewProfiePhoto.setImageBitmap(bitmapProfileImage);
+                    // imageViewProfiePhoto.setImageBitmap(bitmapProfileImage);
                     fileName = RandomGenerateUniqueIDs.getFileName("png");
 
-                    Users.profileImage = ConfigURL.getImagePathBase() + fileName;
-                    data = Users.getUserJSON().toString();
+                    data = Users.getUserJSONForImageUpload(ConfigURL.getServerProfileImageFolderBase() + fileName).toString();
+                    uploadProfileImage2Server(fileName, data);
 
-                    new ImageUploader(imageUploaderReply, bitmapProfileImage, data, REQUEST_CODE_IMAGE_UPLOAD, fileName, null);
-
+                       /*
+                       //Another method defined by Han. Not encourage to use.
+                        Users.profileImage = ConfigURL.getImagePathBase() + fileName;
+                        data = Users.getUserJSON().toString();
+                        new ImageUploader(imageUploaderReply, bitmapProfileImage, data, REQUEST_CODE_IMAGE_UPLOAD, fileName, null);
+                        */
 
                     break;
                 case SELECT_FILE:
@@ -668,14 +732,21 @@ public class ProfileFragment extends Fragment implements ImageUploader.ImageUplo
                     if (intent != null) {
                         profileImagePath = imagePicker.getImagePath(intent.getData());
                         bitmapProfileImage = BitmapFactory.decodeFile(profileImagePath);
-                        imageViewProfiePhoto.setImageBitmap(bitmapProfileImage);
+                        // imageViewProfiePhoto.setImageBitmap(bitmapProfileImage);
+
                         fileName = RandomGenerateUniqueIDs.getFileName("png");
 
+                        data = Users.getUserJSONForImageUpload(ConfigURL.getServerProfileImageFolderBase() + fileName).toString();
+                        uploadProfileImage2Server(fileName, data);
+
+
+
+                       /*
+                       //Another method defined by Han. Not encourage to use.
                         Users.profileImage = ConfigURL.getImagePathBase() + fileName;
                         data = Users.getUserJSON().toString();
                         new ImageUploader(imageUploaderReply, bitmapProfileImage, data, REQUEST_CODE_IMAGE_UPLOAD, fileName, null);
-
-
+                        */
                     } else {
                         Log.e(TAG, "No image file is selected");
                     }
@@ -689,50 +760,11 @@ public class ProfileFragment extends Fragment implements ImageUploader.ImageUplo
         }
     }
 
-    /**
-     * Interface implementation. Receive the response from the server of which the request was usually made by new ImageUploader
-     *
-     * @param reply       reply message from the server, known as response
-     * @param requestCode for the switch case when multiple requests are made
-     */
-
-    @Override
-    public void imageUploaderReply(Object reply, int requestCode) {
-
-        try {
-            JSONObject replyJson = new JSONObject(reply.toString());
-            if (replyJson == null) {
-                Log.e(TAG, "reply can not be null");
-                return;
-            }
-
-
-            switch (requestCode) {
-                case REQUEST_CODE_IMAGE_UPLOAD:
-                    if (!replyJson.has(ConfigConstant.KEY_ERROR)) {
-                        //Profile Image was successfully uploaded to the server
-                        isModify = false;
-                        Users.bitmap = bitmapProfileImage;
-                        UserCookie.storeUserLocal(pref);//update local session
-
-                    } else {
-                        Log.e(TAG, "Upload profile image error! " + reply.toString());
-                    }
-
-                    break;
-            }
-
-        } catch (JSONException e) {
-            e.printStackTrace();
-            Log.e(TAG, e.toString());
-        }
-
-    }
 
     /**
      * Modify user information
      */
-    public void modifyUserProfile() {
+    public void modifyUserProfile(final int resourceID, final JSONObject updatedUserJson) {
         if (isModify) {
 
             /**
@@ -747,18 +779,19 @@ public class ProfileFragment extends Fragment implements ImageUploader.ImageUplo
             Map<String, String> params = new HashMap<String, String>();
             params.put(ConfigConstant.KEY_COUCHDB_DOC_ACTION, "PUT");
             params.put(ConfigConstant.KEY_COUCHDB_DOC_ID, Users.getDocID());
-            params.put(ConfigConstant.KEY_COUCHDB_DOC_DATA, Users.getUserJSON().toString());
+            params.put(ConfigConstant.KEY_COUCHDB_DOC_DATA, updatedUserJson.toString());
 
             CustomRequest customRequest = new CustomRequest(ConfigURL.getCouchDBURL(), params, new Response.Listener<JSONObject>() {
 
                 @Override
                 public void onResponse(JSONObject response) {
                     Log.d(TAG, response.toString());
-                    if (response.has(KEY_ERROR)) {
+                    if (response.has(ConfigConstant.KEY_ERROR)) {
                         Log.e(TAG, response.toString());
                     } else {
                         //if upload success, update local session
                         isModify = false;
+                        updateModifiedInfo(resourceID, updatedUserJson);
                         UserCookie.storeUserLocal(pref);
                         Log.d(TAG, "Information Update Success");
                     }
@@ -768,6 +801,7 @@ public class ProfileFragment extends Fragment implements ImageUploader.ImageUplo
                 @Override
                 public void onErrorResponse(VolleyError error) {
                     Log.e(TAG, "Error: " + error.getMessage());
+                    MyExceptionHandler.presentError(TAG, "Update profile information failed!", getActivity(), error);
                 }
             });
             // Adding request to request queue
@@ -776,15 +810,46 @@ public class ProfileFragment extends Fragment implements ImageUploader.ImageUplo
         }
     }
 
-    /**
-     * After the current activity is destroyed. check whether user information is modified or not.
-     * If yes, update the couchDB
-     */
 
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        modifyUserProfile();
+    public void updateModifiedInfo(int resourceID, JSONObject userJson) {
+        try {
+            String str;
+            switch (resourceID) {
+                case R.id.profile_setting_firstname:
+                    str = userJson.getString(Users.KEY_FIRST_NAME);
+                    textViewFirstName.setText(str);
+                    Users.firstName = str;
+                    break;
+                case R.id.profile_setting_lastname:
+                    str = userJson.getString(Users.KEY_LAST_NAME);
+                    Users.lastName = str;
+                    textViewLastName.setText(str);
+                    break;
+                case R.id.profile_setting_whatup:
+                    str = userJson.getString(Users.KEY_WHATUP);
+                    Users.whatup = str;
+                    textViewWhatUp.setText(str);
+                    break;
+
+                case R.id.profile_setting_username:
+                    str = userJson.getString(Users.KEY_USERNAME);
+                    Users.userName = str;
+                    textViewUserName.setText(str);
+                    break;
+                case R.id.profile_setting_birth:
+                    str = userJson.getString(Users.KEY_BIRTH);
+                    textViewBirth.setText(str);
+                    Users.birth = str;
+                    break;
+                case R.id.profile_setting_gender:
+                    str = userJson.getString(Users.KEY_GENDER);
+                    textViewGender.setText(str);
+                    Users.gender = str;
+                    break;
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 
 

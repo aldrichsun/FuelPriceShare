@@ -10,6 +10,7 @@ import android.widget.NumberPicker;
 import java.text.DecimalFormat;
 
 import unimelb.cis.spatialanalytics.fuelpriceshare.R;
+import unimelb.cis.spatialanalytics.fuelpriceshare.config.ConfigConstant;
 
 
 /**
@@ -19,7 +20,7 @@ import unimelb.cis.spatialanalytics.fuelpriceshare.R;
  */
 public class MyNumberPicker {
     NumberPicker[] nps;
-    int counts=5;//number of NumberPickers in the NumberPicker array nps.
+    int counts = 4;//number of NumberPickers in the NumberPicker array nps.
     String[] values = new String[10];//default NumberPicker value represents a digit from 0 to 9
 
     String[] decimalVales = new String[10];//default NumberPicker value represents a digit from 0 to 9
@@ -38,11 +39,12 @@ public class MyNumberPicker {
          */
         for (int i = 0; i < counts; i++) {
 
-            nps[i] = (NumberPicker) inflater.inflate(R.layout.my_numberpicker,null);
+            nps[i] = (NumberPicker) inflater.inflate(R.layout.my_numberpicker, null);
             //nps[i] = new NumberPicker(context);
             //nps[i].setLayoutParams(params);
-            nps[i].setScaleX(0.6f);
-            nps[i].setScaleY(0.6f);
+            nps[i].setScaleX(0.95f);//set 0.0-1.0
+            nps[i].setScaleY(0.95f);//set 0.0-1.0
+
 
         }
 
@@ -95,7 +97,7 @@ public class MyNumberPicker {
 
             }
 
-            System.out.println("Display Number is: " + temp);
+           Log.d("Display Number",temp);
 
         }
     };
@@ -126,7 +128,7 @@ public class MyNumberPicker {
 
     public boolean setValue(double val, String pattern) {
         if (pattern == null)
-            pattern = "000.00";
+            pattern = ConfigConstant.KEY_DecimalFormat;
 
         if (pattern.length() - 1 > counts) {
             Log.e("MyNumberPicker", "Over Number of NumberPickers");
@@ -162,13 +164,11 @@ public class MyNumberPicker {
         double result = 0;
 
         for (int i = 0; i < counts; i++) {
-            result = result + (double) nps[i].getValue() * Math.pow(10, counts - i - 3);
+            result = result + (double) nps[i].getValue() * Math.pow(10, 2 - i);
         }
 
 
-
-
-        DecimalFormat f = new DecimalFormat("000.00");
+        DecimalFormat f = new DecimalFormat(ConfigConstant.KEY_DecimalFormat);
         String newVal = f.format(result);
 
 
@@ -193,7 +193,7 @@ public class MyNumberPicker {
 
     }
 
-    public int getCounts(){
+    public int getCounts() {
         return counts;
     }
 

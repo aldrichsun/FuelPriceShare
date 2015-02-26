@@ -20,14 +20,35 @@ public class ConfigConstant {
 
     public static final String FLAG_IS_SELECTED="isSelected";
 
+    public static final String KEY_FUEL="fuel";
+    public static final String KEY_ALL_FUEL_BRAND="all_fuel_brand";
+
 
 
     /**
-     * petro stations
+     * petrol stations
      */
 
-    public final static String KEY_PETRO_STATION_ID="petro_station_id";
-    public final static String KEY_PETRO_STATION_NAME="petro_station_name";
+    public final static String KEY_PETROL_STATION="fuel_station";
+    public static final  String KEY_PETROL_STATION_ID="_id";
+    public final static String KEY_PETROL_STATION_NAME="name";
+
+
+    /**
+     * Contribute price parameters
+     */
+
+    public static final String KEY_CONTRIBUTE_PRICE_TRANSACTION_ID="transaction_id";
+    public static final String KEY_LONGITUDE="longitude";
+    public static final String KEY_LATITUDE="latitude";
+
+    /*
+    Status of contributing price
+     */
+
+    public static final String KEY_CONTRIBUTE_PRICE_PROCESS_STATUS="status";
+    public static final String KEY_CONTRIBUTE_PRICE_STATUS_RETRIEVE_PETROL_STATION="retrieve_petrol_station";
+    public static final String KEY_CONTRIBUTE_PRICE_STATUS_PROCESS_FUEL_IMAGE="process_fuel_image";
 
 
 
@@ -49,6 +70,8 @@ public class ConfigConstant {
     /**
      * User information field
      */
+    public static final String KEY_USER="user";
+
     public static final String KEY_ERROR_MSG = "error_msg";
     public static final String KEY_UID = "_id";
     public static final String KEY_USERNAME = "username";
@@ -64,11 +87,7 @@ public class ConfigConstant {
     public static final int SELECT_FILE=2; //select image from gallery.
 
 
-    /**
-     * HTTP Request return code for interface
-     */
-    public static final int REQUEST_CODE_COUCHDB=1;
-    public static final int REQUEST_CODE_IMAGE_UPLOAD=2;
+
 
 
     /**
@@ -84,14 +103,6 @@ public class ConfigConstant {
     public static final String LOCAL_USER_LOGIN="isLogin";
 
 
-    /**
-     * Fragment Control
-     */
-
-    public static final int KEY_FRAGMENT_HOME=0;
-    public static final int KEY_FRAGMENT_PROFILE=1;
-    public static final int KEY_FRAGMENT_REFINE_PRICE=2;
-    public static final int KEY_FRAGMENT_OTHER=3;
 
     /**
      * CouchDB Operations
@@ -101,6 +112,20 @@ public class ConfigConstant {
     public static final String KEY_COUCHDB_DOC_DATA="data";
     public static final String KEY_COUCHDB_DOC_ACTION="action";
     public static final String KEY_COUCHDB_DOC_REV="rev";
+
+
+    /**
+     * folders to store uploaded images / files
+     */
+
+    public static final String KEY_FUEL_IMAGE_FOLDER="/fuel_image/";//Folder that stores uploaded fuel image. Need to be reset
+    public static final String KEY_PROFILE_IMAGE_FOLDER="/user_profile_photo/";//Folder that stores uploaded profile image. Need to be reset
+
+
+    /**
+     * DecimalFormat for NumberPicker
+     */
+    public static final String KEY_DecimalFormat="000.0";
 
 
 }

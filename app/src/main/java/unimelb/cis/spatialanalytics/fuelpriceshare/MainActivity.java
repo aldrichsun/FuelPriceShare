@@ -25,7 +25,7 @@ import android.widget.ListView;
 
 import unimelb.cis.spatialanalytics.fuelpriceshare.R;
 import unimelb.cis.spatialanalytics.fuelpriceshare.config.ConfigConstant;
-import unimelb.cis.spatialanalytics.fuelpriceshare.fragment.ModifyPricelFragment;
+import unimelb.cis.spatialanalytics.fuelpriceshare.fragment.ContributePriceFragment;
 import unimelb.cis.spatialanalytics.fuelpriceshare.fragment.PathFragment;
 import unimelb.cis.spatialanalytics.fuelpriceshare.fragment.ProfileFragment;
 import unimelb.cis.spatialanalytics.fuelpriceshare.fragment.RangeFragment;
@@ -124,7 +124,7 @@ public class MainActivity extends ActionBarActivity {
         rangeFragment = new RangeFragment();
         pathFragment = new PathFragment();
         profileFragment = new ProfileFragment();
-        contributeFragment = new ModifyPricelFragment();
+        contributeFragment = new ContributePriceFragment();
     }
 
     @Override
@@ -156,18 +156,17 @@ public class MainActivity extends ActionBarActivity {
          * Handle Fragment Menu if special requirements are needed
          */
         switch (PRESENT_FRAGMENT_ID) {
-            case ConfigConstant.KEY_FRAGMENT_HOME:
+            case FRAGMENT_RANGE_SEARCH:
                 break;
-            case ConfigConstant.KEY_FRAGMENT_PROFILE:
+            case FRAGMENT_PATH_SEARCH:
                 break;
-            case ConfigConstant.KEY_FRAGMENT_REFINE_PRICE:
+            case FRAGMENT_CONTRIBUTE:
                 if (drawerOpen)
                     menu.setGroupVisible(R.id.menu_group, false);
                 else // TODO discuss with Han
-                    menu.setGroupVisible(R.id.menu_group, ModifyPricelFragment.isMenuVisible);
+                    menu.setGroupVisible(R.id.menu_group, ContributePriceFragment.isMenuVisible);
                 break;
-            case ConfigConstant.KEY_FRAGMENT_OTHER:
-
+            case FRAGMENT_PROFILE:
                 break;
             default:
                 Log.e(LOG_TAG, "No such case id");
@@ -209,7 +208,7 @@ public class MainActivity extends ActionBarActivity {
 
         PRESENT_FRAGMENT_ID = position;
         if(position!=FRAGMENT_CONTRIBUTE)
-            ModifyPricelFragment.isMenuVisible=false;
+            ContributePriceFragment.isMenuVisible=false;
 
         if (rangeFragment != null && pathFragment != null
                 && contributeFragment != null && profileFragment != null ) {
