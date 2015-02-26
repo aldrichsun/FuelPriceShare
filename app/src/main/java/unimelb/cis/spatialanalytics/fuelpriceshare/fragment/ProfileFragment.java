@@ -61,7 +61,7 @@ public class ProfileFragment extends Fragment {
      /*
    UI component parameters
     */
-    
+
     private TextView textViewUserId;
     private TextView textViewUserName;
     private TextView textViewFirstName;
@@ -116,7 +116,7 @@ public class ProfileFragment extends Fragment {
 
     private boolean isModify = false;
     private boolean localFlag = true;
-    private boolean isImageUploading=false;//if we are uploading profile image to the server, it is set to be true.
+    private boolean isImageUploadingOrDownloading =false;//if we are uploading profile image to the server, it is set to be true.
 
     /**
      * Date picker
@@ -190,7 +190,7 @@ public class ProfileFragment extends Fragment {
         linearLayoutProfilePhoto.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(!isImageUploading)
+                if(!isImageUploadingOrDownloading)
                     imagePicker.selectImageBoth();
 
 
@@ -309,6 +309,7 @@ public class ProfileFragment extends Fragment {
                  * For more detailed information, please refer to the official document by
                  * http://developer.android.com/training/volley/index.html
                  */
+                isImageUploadingOrDownloading =true;
                 ImageLoader imageLoader = AppController.getInstance().getImageLoader();
 
                 // If you are using normal ImageView
@@ -317,6 +318,7 @@ public class ProfileFragment extends Fragment {
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         Log.e(TAG, "Image Load Error: " + error.getMessage());
+                        isImageUploadingOrDownloading =false;
                         // MyExceptionHandler.presentError(TAG,"Can not show profile image",getActivity(),error);
                     }
 
@@ -324,6 +326,7 @@ public class ProfileFragment extends Fragment {
                     public void onResponse(ImageLoader.ImageContainer response, boolean arg1) {
                         if (response.getBitmap() != null) {
                             // load image into imageview
+                            isImageUploadingOrDownloading =false;
                             imageViewProfiePhoto.setImageBitmap(response.getBitmap());
                             Users.bitmap = response.getBitmap();
                         }
@@ -361,8 +364,8 @@ public class ProfileFragment extends Fragment {
                 calender.setTime(date);
 
             } catch (ParseException e) {
-                e.printStackTrace();
-                Log.e(TAG, e.toString());
+                //e.printStackTrace();
+                Log.e(TAG, "Error date format", e);
 
             }
         //build DataPickerDialog
@@ -640,7 +643,7 @@ public class ProfileFragment extends Fragment {
      */
 
     public void uploadProfileImage2Server(String fileName, String stringData) {
-        isImageUploading=true;
+        isImageUploadingOrDownloading =true;
         // Tag used to cancel the request
         String tag_json_obj = TAG;
 
@@ -653,7 +656,7 @@ public class ProfileFragment extends Fragment {
             @Override
             public void onResponse(JSONObject response) {
                 Log.d(TAG, response.toString());
-                isImageUploading=false;
+                isImageUploadingOrDownloading =false;
                 if (response.has(ConfigConstant.KEY_ERROR)) {
                     Log.e(TAG, "profile image upload failed!" + response.toString());
 
@@ -675,7 +678,7 @@ public class ProfileFragment extends Fragment {
 
             @Override
             public void onErrorResponse(VolleyError error) {
-                isImageUploading=false;
+                isImageUploadingOrDownloading =false;
                 MyExceptionHandler.presentError(TAG, "Update profile image failed!", getActivity(), error);
 
             }

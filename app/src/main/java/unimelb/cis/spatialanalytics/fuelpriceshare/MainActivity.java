@@ -1,8 +1,10 @@
 package unimelb.cis.spatialanalytics.fuelpriceshare;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
@@ -25,6 +27,7 @@ import android.widget.ListView;
 
 import unimelb.cis.spatialanalytics.fuelpriceshare.R;
 import unimelb.cis.spatialanalytics.fuelpriceshare.config.ConfigConstant;
+import unimelb.cis.spatialanalytics.fuelpriceshare.data.UserCookie;
 import unimelb.cis.spatialanalytics.fuelpriceshare.fragment.ContributePriceFragment;
 import unimelb.cis.spatialanalytics.fuelpriceshare.fragment.PathFragment;
 import unimelb.cis.spatialanalytics.fuelpriceshare.fragment.ProfileFragment;
@@ -62,6 +65,10 @@ public class MainActivity extends ActionBarActivity {
     private Fragment contributeFragment = null;
 
     private int PRESENT_FRAGMENT_ID;
+    private final String PRESENT_FRAGMENT_ID_KEY = "present_fragment_id";
+    private final String LAUNCH_TIME_KEY = "launch_time";
+    private final int MAX_TIME_SHOW_DRAWER_AFTER_LAUNCH = 1;
+    private SharedPreferences pref;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -112,9 +119,20 @@ public class MainActivity extends ActionBarActivity {
 
         setUpFragments();
 
+        pref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         if (savedInstanceState == null) {
-            selectItem(0);
-            mDrawerLayout.openDrawer(Gravity.LEFT);
+
+            int last_display_fragment_id = 0;
+            last_display_fragment_id = pref.getInt(PRESENT_FRAGMENT_ID_KEY, 0);
+            selectItem(last_display_fragment_id);
+
+            int launchTime = pref.getInt(LAUNCH_TIME_KEY, 0);
+            //Log.v(LOG_TAG, "Launch time:" + launchTime);
+            if( launchTime < MAX_TIME_SHOW_DRAWER_AFTER_LAUNCH ) {
+                mDrawerLayout.openDrawer(Gravity.LEFT);
+                pref.edit().putInt(LAUNCH_TIME_KEY, ++launchTime).commit();
+                pref.edit().apply();
+            }
         }
     }
 
@@ -330,5 +348,15 @@ public class MainActivity extends ActionBarActivity {
         if( fragment != null )
             fragment.onActivityResult(requestCode, resultCode, intent);
 
+    }
+
+    @Override
+    protected void onDestroy() {
+
+        super.onDestroy();
+        pref.edit().putInt(
+                PRESENT_FRAGMENT_ID_KEY, PRESENT_FRAGMENT_ID
+        ).commit();
+        pref.edit().apply();
     }
 }
