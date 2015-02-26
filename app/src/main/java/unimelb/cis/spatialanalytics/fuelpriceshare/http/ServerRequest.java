@@ -85,7 +85,7 @@ public class ServerRequest {
 
         } catch (IOException e) {
 
-            Log.e(LOG_TAG, "Error reading from the server", e);
+            Log.e(LOG_TAG, "Error reading from the server: " + e.toString());
             // If the code didn't successfully get the data,
             // then return null.
             return null;
@@ -99,7 +99,7 @@ public class ServerRequest {
                 try {
                     reader.close();
                 } catch (IOException e) {
-                    Log.e(LOG_TAG, "Error closing reading stream: ", e);
+                    Log.e(LOG_TAG, "Error closing reading stream: " + e.toString());
                 }
             }
         }

@@ -6,6 +6,7 @@
 package unimelb.cis.spatialanalytics.fuelpriceshare.login;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -128,11 +129,17 @@ public class RegisterActivity extends Activity {
                 JSONObject json = Users.getUserJSON();
                 params.put("json", json.toString());
 
+                final ProgressDialog pDialog = new ProgressDialog(RegisterActivity.this);
+                pDialog.setMessage("Registering...");
+                pDialog.setCancelable(false);
+                pDialog.show();
+
 
                 CustomRequest customRequest = new CustomRequest(Request.Method.POST, ConfigURL.getRegisterURL(), params, new Response.Listener<JSONObject>() {
 
                     @Override
                     public void onResponse(JSONObject response) {
+                        pDialog.dismiss();
                         Log.d(TAG, response.toString());
 
                         handleResponse(response);
@@ -141,6 +148,7 @@ public class RegisterActivity extends Activity {
 
                     @Override
                     public void onErrorResponse(VolleyError error) {
+                        pDialog.dismiss();
 
                         MyExceptionHandler.presentError(TAG, "Register failed", getApplicationContext(), error);
                     }
@@ -178,7 +186,7 @@ public class RegisterActivity extends Activity {
 
             Intent intent = new Intent(getApplicationContext(), MainActivity.class);
             // intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TOP|Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP|Intent.FLAG_ACTIVITY_CLEAR_TASK);
 
             startActivity(intent);
             /**
@@ -187,6 +195,7 @@ public class RegisterActivity extends Activity {
             Users.phone = phone;
             Users.id = phone;
             UserCookie.storeUserLocal(pref);
+            UserCookie.setLoginStatus(pref, true);
             finish();
 
         } else {

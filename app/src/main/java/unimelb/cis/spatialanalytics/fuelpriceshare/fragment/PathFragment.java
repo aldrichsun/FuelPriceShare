@@ -123,10 +123,12 @@ public class PathFragment extends Fragment {
         else{
             //TODO show more informative message by detecting various errors
             Log.e(LOG_TAG, "Google Play service is not enabled on this device.");
-            Toast toast = Toast.makeText(getActivity(), "Google Play service is not enabled on this device.",
-                    Toast.LENGTH_LONG);
-            toast.setGravity(Gravity.CENTER,0,0);
-            toast.show();
+            if( getActivity() != null ) {
+                Toast toast = Toast.makeText(getActivity(), "Google Play service is not enabled on this device.",
+                        Toast.LENGTH_LONG);
+                toast.setGravity(Gravity.CENTER, 0, 0);
+                toast.show();
+            }
             getActivity().finish();
         }
 //        else if(status == ConnectionResult.SERVICE_VERSION_UPDATE_REQUIRED){
@@ -168,10 +170,12 @@ public class PathFragment extends Fragment {
             }
             else{
                 Log.e(LOG_TAG, "Google Play service is not enabled on this device.");
-                Toast toast = Toast.makeText(getActivity(), "Google Play service is not enabled on this device.",
-                        Toast.LENGTH_LONG);
-                toast.setGravity(Gravity.CENTER,0,0);
-                toast.show();
+                if( getActivity() != null ) {
+                    Toast toast = Toast.makeText(getActivity(), "Google Play service is not enabled on this device.",
+                            Toast.LENGTH_LONG);
+                    toast.setGravity(Gravity.CENTER, 0, 0);
+                    toast.show();
+                }
                 getActivity().finish();
             }
             //TODO show more informative message by detecting various errors
@@ -351,10 +355,12 @@ public class PathFragment extends Fragment {
                 // User must select a marker
                 if( clickedMarer == null ){
 
-                    Toast toast = Toast.makeText(getActivity(),
-                            "Please select a fuel station", Toast.LENGTH_SHORT);
-                    toast.setGravity(Gravity.CENTER,0,0);
-                    toast.show();
+                    if( getActivity() != null ) {
+                        Toast toast = Toast.makeText(getActivity(),
+                                "Please select a fuel station", Toast.LENGTH_SHORT);
+                        toast.setGravity(Gravity.CENTER, 0, 0);
+                        toast.show();
+                    }
                 }else{
                     // redraw the direction with the clicked marker as a way point
                     WayPointTask wayPointTask = new WayPointTask();
@@ -808,20 +814,22 @@ public class PathFragment extends Fragment {
 
             ///////// first check the validness of the geocoding result /////////////
             if (result.optString(ORIGIN_ERROR_KEY).equals(ERROR)) {
-                Toast toast = Toast.makeText(getActivity(), "Error origin address, please try another one ",
-                        Toast.LENGTH_LONG);
-                toast.setGravity(Gravity.CENTER, 0, 0);
-                toast.show();
-
+                if( getActivity() != null ) {
+                    Toast toast = Toast.makeText(getActivity(), "Error origin address, please try another one ",
+                            Toast.LENGTH_LONG);
+                    toast.setGravity(Gravity.CENTER, 0, 0);
+                    toast.show();
+                }
                 mLayout.setPanelState(SlidingUpPanelLayout.PanelState.HIDDEN);
                 return;
             }
             if (result.optString(DESTIN_ERROR_KEY).equals(ERROR)) {
-                Toast toast = Toast.makeText(getActivity(), "Error destination address, please try another one ",
-                        Toast.LENGTH_LONG);
-                toast.setGravity(Gravity.CENTER, 0, 0);
-                toast.show();
-
+                if( getActivity() != null ) {
+                    Toast toast = Toast.makeText(getActivity(), "Error destination address, please try another one ",
+                            Toast.LENGTH_LONG);
+                    toast.setGravity(Gravity.CENTER, 0, 0);
+                    toast.show();
+                }
                 mLayout.setPanelState(SlidingUpPanelLayout.PanelState.HIDDEN);
                 return;
             }
@@ -830,13 +838,13 @@ public class PathFragment extends Fragment {
             ///// and geocoding connection errors ////////////////
             if (result == null || result.optString(RESULT_DIRECTION_KEY).isEmpty() ||
                     result.optString(RESULT_DIRECTION_KEY).equals(ERROR)) {
-
-                Toast toast = Toast.makeText(getActivity(), "Error getting the directions, please check" +
-                                "the addresses or internet connection and try again",
-                        Toast.LENGTH_LONG);
-                toast.setGravity(Gravity.CENTER, 0, 0);
-                toast.show();
-
+                if( getActivity() != null ) {
+                    Toast toast = Toast.makeText(getActivity(), "Error getting the directions, please check" +
+                                    "the addresses or internet connection and try again",
+                            Toast.LENGTH_LONG);
+                    toast.setGravity(Gravity.CENTER, 0, 0);
+                    toast.show();
+                }
                 mLayout.setPanelState(SlidingUpPanelLayout.PanelState.HIDDEN);
                 return;
             }
@@ -883,11 +891,12 @@ public class PathFragment extends Fragment {
                 return;
             }
             if (result.optJSONArray(RESULT_STATION_KEY).length() == 0) {
-
-                Toast toast = Toast.makeText(getActivity(), "No fuel stations near the route, please " +
-                        "increase the range and try again", Toast.LENGTH_LONG);
-                toast.setGravity(Gravity.CENTER, 0, 0);
-                toast.show();
+                if( getActivity() != null ) {
+                    Toast toast = Toast.makeText(getActivity(), "No fuel stations near the route, please " +
+                            "increase the range and try again", Toast.LENGTH_LONG);
+                    toast.setGravity(Gravity.CENTER, 0, 0);
+                    toast.show();
+                }
                 return;
             }
             ///////////////////////////////////////////////////////////////////////////////
@@ -933,10 +942,12 @@ public class PathFragment extends Fragment {
             super.onPreExecute();
 
             // Show the auto complete address with a Toast at the bottom of the screen
-            Toast toast = Toast.makeText(getActivity(), "Retrieving the route, please wait...",
-                    Toast.LENGTH_SHORT);
-            toast.setGravity(Gravity.CENTER, 0, 0);
-            toast.show();
+            if( getActivity() != null ) {
+                Toast toast = Toast.makeText(getActivity(), "Retrieving the route, please wait...",
+                        Toast.LENGTH_SHORT);
+                toast.setGravity(Gravity.CENTER, 0, 0);
+                toast.show();
+            }
         }
 
         /**
@@ -1056,24 +1067,30 @@ public class PathFragment extends Fragment {
 
             ///////// first check the validness of the geocoding result /////////////
             if (result.optString(ORIGIN_ERROR_KEY).equals(ERROR)) {
-                Toast toast = Toast.makeText(getActivity(), "Error getting origin location, please try another one",
-                        Toast.LENGTH_LONG);
-                toast.setGravity(Gravity.CENTER, 0, 0);
-                toast.show();
+                if( getActivity() != null ) {
+                    Toast toast = Toast.makeText(getActivity(), "Error getting origin location, please try another one",
+                            Toast.LENGTH_LONG);
+                    toast.setGravity(Gravity.CENTER, 0, 0);
+                    toast.show();
+                }
                 return;
             }
             if (result.optString(WAYPOINT_ERROR_KEY).equals(ERROR)) {
-                Toast toast = Toast.makeText(getActivity(), "Error getting fuel station location, please try another one",
-                        Toast.LENGTH_LONG);
-                toast.setGravity(Gravity.CENTER, 0, 0);
-                toast.show();
+                if( getActivity() != null ) {
+                    Toast toast = Toast.makeText(getActivity(), "Error getting fuel station location, please try another one",
+                            Toast.LENGTH_LONG);
+                    toast.setGravity(Gravity.CENTER, 0, 0);
+                    toast.show();
+                }
                 return;
             }
             if (result.optString(DESTIN_ERROR_KEY).equals(ERROR)) {
-                Toast toast = Toast.makeText(getActivity(), "Error getting destination location, please try another one",
-                        Toast.LENGTH_LONG);
-                toast.setGravity(Gravity.CENTER, 0, 0);
-                toast.show();
+                if( getActivity() != null ) {
+                    Toast toast = Toast.makeText(getActivity(), "Error getting destination location, please try another one",
+                            Toast.LENGTH_LONG);
+                    toast.setGravity(Gravity.CENTER, 0, 0);
+                    toast.show();
+                }
                 return;
             }
 
@@ -1084,12 +1101,13 @@ public class PathFragment extends Fragment {
                     result.optString(RESULT_DIRECTION_ONE_KEY).equals(ERROR) ||
                     result.optString(RESULT_DIRECTION_TWO_KEY).isEmpty() ||
                     result.optString(RESULT_DIRECTION_TWO_KEY).equals(ERROR) ) {
-
-                Toast toast = Toast.makeText(getActivity(), "Error getting the directions, please check" +
-                                "the internet connection and try again later",
-                        Toast.LENGTH_LONG);
-                toast.setGravity(Gravity.CENTER, 0, 0);
-                toast.show();
+                if( getActivity() != null ) {
+                    Toast toast = Toast.makeText(getActivity(), "Error getting the directions, please check" +
+                                    "the internet connection and try again later",
+                            Toast.LENGTH_LONG);
+                    toast.setGravity(Gravity.CENTER, 0, 0);
+                    toast.show();
+                }
                 return;
             }
 

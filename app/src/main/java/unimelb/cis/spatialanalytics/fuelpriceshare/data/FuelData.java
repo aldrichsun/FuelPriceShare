@@ -1,5 +1,6 @@
 package unimelb.cis.spatialanalytics.fuelpriceshare.data;
 
+import android.location.Location;
 import android.util.Log;
 
 import org.json.JSONArray;
@@ -9,6 +10,7 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 
 import unimelb.cis.spatialanalytics.fuelpriceshare.config.ConfigConstant;
+import unimelb.cis.spatialanalytics.fuelpriceshare.maps.myLocation.MyLocation;
 
 /**
  * Created by hanl4 on 29/01/2015.
@@ -63,8 +65,9 @@ public class FuelData {
             JSONObject json = new JSONObject();
             json.put(ConfigConstant.KEY_CONTRIBUTE_PRICE_TRANSACTION_ID, transactionID);
             json.put(ConfigConstant.KEY_UID, Users.id);
-            json.put(ConfigConstant.KEY_LATITUDE, 1d);
-            json.put(ConfigConstant.KEY_LONGITUDE, 1d);
+            Location currentLocation = MyLocation.getMyLocation();
+            json.put(ConfigConstant.KEY_LATITUDE, currentLocation.getLatitude());
+            json.put(ConfigConstant.KEY_LONGITUDE, currentLocation.getLongitude());
             return json.toString();
         } catch (JSONException e) {
             Log.e(TAG, e.toString());

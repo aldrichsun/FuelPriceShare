@@ -89,12 +89,23 @@ public class LoginActivity extends Activity{
      */
     private final String TAG = "LoginActivity";
 
+//    @Override
+//    protected void onStart() {
+//        super.onStart();
+//        Log.e(TAG, "on start");
+//    }
+//
+//    @Override
+//    protected void onStop() {
+//        super.onStop();
+//        Log.e(TAG, "on stop");
+//    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.activity_login);
+//        Log.e(TAG, "on create");
 
         /**
          * First check user session. if user already logged in before, the system will automatically
@@ -150,6 +161,7 @@ public class LoginActivity extends Activity{
 
 
         }
+        setContentView(R.layout.activity_login);
 
         // Importing all assets like buttons, text fields
         inputUsername = (EditText) findViewById(R.id.loginUsername);
@@ -311,6 +323,10 @@ public class LoginActivity extends Activity{
                         Users.mapFBUser(userFB);
                         usernameTextView.setText("You are currently logged in as " + userFB.getName());
 
+                        final String fbProfileImageURL="https://graph.facebook.com/" + Users.fbId + "/picture?type=large";
+                        Users.profileImage =fbProfileImageURL;
+                        Log.d(TAG,fbProfileImageURL);
+
                         //Check logged FB user registered in our system or not; if not, the system will automatically
                         //register him into the system for the first time logging in
 
@@ -342,7 +358,9 @@ public class LoginActivity extends Activity{
                                     ImageLoader imageLoader = AppController.getInstance().getImageLoader();
 
                                     // If you are using normal ImageView
-                                    imageLoader.get("https://graph.facebook.com/" + Users.fbId + "/picture?type=large", new ImageLoader.ImageListener() {
+
+
+                                    imageLoader.get(fbProfileImageURL, new ImageLoader.ImageListener() {
 
                                         @Override
                                         public void onErrorResponse(VolleyError error) {
@@ -392,7 +410,7 @@ public class LoginActivity extends Activity{
                                     UserCookie.setLoginStatus(pref, true);
                                     //Start the main activity
 
-                                 launchMainActivity();
+                                // launchMainActivity();
                                 }
                                 Log.d(TAG, json.toString());
 
@@ -428,12 +446,18 @@ public class LoginActivity extends Activity{
      * launch main activity after successfully log in
      */
     private void launchMainActivity() {
+
+//        Log.e(TAG, "launch main activity");
+
         Intent intent = new Intent(getApplicationContext(), MainActivity.class);
        // intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+/*
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TOP|Intent.FLAG_ACTIVITY_CLEAR_TASK);
+*/
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP|Intent.FLAG_ACTIVITY_CLEAR_TASK);
+
         startActivity(intent);
         finish();//close login view.
-
     }
 
 
@@ -515,18 +539,21 @@ public class LoginActivity extends Activity{
     public void onResume() {
         super.onResume();
         uiHelper.onResume();
+//        Log.e(TAG, "on resume");
     }
 
     @Override
     public void onPause() {
         super.onPause();
         uiHelper.onPause();
+//        Log.e(TAG, "on pause");
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
         uiHelper.onDestroy();
+//        Log.e(TAG, "on destroy");
     }
 
     @Override

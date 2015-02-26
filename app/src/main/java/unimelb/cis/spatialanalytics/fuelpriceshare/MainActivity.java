@@ -1,8 +1,10 @@
 package unimelb.cis.spatialanalytics.fuelpriceshare;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
@@ -21,6 +23,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
@@ -32,6 +35,7 @@ import unimelb.cis.spatialanalytics.fuelpriceshare.fragment.ContributePriceFragm
 import unimelb.cis.spatialanalytics.fuelpriceshare.fragment.PathFragment;
 import unimelb.cis.spatialanalytics.fuelpriceshare.fragment.ProfileFragment;
 import unimelb.cis.spatialanalytics.fuelpriceshare.fragment.RangeFragment;
+import unimelb.cis.spatialanalytics.fuelpriceshare.maps.myLocation.MyLocation;
 import unimelb.cis.spatialanalytics.fuelpriceshare.settings.SettingsActivity;
 
 /**
@@ -63,6 +67,7 @@ public class MainActivity extends ActionBarActivity {
     private Fragment pathFragment = null;
     private Fragment profileFragment = null;
     private Fragment contributeFragment = null;
+    private MyLocation myLocation = null;
 
     private int PRESENT_FRAGMENT_ID;
     private final String PRESENT_FRAGMENT_ID_KEY = "present_fragment_id";
@@ -72,6 +77,9 @@ public class MainActivity extends ActionBarActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
+//        Log.e(LOG_TAG, "on create");
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -118,6 +126,7 @@ public class MainActivity extends ActionBarActivity {
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
 
         setUpFragments();
+        setUpCurrentLocation();
 
         pref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         if (savedInstanceState == null) {
@@ -143,6 +152,12 @@ public class MainActivity extends ActionBarActivity {
         pathFragment = new PathFragment();
         profileFragment = new ProfileFragment();
         contributeFragment = new ContributePriceFragment();
+    }
+
+    private void setUpCurrentLocation(){
+        // Get LocationManager object from System Service LOCATION_SERVICE
+        myLocation = new MyLocation((LocationManager)
+                getSystemService(Context.LOCATION_SERVICE));
     }
 
     @Override
@@ -223,6 +238,12 @@ public class MainActivity extends ActionBarActivity {
     private void selectItem(int position) {
 
         // update the main content by replacing fragments
+
+        // Han Li and Yu Sun 26/02/2015: close the soft keypad
+        if( getCurrentFocus() != null && getCurrentFocus().getWindowToken() != null) {
+            InputMethodManager keyboard = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+            keyboard.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
+        }
 
         PRESENT_FRAGMENT_ID = position;
         if(position!=FRAGMENT_CONTRIBUTE)
@@ -353,10 +374,36 @@ public class MainActivity extends ActionBarActivity {
     @Override
     protected void onDestroy() {
 
+        Log.e(LOG_TAG, "on destroy");
+
         super.onDestroy();
         pref.edit().putInt(
                 PRESENT_FRAGMENT_ID_KEY, PRESENT_FRAGMENT_ID
         ).commit();
         pref.edit().apply();
     }
+
+//    @Override
+//    protected void onResume() {
+//        Log.e(LOG_TAG, "on resume");
+//        super.onResume();
+//    }
+//
+//    @Override
+//    protected void onStart() {
+//        super.onStart();
+//        Log.e(LOG_TAG, "on start");
+//    }
+//
+//    @Override
+//    public void onPause() {
+//        super.onPause();
+//        Log.e(LOG_TAG, "on pause");
+//    }
+//
+//    @Override
+//    protected void onStop() {
+//        super.onStop();
+//        Log.e(LOG_TAG, "on stop");
+//    }
 }

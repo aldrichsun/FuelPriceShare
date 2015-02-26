@@ -42,6 +42,7 @@ public class ConfigConstant {
     public static final String KEY_LONGITUDE="longitude";
     public static final String KEY_LATITUDE="latitude";
 
+
     /*
     Status of contributing price
      */

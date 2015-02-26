@@ -124,10 +124,12 @@ public class RangeFragment extends Fragment {
         else{
             //TODO show more informative message by detecting various errors
             Log.e(LOG_TAG, "Google Play service is not enabled on this device.");
-            Toast toast = Toast.makeText(getActivity(), "Google Play service is not enabled on this device.",
-                    Toast.LENGTH_LONG);
-            toast.setGravity(Gravity.CENTER,0,0);
-            toast.show();
+            if( getActivity() != null ) {
+                Toast toast = Toast.makeText(getActivity(), "Google Play service is not enabled on this device.",
+                        Toast.LENGTH_LONG);
+                toast.setGravity(Gravity.CENTER, 0, 0);
+                toast.show();
+            }
             getActivity().finish();
         }
 //        else if(status == ConnectionResult.SERVICE_VERSION_UPDATE_REQUIRED){
@@ -173,10 +175,12 @@ public class RangeFragment extends Fragment {
             }
             else{
                 Log.e(LOG_TAG, "Google Play service is not enabled on this device.");
-                Toast toast = Toast.makeText(getActivity(), "Google Play service is not enabled on this device.",
-                        Toast.LENGTH_LONG);
-                toast.setGravity(Gravity.CENTER,0,0);
-                toast.show();
+                if( getActivity() != null ) {
+                    Toast toast = Toast.makeText(getActivity(), "Google Play service is not enabled on this device.",
+                            Toast.LENGTH_LONG);
+                    toast.setGravity(Gravity.CENTER, 0, 0);
+                    toast.show();
+                }
                 getActivity().finish();
             }
             //TODO show more informative message by detecting various errors
@@ -649,11 +653,13 @@ public class RangeFragment extends Fragment {
 
             // 06/02/2015 Yu Sun: It is wrong that we do NOT distinguish null and empty!
             if( addresses == null || addresses.size() == 0){
-                Toast toast = Toast.makeText(
-                        getActivity(), "Wrong address, please try another one",
-                        Toast.LENGTH_SHORT);
-                toast.setGravity(Gravity.CENTER, 0, 0);
-                toast.show();
+                if( getActivity() != null ) {
+                    Toast toast = Toast.makeText(
+                            getActivity(), "Wrong address, please try another one",
+                            Toast.LENGTH_SHORT);
+                    toast.setGravity(Gravity.CENTER, 0, 0);
+                    toast.show();
+                }
                 return;
             }
 
@@ -765,18 +771,22 @@ public class RangeFragment extends Fragment {
 
             progressDialog.dismiss();
             if( jsonArray == null ){
-                Toast toast = Toast.makeText(getActivity(), "Server request errors," +
-                        " please check the addresses or the internet connection and try later", Toast.LENGTH_LONG);
-                toast.setGravity(Gravity.CENTER, 0, 0);
-                toast.show();
+                if( getActivity() != null ) {
+                    Toast toast = Toast.makeText(getActivity(), "Server request errors," +
+                            " please check the addresses or the internet connection and try later", Toast.LENGTH_LONG);
+                    toast.setGravity(Gravity.CENTER, 0, 0);
+                    toast.show();
+                }
                 return;
             }
             if( jsonArray.length() <= 0 ){
-                Toast toast = Toast.makeText(getActivity(), "No stations within " +
-                        this.range_radius + "km, " +
-                        "please increase the radius", Toast.LENGTH_LONG);
-                toast.setGravity(Gravity.CENTER, 0, 0);
-                toast.show();
+                if( getActivity() != null ) {
+                    Toast toast = Toast.makeText(getActivity(), "No stations within " +
+                            this.range_radius + "km, " +
+                            "please increase the radius", Toast.LENGTH_LONG);
+                    toast.setGravity(Gravity.CENTER, 0, 0);
+                    toast.show();
+                }
                 return;
             }
 
@@ -904,10 +914,12 @@ public class RangeFragment extends Fragment {
             super.onPreExecute();
 
             // Show the auto complete address with a Toast at the bottom of the screen
-            Toast toast = Toast.makeText(getActivity(), "Retrieving the route...",
-                    Toast.LENGTH_SHORT);
-            toast.setGravity(Gravity.CENTER, 0, 0);
-            toast.show();
+            if( getActivity() != null ) {
+                Toast toast = Toast.makeText(getActivity(), "Retrieving the route...",
+                        Toast.LENGTH_SHORT);
+                toast.setGravity(Gravity.CENTER, 0, 0);
+                toast.show();
+            }
         }
 
         /**
@@ -1074,17 +1086,21 @@ public class RangeFragment extends Fragment {
 
             ///////// first check the validness of the geocoding result /////////////
             if (result.optString(ORIGIN_ERROR_KEY).equals(ERROR)) {
-                Toast toast = Toast.makeText(getActivity(), "Error origin address, please try another one ",
-                        Toast.LENGTH_LONG);
-                toast.setGravity(Gravity.CENTER, 0, 0);
-                toast.show();
+                if( getActivity() != null ) {
+                    Toast toast = Toast.makeText(getActivity(), "Error origin address, please try another one ",
+                            Toast.LENGTH_LONG);
+                    toast.setGravity(Gravity.CENTER, 0, 0);
+                    toast.show();
+                }
                 return;
             }
             if (result.optString(DESTIN_ERROR_KEY).equals(ERROR)) {
-                Toast toast = Toast.makeText(getActivity(), "Error destination address, please try another one ",
-                        Toast.LENGTH_LONG);
-                toast.setGravity(Gravity.CENTER, 0, 0);
-                toast.show();
+                if( getActivity() != null ) {
+                    Toast toast = Toast.makeText(getActivity(), "Error destination address, please try another one ",
+                            Toast.LENGTH_LONG);
+                    toast.setGravity(Gravity.CENTER, 0, 0);
+                    toast.show();
+                }
                 return;
             }
 
@@ -1093,11 +1109,13 @@ public class RangeFragment extends Fragment {
             if (result == null || result.optString(RESULT_DIRECTION_KEY).isEmpty() ||
                     result.optString(RESULT_DIRECTION_KEY).equals(ERROR)) {
 
-                Toast toast = Toast.makeText(getActivity(), "Error getting the directions, please check" +
-                                "the internet connection and try again",
-                        Toast.LENGTH_LONG);
-                toast.setGravity(Gravity.CENTER, 0, 0);
-                toast.show();
+                if( getActivity() != null ) {
+                    Toast toast = Toast.makeText(getActivity(), "Error getting the directions, please check" +
+                                    "the internet connection and try again",
+                            Toast.LENGTH_LONG);
+                    toast.setGravity(Gravity.CENTER, 0, 0);
+                    toast.show();
+                }
                 return;
             }
 

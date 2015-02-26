@@ -132,7 +132,7 @@ public class ProfileFragment extends Fragment {
     private SharedPreferences pref;
 
     //For LOG
-    private final String TAG = "ProfileFragment";
+    private final String TAG = ProfileFragment.class.getSimpleName();
 
 
     public ProfileFragment() {

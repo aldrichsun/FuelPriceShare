@@ -119,7 +119,7 @@ public class ContributePriceFragment extends Fragment implements DialogInterface
     private int selectedStationID;
 
 
-    private final String TAG = "ModifyPricelFragment";
+    private final String TAG = ContributePriceFragment.class.getSimpleName();
 
     private Activity activity;
 
