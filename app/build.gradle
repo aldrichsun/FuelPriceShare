@@ -1,9 +1,16 @@
 apply plugin: 'com.android.application'
 
 android {
+    signingConfigs {
+        config {
+            keyAlias 'myAndroid'
+            keyPassword '13304396039'
+            storeFile file('C:/Users/yus1/Dropbox/app/key/myAndroid.jks')
+            storePassword '13304396039'
+        }
+    }
     compileSdkVersion 21
     buildToolsVersion "21.1.2"
-
     defaultConfig {
         applicationId "unimelb.cis.spatialanalytics.fuelpriceshare"
         minSdkVersion 14
@@ -15,6 +22,7 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.config
         }
     }
 }

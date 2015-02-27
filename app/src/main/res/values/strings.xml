@@ -19,7 +19,8 @@
     <string name="app_name">FuelPriceShare</string>
     <string name="title_activity_navigate">FuelPriceSharing</string>
     <string name="title_activity_range">RangeSearch</string>
-    <string name="map_api_key">AIzaSyBz0BAUBR4rF-0ReRtHCsUk9wTBD1V4NBs</string>
+    <string name="map_api_key">AIzaSyD_V77CMEWULxLMWsHmspFzA4Sc38OjMqM</string>
+    <!-- <string name="map_api_key">AIzaSyBz0BAUBR4rF-0ReRtHCsUk9wTBD1V4NBs</string> -->
     <string name="action_settings">Settings</string>
     <string name="button_find_address">Find</string>
     <string name="hint_enter_location">Enter location</string>
