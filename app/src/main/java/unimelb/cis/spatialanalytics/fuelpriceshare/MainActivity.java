@@ -246,8 +246,8 @@ public class MainActivity extends ActionBarActivity {
         }
 
         PRESENT_FRAGMENT_ID = position;
-        if(position!=FRAGMENT_CONTRIBUTE)
-            ContributePriceFragment.isMenuVisible=false;
+        //if(position!=FRAGMENT_CONTRIBUTE)
+           // ContributePriceFragment.isMenuVisible=false;
 
         if (rangeFragment != null && pathFragment != null
                 && contributeFragment != null && profileFragment != null ) {
@@ -374,7 +374,7 @@ public class MainActivity extends ActionBarActivity {
     @Override
     protected void onDestroy() {
 
-        Log.e(LOG_TAG, "on destroy");
+        //Log.e(LOG_TAG, "on destroy");
 
         super.onDestroy();
         pref.edit().putInt(

@@ -45,6 +45,9 @@ public class CustomizeMapMarker {
         Rect textRect = new Rect();
         paint.getTextBounds(text, 0, text.length(), textRect);
 
+        int width = (int)(textRect.width()*1.2f);
+        int height = (int)(textRect.height()*1.2f);
+
         Bitmap bm = Bitmap.createBitmap((int)(textRect.width()*1.2f), (int)(textRect.height()*1.2f), Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(bm);
 

@@ -81,6 +81,7 @@ public class LoginActivity extends Activity{
     private LoginButton loginBtn;
     private TextView usernameTextView;
     private UiLifecycleHelper uiHelper;
+    private boolean isReturn=false;
 
 
 
@@ -159,8 +160,9 @@ public class LoginActivity extends Activity{
             // Adding request to request queue
             AppController.getInstance().addToRequestQueue(customRequest, tag_json_obj);
 
-
+            isReturn=true;
         }
+
         setContentView(R.layout.activity_login);
 
         // Importing all assets like buttons, text fields
@@ -212,78 +214,83 @@ public class LoginActivity extends Activity{
                 Map<String, String> params = new HashMap<String, String>();
                 params.put("Action", "Login");
                 params.put("username", username);
-                CustomRequest customRequest = new CustomRequest(Request.Method.POST, ConfigURL.getLoginURL(), params, new Response.Listener<JSONObject>() {
+                CustomRequest customRequest = new CustomRequest(
+                        Request.Method.POST,    /////// first parameter
+                        ConfigURL.getLoginURL(),    /////// second parameter
+                        params,     /////// thirds parameter
+                        ////////////////////////////// fourth parameter //////////////////////////////////////
+                        new Response.Listener<JSONObject>() {
+                            @Override
+                            public void onResponse(JSONObject json) {
+                                Log.d(TAG, json.toString());
 
-                    @Override
-                    public void onResponse(JSONObject json) {
-                        Log.d(TAG, json.toString());
+                                try {
+                                    /**
+                                     * Self defined login function
+                                     */
+                                    if (!json.has(ConfigConstant.KEY_ERROR)) {
+                                        if (json.has(ConfigConstant.KEY_Password)) {
 
-                        try {
-                            /**
-                             * Self defined login function
-                             */
-                            if (!json.has(ConfigConstant.KEY_ERROR)) {
-                                if (json.has(ConfigConstant.KEY_Password)) {
+                                            String res = null;
 
-                                    String res = null;
+                                            res = json.getString(ConfigConstant.KEY_Password);
 
-                                    res = json.getString(ConfigConstant.KEY_Password);
+                                            if (res != null && res.equals(password)) {
+                                                //user successfully logged in
+                                                //record user information into system
+                                                json.put(ConfigConstant.KEY_COUCHDB_DOC_ID,username);//put the username into json since it was removed by the server for security
+                                                UserCookie.storeUserLocal(pref, json);
+                                                UserCookie.setLoginStatus(pref, true);
+                                                Users.mapJson(json);
 
-                                    if (res != null && res.equals(password)) {
-                                        //user successfully logged in
-                                        //record user information into system
-                                        json.put(ConfigConstant.KEY_COUCHDB_DOC_ID,username);//put the username into json since it was removed by the server for security
-                                        UserCookie.storeUserLocal(pref, json);
-                                        UserCookie.setLoginStatus(pref, true);
-                                        Users.mapJson(json);
+                                                //Han Li and Yu Sun 26/02/2015: close the soft keypad for better user experience
+                                                //This InputMethodManager works when the soft keypad is shown after click, but is not
+                                                //shown without any click.
+                                                InputMethodManager imm = (InputMethodManager)
+                                                        getSystemService(Context.INPUT_METHOD_SERVICE);
+                                                imm.hideSoftInputFromWindow(inputUsername.getWindowToken(), 0);
+                                                imm.hideSoftInputFromWindow(inputPassword.getWindowToken(), 0);
 
-                                        //Han Li and Yu Sun 26/02/2015: close the soft keypad for better user experience
-                                        //This InputMethodManager works when the soft keypad is shown after click, but is not
-                                        //shown without any click.
-                                        InputMethodManager imm = (InputMethodManager)
-                                                 getSystemService(Context.INPUT_METHOD_SERVICE);
-                                        imm.hideSoftInputFromWindow(inputUsername.getWindowToken(), 0);
-                                        imm.hideSoftInputFromWindow(inputPassword.getWindowToken(), 0);
+                                                //Launch MainActivity Screen
 
-                                        //Launch MainActivity Screen
+                                                launchMainActivity();
 
-                                        launchMainActivity();
+                                                // Close Login Screen
+                                                finish();
+                                            } else {
+                                                // Error in login
+                                                loginErrorMsg.setText("Incorrect password");
+                                            }
+                                        } else {
 
-                                        // Close Login Screen
-                                        finish();
+                                            Log.d(TAG, "Do not have password field!");
+                                            loginErrorMsg.setText("Password doesn't exist");
+
+                                        }
                                     } else {
                                         // Error in login
-                                        loginErrorMsg.setText("Incorrect password");
+                                        loginErrorMsg.setText("Username doesn't exist");
                                     }
-                                } else {
-
-                                    Log.d(TAG, "Do not have password field!");
-                                    loginErrorMsg.setText("Password doesn't exist");
-
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
                                 }
-                            } else {
-                                // Error in login
-                                loginErrorMsg.setText("Username doesn't exist");
                             }
-                        } catch (JSONException e) {
-                            e.printStackTrace();
+                        },
+                        ///////////////////////////////////////////////////////////////////////////////////////
+                        //////////////////////////////////// fifth parameter ///////////////////////////
+                        new Response.ErrorListener() {
+
+                            @Override
+                            public void onErrorResponse(VolleyError error) {
+
+                                MyExceptionHandler.presentError(TAG, "login failed",getApplicationContext(), error);
+
+                            }
                         }
-
-
-                    }
-                }, new Response.ErrorListener() {
-
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-
-                        MyExceptionHandler.presentError(TAG, "login failed",getApplicationContext(), error);
-
-                    }
-                });
+                        ///////////////////////////////////////////////////////////////////////////////////////
+                );
                 // Adding request to request queue
                 AppController.getInstance().addToRequestQueue(customRequest, tag_json_obj);
-
-
             }
         });
 
@@ -306,10 +313,14 @@ public class LoginActivity extends Activity{
 
         uiHelper = new UiLifecycleHelper(this, statusCallback);
         uiHelper.onCreate(savedInstanceState);
-
-
         usernameTextView = (TextView) findViewById(R.id.username);
         loginBtn = (LoginButton) findViewById(R.id.fb_login_button);
+
+        if(isReturn) {
+            Log.d(TAG,"user is stored in local cookie, return in onCreate");
+            return;
+        }
+
         loginBtn.setReadPermissions(Arrays.asList("email"));
 
         loginBtn.setUserInfoChangedCallback(new UserInfoChangedCallback() {
@@ -413,6 +424,7 @@ public class LoginActivity extends Activity{
                                 // launchMainActivity();
                                 }
                                 Log.d(TAG, json.toString());
+                                launchMainActivity();
 
 
                             }
@@ -420,6 +432,7 @@ public class LoginActivity extends Activity{
 
                             @Override
                             public void onErrorResponse(VolleyError error) {
+                                launchMainActivity();
                                 Log.e(TAG, "Error: " + error.getMessage());
                                 MyExceptionHandler.presentError(TAG, "mapping facebook user information failed", getApplicationContext(), error);
 
@@ -428,7 +441,7 @@ public class LoginActivity extends Activity{
                         // Adding request to request queue
                         AppController.getInstance().addToRequestQueue(customRequest, tag_json_obj);
 
-                        launchMainActivity();
+
 
 
                     }
@@ -441,6 +454,8 @@ public class LoginActivity extends Activity{
 
 
     }
+
+
 
     /**
      * launch main activity after successfully log in

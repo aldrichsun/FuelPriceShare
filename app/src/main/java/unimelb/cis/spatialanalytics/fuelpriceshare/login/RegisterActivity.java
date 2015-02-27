@@ -7,12 +7,14 @@ package unimelb.cis.spatialanalytics.fuelpriceshare.login;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -99,6 +101,12 @@ public class RegisterActivity extends Activity {
                 phone = inputPhone.getText().toString();
                 password = inputPassword.getText().toString();
 
+                // have collected the user input, close the soft keypad
+                InputMethodManager imm = (InputMethodManager)
+                        getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(inputPhone.getWindowToken(), 0);
+                imm.hideSoftInputFromWindow(inputPassword.getWindowToken(), 0);
+
                 /**
                  * Handle input errors. May add more if more requirements are defined such as the length of password etc.
                  */
@@ -117,8 +125,7 @@ public class RegisterActivity extends Activity {
                 /**
                  * User Volley API developed by Google to handle the request!
                  */
-
-                // Tag used to cancel the request
+                // Tag used to cancel the http request by google Volley
                 String tag_json_obj = TAG;
 
                 Map<String, String> params = new HashMap<String, String>();
