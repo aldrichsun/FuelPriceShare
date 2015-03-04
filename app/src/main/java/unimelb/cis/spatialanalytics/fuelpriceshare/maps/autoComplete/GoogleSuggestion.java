@@ -49,8 +49,11 @@ public class GoogleSuggestion {
      * }
      * @param input
      * @return
+     * i) the list of auto-complete predicted addresses from google
+     * ii) an empty list if any error occurs
      */
     public static ArrayList<String> autoComplete(String input) {
+
         ArrayList<String> resultList = null;
 
         String jsonResults = null;
@@ -71,14 +74,16 @@ public class GoogleSuggestion {
 
             if( jsonResults == null ){
                 Log.e(LOG_TAG, "Error getting auto complete places for URL:" + url.toString());
-                return null;
+                return new ArrayList<String>();
             }
 
         } catch (MalformedURLException e) {
             Log.e(LOG_TAG, "Error processing Places API URL", e);
-            return resultList;
+            return new ArrayList<String>();
+
         } catch (UnsupportedEncodingException e) {
             Log.e(LOG_TAG, "Error unsupported encoding", e);
+            return new ArrayList<String>();
         } finally {
             ////Yu Sun 05/02/2015 Currently nothing
         }
@@ -96,7 +101,7 @@ public class GoogleSuggestion {
             }
         } catch (JSONException e) {
             Log.e(LOG_TAG, "Cannot process JSON results", e);
-            return null;
+            return new ArrayList<String>();
         }
 
         return resultList;

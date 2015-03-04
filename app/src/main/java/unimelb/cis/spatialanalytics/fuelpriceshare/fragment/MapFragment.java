@@ -156,7 +156,10 @@ public class MapFragment extends Fragment{
     }
 
     /**
-     * Here
+     * Here we initialize the UI components in the main view (the starting screen for
+     * map fragment). We also set up responding actions for each component.
+     * Each time the RangeTask, PathTask or WayPointTask is executed, we store
+     * the search history of the user.
      */
     private void setUpMap() {
 
@@ -227,7 +230,7 @@ public class MapFragment extends Fragment{
                     pathFuelJumpButton.setShowAnimation(ActionButton.Animations.JUMP_FROM_RIGHT);
                     pathFuelJumpButton.show();
                 }
-                // re-initialize the operation series
+                // re-initialize the operation series (cycles)
                 showResult = false;
             }
         });
@@ -364,18 +367,23 @@ public class MapFragment extends Fragment{
             @Override
             public boolean onMarkerClick(Marker marker) {
 
+                // always show the info window and set the clickedMarker to this
                 marker.showInfoWindow();
                 clickedMarer = marker;
 
-                // Han Li and Yu Sun 26/02/2015: close the soft keypad
+                // Han Li and Yu Sun 26/02/2015: always close the soft keypad
                 if( getActivity().getCurrentFocus() != null && getActivity().getCurrentFocus().getWindowToken() != null) {
                     InputMethodManager keyboard = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
                     keyboard.hideSoftInputFromWindow(getActivity().getCurrentFocus().getWindowToken(), 0);
                 }
 
-                if( showResult )
+                if( showResult ) // if the  query cycle has ended, we do nothing
                     return true;
 
+                // if the direction sliding panel is expanded, we set the way point
+                // autoCompleteTextView to the name of the marker (whether or not
+                // the way point sliding panel is expanded or hidden) if the marker is
+                // not the destination marker
                 if( directionSliding.getPanelState() == PanelState.EXPANDED ||
                     directionSliding.getPanelState() == PanelState.ANCHORED ){
 
@@ -390,6 +398,8 @@ public class MapFragment extends Fragment{
                     return true;
                 }
 
+                // if the clicked marker is the destination marker, we show the direction
+                // fab (path query fab) and hide the way point fab
                 if( marker.getPosition().equals( destinLatLng ) ) { // user clicks the destination
 
                     if( !wayPointJumpButton.isHidden() ) {
@@ -401,7 +411,8 @@ public class MapFragment extends Fragment{
                         pathFuelJumpButton.show();
                     }
                 }
-                else{ // user clicks any fuel station
+                else{ // user clicks any fuel station, we show the way point fab and
+                      // hide the direction (path query) fab
 
                     if( !pathFuelJumpButton.isHidden() ){
                         pathFuelJumpButton.setHideAnimation(ActionButton.Animations.JUMP_TO_DOWN);
@@ -423,16 +434,20 @@ public class MapFragment extends Fragment{
             @Override
             public void onMapClick(LatLng latLng) {
 
+                // this is only possible at the initial state.
+                // After the user clicks 'find' (or autoCompleteTextVew) till the end of
+                // the query cycle, it is guaranteed that there is always a clickedMarker.
                 if( clickedMarer == null )
                     return;
 
+                // Panel is shown, we close the panel
                 if(directionSliding.getPanelState() == SlidingUpPanelLayout.PanelState.ANCHORED ){
                     directionSliding.setPanelState(SlidingUpPanelLayout.PanelState.HIDDEN);
                 }
                 else {
-                    if( showResult )
+                    if( showResult ) // if the query cycle has ended
                         return;
-                    //else
+                    //else show the direction fab
                     if( !wayPointJumpButton.isHidden() ) {
                         wayPointJumpButton.setHideAnimation(ActionButton.Animations.JUMP_TO_DOWN);
                         wayPointJumpButton.hide();
@@ -447,6 +462,11 @@ public class MapFragment extends Fragment{
         ////////////////////////////////////////////////////////////////////////
     }
 
+    /**
+     * We here initialize and set up the path query sliding up panel components.
+     * Each time the RangeTask, PathTask or WayPointTask is executed, we store
+     * the search history of the user.
+     */
     public void setUpDirectionSlidingPanel(){
 
         //Initialize the sliding up panel
@@ -473,18 +493,23 @@ public class MapFragment extends Fragment{
             @Override
             public void onPanelCollapsed(View panel) {
 
-                // Han Li and Yu Sun 26/02/2015: close the soft keypad
+                // When the panel is closed, we
+                // Han Li and Yu Sun 26/02/2015: always close the soft keypad
                 if( getActivity().getCurrentFocus() != null && getActivity().getCurrentFocus().getWindowToken() != null) {
                     InputMethodManager keyboard = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
                     keyboard.hideSoftInputFromWindow(getActivity().getCurrentFocus().getWindowToken(), 0);
                 }
 
-                if( showResult )
+                if( showResult ) //if the query cycle has ended, we do nothing
                     return;
+                //otherwise if the previous clicked marker is the destination marker
+                // we show the direction (path query) fab
                 if( clickedMarer.getPosition().equals( destinLatLng ) ) {
                     // we came from the pathFuelJumpButton
                     pathFuelJumpButton.setShowAnimation(ActionButton.Animations.FADE_IN);
                     pathFuelJumpButton.show();
+                //if the previous clicked marker is a fuel station marker
+                // we show the way point fab
                 }else{
                     // we came from the wayPointJumpButton
                     wayPointJumpButton.setShowAnimation(ActionButton.Animations.FADE_IN);
@@ -507,6 +532,8 @@ public class MapFragment extends Fragment{
 
             @Override
             public void onPanelHidden(View panel) {
+
+                // the operations are the same as the onPanelCollapsed method
 
                 // Han Li and Yu Sun 26/02/2015: close the soft keypad
                 if( getActivity().getCurrentFocus() != null && getActivity().getCurrentFocus().getWindowToken() != null) {
@@ -586,6 +613,12 @@ public class MapFragment extends Fragment{
 
     }
 
+    /**
+     * We here initialize and set up the detour query (way point query) sliding up panel
+     * components.
+     * Each time the RangeTask, PathTask or WayPointTask is executed, we store
+     * the search history of the user.
+     */
     public void setUpWayPointSlidingPanel(){
 
         //Initialize the sliding up panel
@@ -715,11 +748,15 @@ public class MapFragment extends Fragment{
                 //////////////////////////////////////////////////
             }
         });
-
     }
 
     /**
+     * Listener for the autoCompleteTextView on the path query sliding up panel.
      *
+     * Once the item is clicked, we close the soft keypad, check the origin_ and
+     * destination_autoCompleteTextView, if both are not empty, we call the PathQueryTask
+     * to geocode the origin and destination addresses, compute the direction (or called
+     * path or route) between the origin and destination and the fuel stations near to the path.
      */
     private class pathFuelAutoCompleteOnItemClickListener implements AdapterView.OnItemClickListener {
 
@@ -794,7 +831,13 @@ public class MapFragment extends Fragment{
     }
 
     /**
+     * Listener for the autoCompleteTextView on the path query sliding up panel.
      *
+     * Once the item is clicked, we close the soft keypad, check the origin_ and
+     * destination_autoCompleteTextView, if both are not empty, we call the WayPointTask
+     * to geocode the origin and destination addresses, compute the detoured direction
+     * (or called path or route) between the origin and destination with the selected
+     * fuel station as a way point.
      */
     private class wayPointAutoCompleteOnItemClickListener implements AdapterView.OnItemClickListener {
 
@@ -823,9 +866,10 @@ public class MapFragment extends Fragment{
         }
 
         // Once the item is clicked, we close the soft keypad, check the origin_ and
-        // destination_autoCompleteTextView, if both are not empty, we call the PathQueryTask
-        // to geocode the origin and destination addresses, compute the direction (or called
-        // path or route) between the origin and destination and the fuel stations near to the path.
+        // destination_autoCompleteTextView, if both are not empty, we call the WayPointTask
+        // to geocode the origin and destination addresses, compute the detoured direction
+        // (or called path or route) between the origin and destination with the selected
+        // fuel station as a way point.
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
@@ -881,6 +925,8 @@ public class MapFragment extends Fragment{
      * ii) and use the user preferred range distance to issue the range query,
      * ii) draw on the map the input address with normal marker and the
      * returned points with customized marker icons.
+     * iv) store the destination address and location in the instance variable
+     * 'destinLatLng' and 'destinAddressText', respectively.
      */
     private class RangeQueryTask extends AsyncTask<String, Void, JSONArray>{
 
@@ -1038,8 +1084,13 @@ public class MapFragment extends Fragment{
      * i) geocode the origin and destination addresses,
      * ii) compute the direction (or called path or route) between the origin
      * and destination and the fuel stations near to the path
-     * iii) draw the path and fuel stations on the pathMap
+     * iii) draw the path and fuel stations on the map
      * and iv) move the focus of the map to the path.
+     * v) store the destination address and location in the instance variable
+     * 'destinLatLng' and 'destinAddressText', respectively, if the destination
+     * address is changed at this stage.
+     * vi) close the direction sliding up panel if the query executes successfully.
+     *
      * We choose to CHECK the address in the origin_ and destination_autoCompleteTextView
      * each time as 1) it's difficult to keep track of a LatLng object for the origin
      * or destination since the user behaviour is unpredictable and 2) it's easier later for
@@ -1208,7 +1259,6 @@ public class MapFragment extends Fragment{
                 }
                 ///////////////////////////////////////////////////////////////////////////////
 
-
                 PathQuery pq = new PathQuery();
                 Log.v(LOG_TAG, "Retrieving results from server...");
                 result = pq.executeQuery(
@@ -1372,7 +1422,18 @@ public class MapFragment extends Fragment{
     }
 
     /**
-     *
+     * The function of the task is as follows:
+     * i) geocode the origin and destination addresses,
+     * ii) compute the direction (or called path or route) from the origin to the way point
+     * and from the way point to the destination.
+     * iii) draw the path and the selected fuel station as a regular marker on the map
+     * and iv) move the focus of the map to the path.
+     * v) We DONOT store the destination address or location in the instance variable
+     * 'destinLatLng' or 'destinAddressText'. Instead we set the instance variable
+     * 'showResult' to true if the execution succeeds, which ends the quering cicle by
+     * terminating all interaction operations except the 'find' button (an the
+     * autoCompleteTextView). When the user 'find' again, we set the 'showResult' to false.
+     * vi) close the direction sliding up panel if the query executes successfully.
      */
     private class WayPointTask extends AsyncTask<String, Void, JSONObject>{
 
@@ -1587,6 +1648,7 @@ public class MapFragment extends Fragment{
                     //else
                     d_lat = addresses_d.get(0).getLatitude();
                     d_lng = addresses_d.get(0).getLongitude();
+
                 }
                 ///////////////////////////////////////////////////////////////////////////////
 
@@ -1759,6 +1821,7 @@ public class MapFragment extends Fragment{
     /**
      * This task stores the user input address in the background.
      * It has only one parameter: the user input address.
+     * When error occurs, we do noting currently.
      */
     private class AddressHistoryTask extends AsyncTask<String, Void, Boolean> {
 
