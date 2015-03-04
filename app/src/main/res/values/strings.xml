@@ -47,7 +47,7 @@
     <string name="APP_ID">1589475934622660</string>
 
     <!-- for my location -->
-    <string name="Your_location">Your location</string>
+    <string name="Your_location">Current location</string>
 
 
     <!--CROP IMAGE-->

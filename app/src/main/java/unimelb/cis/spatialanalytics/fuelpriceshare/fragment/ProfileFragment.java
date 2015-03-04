@@ -102,7 +102,6 @@ public class ProfileFragment extends Fragment {
      */
 
     private Bitmap bitmapProfileImage;
-    private String profileImagePath;
 
 
     /**
@@ -386,8 +385,9 @@ public class ProfileFragment extends Fragment {
 
 
         if (Users.bitmap != null)
-            //imageViewProfiePhoto.setImageBitmap(Users.bitmap);
-            imageViewProfiePhoto.setImageBitmap(bitmapProfileImage);
+            imageViewProfiePhoto.setImageBitmap(Users.bitmap);
+            //bitmapProfileImage=Users.bitmap;
+            //imageViewProfiePhoto.setImageBitmap(bitmapProfileImage);
 
         else {
 
@@ -418,8 +418,8 @@ public class ProfileFragment extends Fragment {
                         if (response.getBitmap() != null) {
                             // load image into imageview
                             isImageUploadingOrDownloading = false;
-                            //imageViewProfiePhoto.setImageBitmap(response.getBitmap());
-                            imageViewProfiePhoto.setImageBitmap(Bitmap.createScaledBitmap(response.getBitmap(), ConfigConstant.PROFILE_IMAGE_WIDTH, ConfigConstant.PROFILE_IMAGE_HEIGHT, false));
+                             imageViewProfiePhoto.setImageBitmap(response.getBitmap());
+                            //imageViewProfiePhoto.setImageBitmap(Bitmap.createScaledBitmap(response.getBitmap(), ConfigConstant.PROFILE_IMAGE_WIDTH, ConfigConstant.PROFILE_IMAGE_HEIGHT, false));
 
                             Users.bitmap = response.getBitmap();
                         }
@@ -756,8 +756,8 @@ public class ProfileFragment extends Fragment {
 
                 } else {
                     //if upload success, update local session
-                    //imageViewProfiePhoto.setImageBitmap(bitmapProfileImage);
-                    imageViewProfiePhoto.setImageBitmap(Bitmap.createScaledBitmap(bitmapProfileImage, ConfigConstant.PROFILE_IMAGE_WIDTH, ConfigConstant.PROFILE_IMAGE_HEIGHT, false));
+                    imageViewProfiePhoto.setImageBitmap(bitmapProfileImage);
+                    //imageViewProfiePhoto.setImageBitmap(Bitmap.createScaledBitmap(bitmapProfileImage, ConfigConstant.PROFILE_IMAGE_WIDTH, ConfigConstant.PROFILE_IMAGE_HEIGHT, false));
 
                     Users.profileImage = Users.tempProfielImageName;
                     Users.tempProfielImageName = "";
@@ -807,7 +807,6 @@ public class ProfileFragment extends Fragment {
                     Get the image captured by camera
                      */
                     File imageFile = imagePicker.getImageFile();
-                    profileImagePath = imageFile.getAbsolutePath();
                     //compress the image
                     bitmapProfileImage = ImageDecoder.decodeSampledBitmapFromFile(imageFile, ConfigConstant.PROFILE_IMAGE_WIDTH, ConfigConstant.PROFILE_IMAGE_HEIGHT);
                     bitmapProfileImage=ImageDecoder.rotateImage(bitmapProfileImage,imageFile.getAbsolutePath());
@@ -826,8 +825,6 @@ public class ProfileFragment extends Fragment {
                      */
                     if (intent != null) {
                         bitmapProfileImage = ImageDecoder.decodeSampledBitmapFromUri(getActivity(), intent.getData(), ConfigConstant.PROFILE_IMAGE_WIDTH, ConfigConstant.PROFILE_IMAGE_HEIGHT);
-                        profileImagePath = imagePicker.getImagePath(intent.getData());
-
                         bitmapProfileImage=ImageDecoder.createScaledBitmap(bitmapProfileImage,ConfigConstant.IMAGE_TYPE_PROFILE);
 
                         fileName = RandomGenerateUniqueIDs.getFileName("png");

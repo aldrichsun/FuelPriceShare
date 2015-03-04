@@ -74,6 +74,12 @@ public class AutoCompleteAdapter extends ArrayAdapter<String> implements Filtera
                 if (constraint != null) {
 
                     resultList = new ArrayList<>();
+                    if( constraint.equals( mContext.getString(R.string.Your_location) ) ){
+                        // Assign the data to the FilterResults
+                        filterResults.values = resultList;
+                        filterResults.count = resultList.size();
+                        return filterResults;
+                    }
 
                     ///////////////// Historical addresses //////////////////
                     // 03/03/2015 Yu Sun: search in the retrieved history and add the

@@ -48,6 +48,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import unimelb.cis.spatialanalytics.fuelpriceshare.R;
+import unimelb.cis.spatialanalytics.fuelpriceshare.maps.myLocation.GPSTracker;
 import unimelb.cis.spatialanalytics.fuelpriceshare.maps.DrawOnMap.DecodeDirection;
 import unimelb.cis.spatialanalytics.fuelpriceshare.maps.DrawOnMap.DrawMarkersOnMap;
 import unimelb.cis.spatialanalytics.fuelpriceshare.maps.autoComplete.AutoCompleteAdapter;
@@ -89,6 +90,8 @@ public class MapFragment extends Fragment{
     private boolean showResult = false; // whether a operation series has come to an end
 
     private String lastAddress = ""; // used for storing location history
+
+    private boolean isCurrentLocationEnabled = false; // whether we can get the user's current location
 
     public void MapFragment(){
         // Required empty public constructor
@@ -165,14 +168,21 @@ public class MapFragment extends Fragment{
 
         /////////////// Set up the initial focus of the map, which is the user current location ////////////////
         mMap.setMyLocationEnabled(true);
-        Location myLocation = MyLocation.getMyLocation();
+        //Location myLocation = MyLocation.getMyLocation();
+        GPSTracker gps = new GPSTracker( getActivity() );
+        Location myLocation = gps.getLocation();
+        isCurrentLocationEnabled = gps.canGetLocation();
+        currentLocationName = getString(R.string.Your_location);
+
         if( myLocation != null ){
-            currentLocationName = getString(R.string.Your_location);
+
             currentLocation = new LatLng(myLocation.getLatitude(), myLocation.getLongitude());
+            //Log.e(LOG_TAG, "The current location is: " + currentLocation.toString());
             destinLatLng = new LatLng(myLocation.getLatitude(), myLocation.getLongitude());
         }
         else {
-            destinLatLng = new LatLng(-37.7963, 144.9614); // Melbourne Uni
+            //destinLatLng = new LatLng(-37.7963, 144.9614); // Melbourne Uni
+            destinLatLng = new LatLng(0.0, 0.0);
         }
         ////mMap.addMarker(new MarkerOptions().position(latLng).title("Melbourne Uni"));
         CameraPosition cameraPosition = new CameraPosition.Builder()
@@ -236,6 +246,10 @@ public class MapFragment extends Fragment{
         });
         autoCompleteTextView.setOnLongClickListener(new myOnLongClickListener(
                 (ActionBarActivity)getActivity()));
+        if( isCurrentLocationEnabled ){
+            autoCompleteTextView.setText(getString(R.string.Your_location));
+        }
+
         //////////////////////////////////////////////////////
 
         ///////////////// Set the 'Find' button listener /////////////////////
@@ -317,7 +331,9 @@ public class MapFragment extends Fragment{
                 ////// set the origin and destination text
                 AutoCompleteTextView pathFuelOrigin = (AutoCompleteTextView) getActivity()
                         .findViewById(R.id.path_fuel_origin_autoCompleteTextView);
-                pathFuelOrigin.setText(getString(R.string.Your_location));
+                if( isCurrentLocationEnabled ) {
+                    pathFuelOrigin.setText(getString(R.string.Your_location));
+                }
                 AutoCompleteTextView pathFuelDestin = (AutoCompleteTextView) getActivity()
                         .findViewById(R.id.path_fuel_destination_autoCompleteTextView);
                 pathFuelDestin.setText(destinAddressText);
@@ -341,7 +357,9 @@ public class MapFragment extends Fragment{
 
                 AutoCompleteTextView originText = (AutoCompleteTextView)
                         getActivity().findViewById(R.id.wayPoint_origin_autoCompleteTextView);
-                originText.setText( getString(R.string.Your_location) );
+                if( isCurrentLocationEnabled ) {
+                    originText.setText(getString(R.string.Your_location));
+                }
 
                 AutoCompleteTextView wayPointText = (AutoCompleteTextView)
                         getActivity().findViewById(R.id.waypoint_autoCompleteTextView);
@@ -934,6 +952,7 @@ public class MapFragment extends Fragment{
         private double range_radius = 3.0;
         ProgressDialog progressDialog;
         private boolean geocodeError = false;
+        private boolean curLocationError = false;
 
         /**
          * 16/02/2015 Yu Sun:
@@ -950,8 +969,18 @@ public class MapFragment extends Fragment{
                             getString(R.string.pref_default_range_distance)
                     );
             this.range_radius = Double.valueOf(range_radius);
+
+            //Location location = MyLocation.getMyLocation();
+            curLocationError = false;
+            GPSTracker gpsTracker = new GPSTracker( getActivity() );
+            Location location = gpsTracker.getLocation();
+            isCurrentLocationEnabled = gpsTracker.canGetLocation();
+            if( location != null )
+                currentLocation = new LatLng(location.getLatitude(), location.getLongitude());
+
             // the geo-coding error flag
             geocodeError = false;
+
             // progress dialog
             progressDialog = new ProgressDialog(getActivity());
             progressDialog.setTitle("Please wait...");
@@ -973,30 +1002,40 @@ public class MapFragment extends Fragment{
         @Override
         protected JSONArray doInBackground(String... locationName) {
 
-            //We first geo-code the input address
-            Geocoder geocoder = new Geocoder( getActivity() );
-            List<Address> addresses = null;
+            if( locationName[0].equals( currentLocationName ) ){
+                if( currentLocation == null ){
+                    curLocationError = true;
+                    return null;
+                }
+                //else
+                destinLatLng = new LatLng(currentLocation.latitude, currentLocation.longitude);
+                destinAddressText = currentLocationName;
+            }
+            else {
+                //We first geo-code the input address
+                Geocoder geocoder = new Geocoder(getActivity());
+                List<Address> addresses = null;
 
-            try {
-                // Log.v(LOG_TAG, "The geocoding address is: " + locationName[0]);
-                // Getting a maximum of 3 Address that matches the input text
-                addresses = geocoder.getFromLocationName(locationName[0], 1);
-            } catch (IOException e) {
-                Log.e(LOG_TAG, "Internet error when doing geo-coding on: " + locationName[0], e);
-                geocodeError = true;
-                return null;
+                try {
+                    addresses = geocoder.getFromLocationName(locationName[0], 1);
+                } catch (IOException e) {
+                    Log.e(LOG_TAG, "Internet error when doing geo-coding on: " + locationName[0], e);
+                    geocodeError = true;
+                    return null;
+                }
+                if (addresses == null || addresses.size() == 0) {
+                    geocodeError = true;
+                    return null;
+                }
+                // We have successfully get the searched address
+                // First store it as the destination
+                Address address = (Address) addresses.get(0);
+                destinLatLng = new LatLng(address.getLatitude(), address.getLongitude());
+                destinAddressText = String.format("%s, %s",
+                        address.getMaxAddressLineIndex() > 0 ? address.getAddressLine(0) : "",
+                        address.getCountryName());
             }
-            if( addresses == null || addresses.size() == 0) {
-                geocodeError = true;
-                return null;
-            }
-            // We have successfully get the searched address
-            // First store it as the destination
-            Address address = (Address) addresses.get(0);
-            destinLatLng = new LatLng(address.getLatitude(), address.getLongitude());
-            destinAddressText = String.format("%s, %s",
-                    address.getMaxAddressLineIndex() > 0 ? address.getAddressLine(0) : "",
-                    address.getCountryName());
+
             // Then start the range query
             //Log.v(LOG_TAG, "Starting the range query...");
             RangeQuery rangeQuery = new RangeQuery();
@@ -1017,6 +1056,16 @@ public class MapFragment extends Fragment{
                     Toast toast = Toast.makeText(
                             getActivity(), "Internet error or wrong address, " +
                                     "please check and try later",
+                            Toast.LENGTH_SHORT);
+                    toast.setGravity(Gravity.CENTER, 0, 0);
+                    toast.show();
+                }
+                return;
+            }
+            if( curLocationError ){
+                if( getActivity() != null ) {
+                    Toast toast = Toast.makeText(
+                            getActivity(), "Sorry, cannot get current location",
                             Toast.LENGTH_SHORT);
                     toast.setGravity(Gravity.CENTER, 0, 0);
                     toast.show();
@@ -1124,7 +1173,10 @@ public class MapFragment extends Fragment{
                     );
             this.path_distance = Double.valueOf(path_dist);
             // update the current location
-            Location location = MyLocation.getMyLocation();
+            //Location location = MyLocation.getMyLocation();
+            GPSTracker gpsTracker = new GPSTracker( getActivity() );
+            Location location = gpsTracker.getLocation();
+            isCurrentLocationEnabled = gpsTracker.canGetLocation();
             if( location != null )
                 currentLocation = new LatLng(location.getLatitude(), location.getLongitude());
             // progress dialog
@@ -1455,7 +1507,10 @@ public class MapFragment extends Fragment{
             super.onPreExecute();
 
             // update the current location
-            Location location = MyLocation.getMyLocation();
+            //Location location = MyLocation.getMyLocation();
+            GPSTracker gpsTracker = new GPSTracker( getActivity() );
+            Location location = gpsTracker.getLocation();
+            isCurrentLocationEnabled = gpsTracker.canGetLocation();
             if( location != null )
                 currentLocation = new LatLng(location.getLatitude(), location.getLongitude());
 

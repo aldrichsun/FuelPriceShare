@@ -15,6 +15,7 @@ import android.util.Log;
  * Used exclusively (only) for ContributePriceFragment to get current user location
  * when choosing the fuel stations nearby.
  */
+@Deprecated // by Yu Sun and Han Li on 04/03/2015
 public class MyLocation {
 
     private static LocationManager locationManager;

@@ -29,6 +29,7 @@ import unimelb.cis.spatialanalytics.fuelpriceshare.fragment.MapFragment;
 import unimelb.cis.spatialanalytics.fuelpriceshare.fragment.PathFragment;
 import unimelb.cis.spatialanalytics.fuelpriceshare.fragment.ProfileFragment;
 import unimelb.cis.spatialanalytics.fuelpriceshare.fragment.RangeFragment;
+import unimelb.cis.spatialanalytics.fuelpriceshare.maps.myLocation.GPSTracker;
 import unimelb.cis.spatialanalytics.fuelpriceshare.maps.myLocation.MyLocation;
 import unimelb.cis.spatialanalytics.fuelpriceshare.settings.SettingsActivity;
 
@@ -64,7 +65,8 @@ public class MainActivity extends ActionBarActivity {
 //    private Fragment pathFragment = null;
     private Fragment profileFragment = null;
     private Fragment contributeFragment = null;
-    private MyLocation myLocation = null;
+
+//    private MyLocation myLocation = null;
 
     private int PRESENT_FRAGMENT_ID;
     private final String PRESENT_FRAGMENT_ID_KEY = "present_fragment_id";
@@ -156,7 +158,11 @@ public class MainActivity extends ActionBarActivity {
 
     private void setUpCurrentLocation(){
         // Get LocationManager object from System Service LOCATION_SERVICE
-        myLocation = new MyLocation(this);
+        //myLocation = new MyLocation(this);
+
+        // remind the user to open the GPS settings
+        GPSTracker gpsTracker = new GPSTracker( this );
+        gpsTracker.checkGetLocationStatus();
     }
 
     @Override

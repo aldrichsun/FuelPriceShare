@@ -10,6 +10,7 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 
 import unimelb.cis.spatialanalytics.fuelpriceshare.config.ConfigConstant;
+import unimelb.cis.spatialanalytics.fuelpriceshare.maps.myLocation.GPSTracker;
 
 /**
  * Created by hanl4 on 29/01/2015.
@@ -66,6 +67,7 @@ public class FuelData {
             json.put(ConfigConstant.KEY_UID, Users.id);
 
             GPSTracker gps = new GPSTracker(context);
+            gps.getLocation(); //added by Yu Sun on 04/03/2015
             if(gps.canGetLocation()) {
                 json.put(ConfigConstant.KEY_CAN_GET_LOCATION,true);
                 json.put(ConfigConstant.KEY_LATITUDE, gps.getLatitude());

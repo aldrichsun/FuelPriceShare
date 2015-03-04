@@ -83,7 +83,7 @@
 
 
 
-        <activity android:name="com.soundcloud.android.crop.CropImageActivity"
+        <activity android:name="unimelb.cis.spatialanalytics.fuelpriceshare.cropimage.CropImageActivity"
             android:screenOrientation="portrait" />
 
         <activity
