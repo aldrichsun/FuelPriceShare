@@ -14,6 +14,8 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.support.v7.app.ActionBarActivity;
 
+import unimelb.cis.spatialanalytics.fuelpriceshare.R;
+
 /**
  * Created by Yu Sun on 20/02/2015.
  * This 'functional class' creates the customized markers to show on Google Map.
@@ -45,23 +47,44 @@ public class CustomizeMapMarker {
         Rect textRect = new Rect();
         paint.getTextBounds(text, 0, text.length(), textRect);
 
-        int width = (int)(textRect.width()*1.2f);
-        int height = (int)(textRect.height()*1.2f);
+        // For text background: a rectangle
+        int rect_width = (int)(textRect.width()*1.2f);
+        int rect_height = (int)(textRect.height()*1.2f);
+        // For the dot to show the precise location
+        int radius = 5; // pixels
 
-        Bitmap bm = Bitmap.createBitmap((int)(textRect.width()*1.2f), (int)(textRect.height()*1.2f), Bitmap.Config.ARGB_8888);
+        Bitmap bm = Bitmap.createBitmap( rect_width, rect_height + 2*radius, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(bm);
 
+        ///////////////////////// draw the background rect //////////////////////
         Paint bgPaint = new Paint();
         bgPaint.setAlpha(10);
-        canvas.drawRect(0, 0, (int)(textRect.width()*1.2f), (int)(textRect.height()*1.2f), bgPaint);
+        canvas.drawRect(0, 0, rect_width, rect_height, bgPaint);
+        //////////////////////////////////////////////////////////////////////////
 
+        ////////////////////////// draw the text ////////////////////
         //Calculate the positions
-        int xPos = (canvas.getWidth() / 2); // - 2;     //-2 is for regulating the x position offset
+        int xPos = (rect_width / 2); // - 2;     //-2 is for regulating the x position offset
 
         //"- ((paint.descent() + paint.ascent()) / 2)" is the distance from the baseline to the center.
-        int yPos = (int) ((canvas.getHeight() / 2) - ((paint.descent() + paint.ascent()) / 2)) ;
+        int yPos = (int) ((rect_height / 2) - ((paint.descent() + paint.ascent()) / 2)) ;
 
         canvas.drawText(text, xPos, yPos, paint);
+        //////////////////////////////////////////////////////////////
+
+        ////////////////// draw the dot to show the exact location //////////////
+        Paint circlePaint = new Paint();
+        // set color
+        //circlePaint.setColor(context.getResources().getColor(R.color.orange));
+        //circlePaint.setColor(context.getResources().getColor(R.color.red));
+        circlePaint.setColor(Color.RED);
+        // set style
+        circlePaint.setStyle(Style.FILL);
+        // draw circle with radius 30
+        int c_xPos = (rect_width / 2);
+        int c_yPos = rect_height + radius;
+        canvas.drawCircle(c_xPos, c_yPos, radius, circlePaint);
+        //////////////////////////////////////////////////////////////////////////
 
         return bm;
     }

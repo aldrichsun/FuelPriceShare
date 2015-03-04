@@ -12,6 +12,7 @@ import org.json.JSONObject;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import unimelb.cis.spatialanalytics.fuelpriceshare.config.URLConstant;
 import unimelb.cis.spatialanalytics.fuelpriceshare.http.ServerRequest;
 
 /**
@@ -34,7 +35,7 @@ public class RangeQuery {
 
     private static final String LOG_TAG = RangeQuery.class.getSimpleName();
     // The host address of the API (servlet)
-    private final String QUERY_BASE_URL = "http://128.250.26.229:8080/FuelPriceSharingServer/RangeQueryServlet?";
+    private final String QUERY_BASE_URL = URLConstant.RANGE_QUERY_BASE_URL;
     // These names are determined by the API documentation
     private final String TABLE_NAME = "fuel_station"; // Query table name
     private final String LAT_PARAM = "lat"; // Parameter latitude name

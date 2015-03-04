@@ -19,9 +19,9 @@ import unimelb.cis.spatialanalytics.fuelpriceshare.http.ServerRequest;
  * For user input automatic completion.
  * TODO Optimize the auto complete by the user's historical search and current location
  */
-public class AutoComplete {
+public class GoogleSuggestion {
 
-    private static final String LOG_TAG = AutoComplete.class.getSimpleName();
+    private static final String LOG_TAG = GoogleSuggestion.class.getSimpleName();
 
     // API host address
     private static final String PLACES_API_BASE = "https://maps.googleapis.com/maps/api/place";
@@ -31,10 +31,25 @@ public class AutoComplete {
     // My API key
     private static final String API_KEY = "AIzaSyBaLZ9LFvlLmVL16xGDQkKOF5Ml69_JcSI";
 
-    public AutoComplete(){
+    public GoogleSuggestion(){
         //API_KEY = getString(R.string.map_api_key);
     }
 
+    /**
+     * This function takes the "input" as a seed and returns the places auto-complete predictions
+     * from Google auto-complete service.
+     * For example, when input = "University of Mel", it returns a list of
+     * {
+     *     "University of Melbourne, Parkville, Victoria, Australia",
+     *     "University of Melbourne, Burnley Campus, Burnley, Victoria, Australia",
+     *     "Library - University of Melbourne, Parkville, Victoria, Australia",
+     *     "The University of Melbourne Health Service, Cardigan Street, Carlton, Victoria, Australia",
+     *     ...
+     *     "Richard Berry building, University of Melbourne, Swanston Street, Parkville, Victoria, Australia"
+     * }
+     * @param input
+     * @return
+     */
     public static ArrayList<String> autoComplete(String input) {
         ArrayList<String> resultList = null;
 
@@ -56,7 +71,7 @@ public class AutoComplete {
 
             if( jsonResults == null ){
                 Log.e(LOG_TAG, "Error getting auto complete places for URL:" + url.toString());
-                return resultList;
+                return null;
             }
 
         } catch (MalformedURLException e) {
@@ -81,6 +96,7 @@ public class AutoComplete {
             }
         } catch (JSONException e) {
             Log.e(LOG_TAG, "Cannot process JSON results", e);
+            return null;
         }
 
         return resultList;

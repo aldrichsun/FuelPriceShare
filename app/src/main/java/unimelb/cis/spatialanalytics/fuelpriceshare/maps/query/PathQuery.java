@@ -9,6 +9,7 @@ import org.json.JSONObject;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import unimelb.cis.spatialanalytics.fuelpriceshare.config.URLConstant;
 import unimelb.cis.spatialanalytics.fuelpriceshare.http.ServerRequest;
 
 /**
@@ -41,7 +42,7 @@ public class PathQuery {
 
     private static final String LOG_TAG = PathQuery.class.getSimpleName();
 
-    private static final String QUERY_BASE_URL = "http://128.250.26.229:8080/FuelPriceSharingServer/PathQueryServlet";
+    private static final String QUERY_BASE_URL = URLConstant.PATH_QUERY_BASE_URL;
     private final String TABLE_NAME = "fuel_station"; // Query table name TODO used later
     public static final String PARAM_ORIGIN = "origin";
     public static final String PARAM_DESTINATION = "destination";
@@ -87,6 +88,7 @@ public class PathQuery {
             url = new URL(buildUri.toString());
         } catch (MalformedURLException e) {
             Log.e(LOG_TAG, "Error malformed URL:"+buildUri.toString(), e);
+            return null;
         }
 
         Log.v(LOG_TAG, "The request URL is: " + url.toString());

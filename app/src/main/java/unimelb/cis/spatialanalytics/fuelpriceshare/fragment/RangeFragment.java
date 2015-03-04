@@ -73,6 +73,7 @@ import com.gc.materialdesign.views.ButtonRectangle;
  * for the next improved version. A byproduct in that version is we can use the PreferenceFragment
  * instead of PreferenceActivity.
  */
+@Deprecated
 public class RangeFragment extends Fragment {
 
     private static final String LOG_TAG = RangeFragment.class.getSimpleName();
@@ -969,7 +970,7 @@ public class RangeFragment extends Fragment {
                 else if( origin_addr.equals( fuelStationClickedName ) ){
                     if( fuelStationClickedLatLng == null ){
                         try {
-                            errorObj.put(this.DESTIN_ERROR_KEY, this.ERROR);
+                            errorObj.put(this.ORIGIN_ERROR_KEY, this.ERROR);
                         } catch (JSONException e) {
                         }
                         return errorObj;
@@ -1013,7 +1014,7 @@ public class RangeFragment extends Fragment {
                 else if( destin_addr.equals( currentLocationName ) ){
                     if( currentLocation == null ){
                         try {
-                            errorObj.put(this.ORIGIN_ERROR_KEY, this.ERROR);
+                            errorObj.put(this.DESTIN_ERROR_KEY, this.ERROR);
                         } catch (JSONException e) {
                         }
                         return errorObj;

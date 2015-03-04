@@ -29,9 +29,25 @@ import java.net.URL;
 public class ServerRequest {
 
     private static final String LOG_TAG = ServerRequest.class.getSimpleName();
+    private String requestMethod;
+    private int connectionTimeOut;
 
     public ServerRequest(){
 
+        this.requestMethod = "GET"; //default value
+        this.connectionTimeOut = 10 * 1000; // default value: 10s
+    }
+
+    public ServerRequest(String requestMethod){
+
+        this.requestMethod = requestMethod;
+        this.connectionTimeOut = 10 * 1000; // default value: 10s
+    }
+
+    public ServerRequest(int connectionTimeOut){
+
+        this.requestMethod = "GET";
+        this.connectionTimeOut = connectionTimeOut;
     }
 
     /**
@@ -48,7 +64,9 @@ public class ServerRequest {
         try{
             urlConnection = (HttpURLConnection) url.openConnection();
 
-            urlConnection.setRequestMethod("GET");
+            urlConnection.setRequestMethod( this.requestMethod );
+            urlConnection.setConnectTimeout( this.connectionTimeOut );
+
             //Log.v(LOG_TAG, "Connecting to the URL...");
             urlConnection.connect();
 

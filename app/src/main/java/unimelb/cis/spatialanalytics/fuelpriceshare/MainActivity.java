@@ -32,6 +32,7 @@ import unimelb.cis.spatialanalytics.fuelpriceshare.R;
 import unimelb.cis.spatialanalytics.fuelpriceshare.config.ConfigConstant;
 import unimelb.cis.spatialanalytics.fuelpriceshare.data.UserCookie;
 import unimelb.cis.spatialanalytics.fuelpriceshare.fragment.ContributePriceFragment;
+import unimelb.cis.spatialanalytics.fuelpriceshare.fragment.MapFragment;
 import unimelb.cis.spatialanalytics.fuelpriceshare.fragment.PathFragment;
 import unimelb.cis.spatialanalytics.fuelpriceshare.fragment.ProfileFragment;
 import unimelb.cis.spatialanalytics.fuelpriceshare.fragment.RangeFragment;
@@ -55,16 +56,19 @@ public class MainActivity extends ActionBarActivity {
 
     private String[] mDrawerItemStrings;
 
-    private static final int FRAGMENT_RANGE_SEARCH = 0;
-    private static final int FRAGMENT_PATH_SEARCH = 1;
-    private static final int FRAGMENT_PROFILE = 2;
-    private static final int FRAGMENT_CONTRIBUTE = 3;
+    private static final int FRAGMENT_MAP = 0;
+//    private static final int FRAGMENT_RANGE_SEARCH = 1;
+//    private static final int FRAGMENT_PATH_SEARCH = 2;
 
-    private static final int ACTIVITY_SETTING = 4;
+    private static final int FRAGMENT_PROFILE = 1;
+    private static final int FRAGMENT_CONTRIBUTE = 2;
+
+//    private static final int ACTIVITY_SETTING = 4;
 
     private Fragment fragment = null;
-    private Fragment rangeFragment = null;
-    private Fragment pathFragment = null;
+    private Fragment mapFragment = null;
+//    private Fragment rangeFragment = null;
+//    private Fragment pathFragment = null;
     private Fragment profileFragment = null;
     private Fragment contributeFragment = null;
     private MyLocation myLocation = null;
@@ -131,9 +135,11 @@ public class MainActivity extends ActionBarActivity {
         pref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         if (savedInstanceState == null) {
 
-            int last_display_fragment_id = 0;
-            last_display_fragment_id = pref.getInt(PRESENT_FRAGMENT_ID_KEY, 0);
-            selectItem(last_display_fragment_id);
+            // Yu Sun 02/03/2015: Changed according to Rui's comments
+            //int last_display_fragment_id = 0;
+            //last_display_fragment_id = pref.getInt(PRESENT_FRAGMENT_ID_KEY, 0);
+            //selectItem(last_display_fragment_id);
+            selectItem(0);
 
             int launchTime = pref.getInt(LAUNCH_TIME_KEY, 0);
             //Log.v(LOG_TAG, "Launch time:" + launchTime);
@@ -148,8 +154,9 @@ public class MainActivity extends ActionBarActivity {
     private void setUpFragments(){
 
         /////////// Create all the fragments to be used ////////////
-        rangeFragment = new RangeFragment();
-        pathFragment = new PathFragment();
+        mapFragment = new MapFragment();
+//        rangeFragment = new RangeFragment();
+//        pathFragment = new PathFragment();
         profileFragment = new ProfileFragment();
         contributeFragment = new ContributePriceFragment();
     }
@@ -189,10 +196,12 @@ public class MainActivity extends ActionBarActivity {
          * Handle Fragment Menu if special requirements are needed
          */
         switch (PRESENT_FRAGMENT_ID) {
-            case FRAGMENT_RANGE_SEARCH:
+            case FRAGMENT_MAP:
                 break;
-            case FRAGMENT_PATH_SEARCH:
-                break;
+//            case FRAGMENT_RANGE_SEARCH:
+//                break;
+//            case FRAGMENT_PATH_SEARCH:
+//                break;
             case FRAGMENT_CONTRIBUTE:
                 if (drawerOpen)
                     menu.setGroupVisible(R.id.menu_group, false);
@@ -249,8 +258,9 @@ public class MainActivity extends ActionBarActivity {
         //if(position!=FRAGMENT_CONTRIBUTE)
            // ContributePriceFragment.isMenuVisible=false;
 
-        if (rangeFragment != null && pathFragment != null
-                && contributeFragment != null && profileFragment != null ) {
+//        if (mapFragment != null && rangeFragment != null && pathFragment != null
+//                && contributeFragment != null && profileFragment != null ) {
+        if (mapFragment != null && contributeFragment != null && profileFragment != null ) {
 
             //FragmentManager fragmentManager = getSupportFragmentManager();
             FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
@@ -263,36 +273,47 @@ public class MainActivity extends ActionBarActivity {
 
             fragment = null;
             switch (position) {
-                case FRAGMENT_RANGE_SEARCH:
-                    if( rangeFragment.isAdded() ){
-                        fragmentTransaction.show(rangeFragment);
+                case FRAGMENT_MAP:
+                    if( mapFragment.isAdded() ){
+                        fragmentTransaction.show(mapFragment);
                     }else{
-                        fragmentTransaction.add(R.id.content_frame, rangeFragment);
+                        fragmentTransaction.add(R.id.content_frame, mapFragment);
                     }
-                    if(pathFragment.isAdded()){fragmentTransaction.hide(pathFragment);}
                     if(profileFragment.isAdded()){fragmentTransaction.hide(profileFragment);}
                     if(contributeFragment.isAdded()){fragmentTransaction.hide(contributeFragment);}
-                    fragment = rangeFragment;
+                    fragment = mapFragment;
                     break;
-                case FRAGMENT_PATH_SEARCH:
-                    if( pathFragment.isAdded() ){
-                        fragmentTransaction.show(pathFragment);
-                    }else{
-                        fragmentTransaction.add(R.id.content_frame, pathFragment);
-                    }
-                    if(rangeFragment.isAdded()){fragmentTransaction.hide(rangeFragment);}
-                    if(profileFragment.isAdded()){fragmentTransaction.hide(profileFragment);}
-                    if(contributeFragment.isAdded()){fragmentTransaction.hide(contributeFragment);}
-                    fragment = pathFragment;
-                    break;
+//                case FRAGMENT_RANGE_SEARCH:
+//                    if( rangeFragment.isAdded() ){
+//                        fragmentTransaction.show(rangeFragment);
+//                    }else{
+//                        fragmentTransaction.add(R.id.content_frame, rangeFragment);
+//                    }
+//                    if(pathFragment.isAdded()){fragmentTransaction.hide(pathFragment);}
+//                    if(profileFragment.isAdded()){fragmentTransaction.hide(profileFragment);}
+//                    if(contributeFragment.isAdded()){fragmentTransaction.hide(contributeFragment);}
+//                    fragment = rangeFragment;
+//                    break;
+//                case FRAGMENT_PATH_SEARCH:
+//                    if( pathFragment.isAdded() ){
+//                        fragmentTransaction.show(pathFragment);
+//                    }else{
+//                        fragmentTransaction.add(R.id.content_frame, pathFragment);
+//                    }
+//                    if(rangeFragment.isAdded()){fragmentTransaction.hide(rangeFragment);}
+//                    if(profileFragment.isAdded()){fragmentTransaction.hide(profileFragment);}
+//                    if(contributeFragment.isAdded()){fragmentTransaction.hide(contributeFragment);}
+//                    fragment = pathFragment;
+//                    break;
                 case FRAGMENT_PROFILE:
                     if(profileFragment.isAdded()){
                         fragmentTransaction.show(profileFragment);
                     }else{
                         fragmentTransaction.add(R.id.content_frame, profileFragment);
                     }
-                    if(rangeFragment.isAdded()){fragmentTransaction.hide(rangeFragment);}
-                    if(pathFragment.isAdded()){fragmentTransaction.hide(pathFragment);}
+//                    if(rangeFragment.isAdded()){fragmentTransaction.hide(rangeFragment);}
+//                    if(pathFragment.isAdded()){fragmentTransaction.hide(pathFragment);}
+                    if(mapFragment.isAdded()){fragmentTransaction.hide(mapFragment);}
                     if(contributeFragment.isAdded()){fragmentTransaction.hide(contributeFragment);}
                     fragment = profileFragment;
                     break;
@@ -302,8 +323,9 @@ public class MainActivity extends ActionBarActivity {
                     }else{
                         fragmentTransaction.add(R.id.content_frame, contributeFragment);
                     }
-                    if(rangeFragment.isAdded()){fragmentTransaction.hide(rangeFragment);}
-                    if(pathFragment.isAdded()){fragmentTransaction.hide(pathFragment);}
+//                    if(rangeFragment.isAdded()){fragmentTransaction.hide(rangeFragment);}
+//                    if(pathFragment.isAdded()){fragmentTransaction.hide(pathFragment);}
+                    if(mapFragment.isAdded()){fragmentTransaction.hide(mapFragment);}
                     if(profileFragment.isAdded()){fragmentTransaction.hide(profileFragment);}
                     fragment = contributeFragment;
                     break;

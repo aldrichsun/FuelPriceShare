@@ -70,6 +70,7 @@ import unimelb.cis.spatialanalytics.fuelpriceshare.settings.SettingsActivity;
  * for the next improved version. A byproduct in that version is we can use the PreferenceFragment
  * instead of PreferenceActivity.
  */
+@Deprecated
 public class PathFragment extends Fragment {
 
     private static final String LOG_TAG = PathFragment.class.getSimpleName();
@@ -620,7 +621,6 @@ public class PathFragment extends Fragment {
      * each time as 1) it's difficult to keep track of a LatLng object for the origin
      * or destination since the user behaviour is unpredictable and 2) it's easier later for
      * us to move the geocode task to the server.
-     * TODO !!!!! the app crashes when the server is shut down
      */
     private class PathQueryTask extends AsyncTask<String, Void, JSONObject> {
 

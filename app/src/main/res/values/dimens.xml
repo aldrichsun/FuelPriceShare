@@ -24,7 +24,8 @@
     <dimen name="bottom_text_view">8dp</dimen>
     <dimen name="Route_top_padding">8dp</dimen>
     <dimen name="query_button_linear_layout_bottom_margin">8dp</dimen>
-    <dimen name="auto_complete_text_size">20dp</dimen>
+    <dimen name="name_auto_complete_text_size">20dp</dimen>
+    <dimen name="other_auto_complete_text_size">12dp</dimen>
 
     <!-- Floating action button -->
     <dimen name="direction_fab_margin">96dp</dimen>

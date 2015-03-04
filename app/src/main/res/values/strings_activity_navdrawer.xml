@@ -2,8 +2,11 @@
 <resources>
 
     <string-array name="nav_drawer_items">
+        <!--
         <item>Stations Around</item>
         <item>Get Directions</item>
+        -->
+        <item>Find Fuel Station</item>
         <item>Profile Setting</item>
         <item>Contribute Price</item>
     </string-array>

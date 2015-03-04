@@ -1,0 +1,200 @@
+<RelativeLayout
+    xmlns:sothree="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    >
+
+    <com.sothree.slidinguppanel.SlidingUpPanelLayout
+        xmlns:sothree="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/direction_sliding"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="bottom"
+        sothree:umanoPanelHeight="0dp"
+        sothree:umanoShadowHeight="0dp"
+        sothree:umanoParalaxOffset="100dp"
+        sothree:umanoDragView="@+id/directionDragView">
+
+        <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:tools="http://schemas.android.com/tools"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            tools:context=".MainActivity"
+            android:weightSum="1">
+
+
+            <RelativeLayout
+                android:layout_width="fill_parent"
+                android:layout_height="48dp"
+                android:orientation="horizontal"
+                android:layout_marginLeft="@dimen/activity_vertical_margin"
+                android:layout_marginRight="@dimen/activity_vertical_margin">
+
+                <com.gc.materialdesign.views.ButtonRectangle
+                    android:id="@+id/locate_destination_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="48dp"
+                    android:background="@color/orange"
+                    android:text="@string/button_find_address"
+                    android:layout_alignParentRight="true" />
+
+                <AutoCompleteTextView
+                    android:id="@+id/locate_dest_autoCompleteTextView"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/hint_enter_location"
+                    android:inputType="text"
+                    android:layout_toLeftOf="@id/locate_destination_button"
+                    android:layout_alignParentBottom="true" />
+
+            </RelativeLayout>
+
+            <fragment
+                xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:tools="http://schemas.android.com/tools"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:id="@+id/map"
+                android:name="com.google.android.gms.maps.SupportMapFragment"
+                android:layout_weight="0.97" />
+
+        </LinearLayout>
+
+        <com.sothree.slidinguppanel.SlidingUpPanelLayout
+            xmlns:sothree="http://schemas.android.com/apk/res-auto"
+            android:id="@+id/wayPoint_sliding"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="bottom"
+            sothree:umanoPanelHeight="0dp"
+            sothree:umanoShadowHeight="0dp"
+            sothree:umanoParalaxOffset="100dp"
+            sothree:umanoDragView="@+id/wayPointDragView">
+
+            <RelativeLayout
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:layout_gravity="top"
+                android:orientation="horizontal"
+                android:layout_marginLeft="@dimen/activity_vertical_margin"
+                android:layout_marginRight="@dimen/activity_vertical_margin">
+
+                <com.gc.materialdesign.views.ButtonRectangle
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/route_button"
+                    android:id="@+id/path_fuel_button"
+                    android:background="@color/orange"
+                    android:layout_alignParentRight="true"
+                    />
+
+                <LinearLayout
+                    android:orientation="vertical"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_toLeftOf="@id/path_fuel_button">
+
+                    <AutoCompleteTextView
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/path_fuel_origin_autoCompleteTextView"
+                        android:hint="@string/origin_autoComplete_hint"
+                        android:inputType="textAutoComplete"/>
+
+                    <AutoCompleteTextView
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/path_fuel_destination_autoCompleteTextView"
+                        android:hint="@string/destination_autoComplete_hint"
+                        android:inputType="textAutoComplete"/>
+
+                </LinearLayout>
+
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:layout_gravity="top"
+                android:orientation="horizontal"
+                android:layout_marginLeft="@dimen/activity_vertical_margin"
+                android:layout_marginRight="@dimen/activity_vertical_margin">
+
+                <com.gc.materialdesign.views.ButtonRectangle
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/route_button"
+                    android:id="@+id/wayPoint_button"
+                    android:background="@color/orange"
+                    android:layout_alignParentRight="true"
+                    />
+
+                <LinearLayout
+                    android:orientation="vertical"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_toLeftOf="@id/wayPoint_button">
+
+                    <AutoCompleteTextView
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/wayPoint_origin_autoCompleteTextView"
+                        android:hint="@string/origin_autoComplete_hint"
+                        android:inputType="textAutoComplete"/>
+
+                    <AutoCompleteTextView
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/waypoint_autoCompleteTextView"
+                        android:inputType="textAutoComplete"/>
+
+                    <AutoCompleteTextView
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/wayPoint_destination_autoCompleteTextView"
+                        android:hint="@string/destination_autoComplete_hint"
+                        android:inputType="textAutoComplete"/>
+
+                </LinearLayout>
+
+            </RelativeLayout>
+
+        </com.sothree.slidinguppanel.SlidingUpPanelLayout>
+
+    </com.sothree.slidinguppanel.SlidingUpPanelLayout>
+
+    <com.software.shell.fab.ActionButton
+        xmlns:fab="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/path_fuel_jump_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom = "true"
+        android:layout_alignParentRight = "true"
+        android:layout_marginRight="@dimen/my_fab_margin"
+        android:layout_marginBottom="@dimen/my_fab_margin"
+        fab:type="DEFAULT"
+        fab:button_color="@color/darkGreen"
+        fab:button_colorPressed="@color/fab_material_light_green_900"
+        fab:image="@drawable/ic_directions_24px_white"
+        fab:image_size="24dp"
+        />
+
+    <com.software.shell.fab.ActionButton
+        xmlns:fab="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/wayPoint_jump_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom = "true"
+        android:layout_alignParentRight = "true"
+        android:layout_marginRight="@dimen/my_fab_margin"
+        android:layout_marginBottom="@dimen/my_fab_margin"
+        fab:type="DEFAULT"
+        fab:button_color="@color/darkGreen"
+        fab:button_colorPressed="@color/fab_material_light_green_900"
+        fab:image="@drawable/ic_directions_car_24px_white"
+        fab:image_size="16dp"
+        />
+
+</RelativeLayout>
