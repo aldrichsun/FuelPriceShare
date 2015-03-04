@@ -2,7 +2,9 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-   >
+    android:background="#3f374f"
+
+    >
     <!-- android:background="#3b3b3b" -->
 
     <LinearLayout
@@ -22,14 +24,14 @@
         <TextView
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:text="Phone"
-           />
+            android:text="Phone/Email/Username"
+            />
         <!--  Name TextField -->
         <EditText
             android:id="@+id/registerPhone"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:inputType="phone"/>
+           />
 
 
 
@@ -61,6 +63,7 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="20dip"
+            android:background="#3B5998"
             android:text="Register" />
 
         <!--  Link to Login Screen -->
@@ -68,9 +71,9 @@
             android:id="@+id/btnLinkToLoginScreen"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="40dip"
+            android:layout_marginTop="10dip"
             android:background="@null"
-            android:text="Already has an account? Login Me!"
+            android:text="Already has an account? Login Now!"
             android:textColor="#21dbd4"
             android:textStyle="bold" />
     </LinearLayout>

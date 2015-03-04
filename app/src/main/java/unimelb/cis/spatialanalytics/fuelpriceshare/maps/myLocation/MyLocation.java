@@ -1,12 +1,14 @@
 package unimelb.cis.spatialanalytics.fuelpriceshare.maps.myLocation;
 
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.location.Criteria;
 import android.location.Location;
-import android.location.LocationListener;
 import android.location.LocationManager;
-import android.os.Bundle;
-
-import com.google.android.gms.maps.model.LatLng;
+import android.provider.Settings;
+import android.util.Log;
 
 /**
  * Created by Yu Sun on 26/02/2015.
@@ -15,86 +17,62 @@ import com.google.android.gms.maps.model.LatLng;
  */
 public class MyLocation {
 
-//    private static LatLng currentLocation = null;
     private static LocationManager locationManager;
+    private static Context context;
+    private static  String TAG=MyLocation.class.getSimpleName();
 
-    public MyLocation(LocationManager locationManager){
-        this.locationManager = locationManager;
-//        setUpMyLocation();
+    public MyLocation (Context context)
+    {
+        this.context=context;
+        this.locationManager= (LocationManager)context.getSystemService(Context.LOCATION_SERVICE);
+        //isGPSEnabled();
+
     }
-
-//    public static LatLng get(){
-//        return currentLocation;
-//    }
 
     /**
      * TODO add comments
      * @return
      */
     public static Location getMyLocation(){
+        //before fetching the location, we need to enable the GPS server.
+        //isGPSEnabled();
 
         // Create a criteria object to retrieve provider
         Criteria criteria = new Criteria();
         // Get the name of the best provider
         String provider = locationManager.getBestProvider(criteria, true);
 
-//        ////// set up the current location change listener /////////
-//        setUpLocationChangeListener();
-//        ////////////////////////////////////////////////////////////
 
         // Get the initial Current Location
         Location myLocation = locationManager.getLastKnownLocation(provider);
-//        currentLocation = new LatLng(myLocation.getLatitude(), myLocation.getLongitude());
         return myLocation;
     }
 
-//    // TODO Untested code: test it
-//    private void setUpLocationChangeListener(){
-//
-//        // The minimum time (in miliseconds) the system will wait until checking if the location changed
-//        int minTime = 60000; // 1 min
-//        // The minimum distance (in meters) traveled until you will be notified
-//        float minDistance = 15;
-//        // Create a new instance of the location listener
-//        MyLocationListener myLocListener = new MyLocationListener();
-//        // Get the criteria you would like to use
-//        Criteria criteria = new Criteria();
-//        criteria.setPowerRequirement(Criteria.POWER_LOW);
-//        criteria.setAccuracy(Criteria.ACCURACY_FINE);
-//        criteria.setAltitudeRequired(false);
-//        criteria.setBearingRequired(false);
-//        criteria.setCostAllowed(true);  // may require data transformation from ISP
-//        criteria.setSpeedRequired(false);
-//        // Get the best provider from the criteria specified, and false to say it can turn the provider on if it isn't already
-//        String bestProvider = locationManager.getBestProvider(criteria, false);
-//        // Request location updates
-//        locationManager.requestLocationUpdates(bestProvider, minTime, minDistance, myLocListener);
-//    }
-//
-//    private class MyLocationListener implements LocationListener {
-//
-//        @Override
-//        public void onLocationChanged(Location location){
-//            if (location != null){
-//                // Do something knowing the location changed by the distance you requested
-//                currentLocation = null;
-//                currentLocation = new LatLng(location.getLatitude(), location.getLongitude());
-//            }
-//        }
-//
-//        @Override
-//        public void onProviderDisabled(String arg0){
-//            // Do something here if you would like to know when the provider is disabled by the user
-//        }
-//
-//        @Override
-//        public void onProviderEnabled(String arg0){
-//            // Do something here if you would like to know when the provider is enabled by the user
-//        }
-//
-//        @Override
-//        public void onStatusChanged(String arg0, int arg1, Bundle arg2){
-//            // Do something here if you would like to know when the provider status changes
-//        }
-//    }
+    public static void isGPSEnabled()
+    {
+        Log.e(TAG,"check GPS");
+        if(!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+            //Ask the user to enable GPS
+            AlertDialog.Builder builder = new AlertDialog.Builder(context);
+            builder.setTitle("Location Manager");
+            builder.setMessage("Would you like to enable GPS?");
+            builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    //Launch settings, allowing user to make a change
+                    Intent i = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                    context.startActivity(i);
+                }
+            });
+            builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    //No location service, no Activity
+                    dialog.dismiss();
+                }
+            });
+            builder.create().show();
+        }
+    }
+
 }

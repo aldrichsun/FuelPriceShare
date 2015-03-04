@@ -32,4 +32,10 @@
     <dimen name="my_fab_margin">32dp</dimen>
     <dimen name="close_fab_margin">16dp</dimen>
 
+
+
+    <!--CROP IMAGE-->
+    <dimen name="crop__bar_height">56dp</dimen>
+
+
 </resources>

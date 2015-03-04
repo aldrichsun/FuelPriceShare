@@ -2,6 +2,7 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
+    android:background="#3f374f"
    >
     <!-- android:background="#3b3b3b"-->
 
@@ -89,8 +90,8 @@
             <TextView
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:text="Phone"
-               />
+                android:text="Account"
+                />
             <!--  Email TextField -->
             <EditText
                 android:id="@+id/loginUsername"
@@ -126,6 +127,7 @@
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="20dip"
+                android:background="#3B5998"
                 android:text="Sign In" />
 
 
@@ -134,9 +136,9 @@
                 android:id="@+id/btnLinkToRegisterScreen"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="40dip"
+                android:layout_marginTop="10dip"
                 android:background="@null"
-                android:text="I don&apos;t have account. Register Me!"
+                android:text="Don&apos;t have an account. Register Now!"
                 android:textColor="#21dbd4"
                 android:textStyle="bold" />
 

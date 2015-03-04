@@ -11,11 +11,11 @@ public class ConfigURL {
  /*   private static String ip = "http://128.250.26.228";//server IP address
     private static String tomPort = "8080";//Tomcat port number*/
 
-//    private static String ip="http://spatialanalytics.cis.unimelb.edu.au";
-//    private static String tomPort="8082";
+    private static String ip="http://spatialanalytics.cis.unimelb.edu.au";
+    private static String tomPort="8082";
 
-    private  static String ip = "http://128.250.26.229";
-    private static String tomPort="8080";
+/*    private static String ip = "http://128.250.26.52";
+    private static String tomPort = "8080";*/
 
     private static String serverProject = "FuelPriceShare";//server project name
 
@@ -32,6 +32,7 @@ public class ConfigURL {
 
     /**
      * get upload refined fuel information servlet
+     *
      * @return
      */
     public static String getUploadRefinedResultServlet() {
@@ -40,10 +41,9 @@ public class ConfigURL {
     }
 
 
-
-
     /**
      * get login activity servlet
+     *
      * @return
      */
 
@@ -54,6 +54,7 @@ public class ConfigURL {
 
     /**
      * get register activity servlet
+     *
      * @return
      */
 
@@ -64,6 +65,7 @@ public class ConfigURL {
 
     /**
      * get couchDB servlet
+     *
      * @return
      */
 
@@ -75,6 +77,7 @@ public class ConfigURL {
 
     /**
      * get image upload servlet
+     *
      * @return
      */
     public static String getUploadImageServlet() {
@@ -85,6 +88,7 @@ public class ConfigURL {
 
     /**
      * get the path of profile image stored at the server side
+     *
      * @return
      */
     public static String getServerProfileImageFolderBase() {
@@ -95,6 +99,7 @@ public class ConfigURL {
 
     /**
      * get the fuel image process servlet
+     *
      * @return
      */
     public static String getFuelPriceImageProcessServlet() {

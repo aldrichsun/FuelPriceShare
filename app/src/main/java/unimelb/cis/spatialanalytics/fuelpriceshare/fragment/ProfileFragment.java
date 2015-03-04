@@ -7,7 +7,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
@@ -47,6 +46,7 @@ import unimelb.cis.spatialanalytics.fuelpriceshare.http.AppController;
 import unimelb.cis.spatialanalytics.fuelpriceshare.http.CustomRequest;
 import unimelb.cis.spatialanalytics.fuelpriceshare.http.MultiPartRequest;
 import unimelb.cis.spatialanalytics.fuelpriceshare.http.MyExceptionHandler;
+import unimelb.cis.spatialanalytics.fuelpriceshare.others.ImageDecoder;
 import unimelb.cis.spatialanalytics.fuelpriceshare.others.ImagePicker;
 import unimelb.cis.spatialanalytics.fuelpriceshare.others.RandomGenerateUniqueIDs;
 
@@ -75,6 +75,7 @@ public class ProfileFragment extends Fragment {
     private ImageView imageViewProfiePhoto;
 
     private LinearLayout linearLayoutProfilePhoto;
+    private LinearLayout linearLayoutPassword;
     private LinearLayout linearLayoutUsername;
     private LinearLayout linearLayoutFirstName;
     private LinearLayout linearLayoutLastName;
@@ -116,7 +117,7 @@ public class ProfileFragment extends Fragment {
 
     private boolean isModify = false;
     private boolean localFlag = true;
-    private boolean isImageUploadingOrDownloading =false;//if we are uploading profile image to the server, it is set to be true.
+    private boolean isImageUploadingOrDownloading = false;//if we are uploading profile image to the server, it is set to be true.
 
     /**
      * Date picker
@@ -174,6 +175,7 @@ public class ProfileFragment extends Fragment {
 
 
         linearLayoutProfilePhoto = (LinearLayout) rootView.findViewById(R.id.profile_setting_linear_layout_profile_photo);
+        linearLayoutPassword = (LinearLayout) rootView.findViewById(R.id.profile_setting_linear_layout_password);
         linearLayoutUsername = (LinearLayout) rootView.findViewById(R.id.profile_setting_linear_layout_username);
         linearLayoutFirstName = (LinearLayout) rootView.findViewById(R.id.profile_setting_linear_layout_fristname);
         linearLayoutLastName = (LinearLayout) rootView.findViewById(R.id.profile_setting_linear_layout_lastname);
@@ -190,9 +192,24 @@ public class ProfileFragment extends Fragment {
         linearLayoutProfilePhoto.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(!isImageUploadingOrDownloading)
+                if (!isImageUploadingOrDownloading)
                     imagePicker.selectImageBoth();
 
+
+            }
+        });
+
+
+        /**
+         * change password
+         */
+        linearLayoutPassword.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                ////change password
+                String title = "Change Password";
+                profilePasswordEditingPanel(title, -404);//do not need to re-set password in the panel
 
             }
         });
@@ -284,6 +301,77 @@ public class ProfileFragment extends Fragment {
     }
 
 
+    public void profilePasswordEditingPanel(String title, final int resourceID) {
+        //inflate the view
+        LayoutInflater inflater = (LayoutInflater) getActivity().getApplicationContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        /*
+        Initialize the UI component within the layout
+         */
+        LinearLayout layout = (LinearLayout) inflater.inflate(R.layout.dialog_profile_update_password, null);
+        final EditText editText1 = (EditText) layout.findViewById(R.id.profile_setting_edit_password1);
+        final EditText editText2 = (EditText) layout.findViewById(R.id.profile_setting_edit_password2);
+        Button buttonCancel = (Button) layout.findViewById(R.id.profile_setting_edit_button_cancel);
+        Button buttonUpdate = (Button) layout.findViewById(R.id.profile_setting_edit_button_update);
+        final TextView textViewError = (TextView) layout.findViewById(R.id.profile_setting_error);
+
+        textViewError.setText("");
+
+
+        //build the alter dialog, and set the view of layout
+        final AlertDialog dialog = buildProfileUpdateDialog(layout, title);
+
+        //confirm button clicked
+        buttonUpdate.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String str1 = editText1.getText().toString().trim();
+                String str2 = editText2.getText().toString().trim();
+                //field can not be null or empty
+                if (str1 != null && !str1.equals("") && str2 != null && !str2.equals("")) {
+                    /*
+                    Get the modified information, re-set corresponding view values and update user information
+                    by calling modifyUserProfile function.
+                     */
+                    try {
+                        JSONObject jsonObject = Users.getUserJSON();
+                        if (str1.equals(str2)) {
+                            jsonObject.put(Users.KEY_PASSWORD, str1);
+                            isModify = true;
+                            modifyUserProfile(resourceID, jsonObject);
+                            dialog.dismiss();
+                        } else {
+                            textViewError.setText("Two password inputs are not the same!");
+
+
+                        }
+
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        Log.e(TAG, e.toString());
+                        dialog.dismiss();
+                    }
+
+
+                } else {
+                    textViewError.setText("Field can not be empty");
+                }
+
+            }
+        });
+
+        //cancel button clicked
+        buttonCancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+            }
+        });
+
+
+    }
+
+
     /**
      * Set default values for Views
      */
@@ -298,18 +386,21 @@ public class ProfileFragment extends Fragment {
 
 
         if (Users.bitmap != null)
-            imageViewProfiePhoto.setImageBitmap(Users.bitmap);
+            //imageViewProfiePhoto.setImageBitmap(Users.bitmap);
+            imageViewProfiePhoto.setImageBitmap(bitmapProfileImage);
+
         else {
 
             if (Users.profileImage.equals(""))
                 imageViewProfiePhoto.setImageResource(R.drawable.ic_action_picture);
+
             else {
                 /**
                  * Google Volley API to download profile photo from server.
                  * For more detailed information, please refer to the official document by
                  * http://developer.android.com/training/volley/index.html
                  */
-                isImageUploadingOrDownloading =true;
+                isImageUploadingOrDownloading = true;
                 ImageLoader imageLoader = AppController.getInstance().getImageLoader();
 
                 // If you are using normal ImageView
@@ -318,7 +409,7 @@ public class ProfileFragment extends Fragment {
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         Log.e(TAG, "Image Load Error: " + error.getMessage());
-                        isImageUploadingOrDownloading =false;
+                        isImageUploadingOrDownloading = false;
                         // MyExceptionHandler.presentError(TAG,"Can not show profile image",getActivity(),error);
                     }
 
@@ -326,8 +417,10 @@ public class ProfileFragment extends Fragment {
                     public void onResponse(ImageLoader.ImageContainer response, boolean arg1) {
                         if (response.getBitmap() != null) {
                             // load image into imageview
-                            isImageUploadingOrDownloading =false;
-                            imageViewProfiePhoto.setImageBitmap(response.getBitmap());
+                            isImageUploadingOrDownloading = false;
+                            //imageViewProfiePhoto.setImageBitmap(response.getBitmap());
+                            imageViewProfiePhoto.setImageBitmap(Bitmap.createScaledBitmap(response.getBitmap(), ConfigConstant.PROFILE_IMAGE_WIDTH, ConfigConstant.PROFILE_IMAGE_HEIGHT, false));
+
                             Users.bitmap = response.getBitmap();
                         }
                     }
@@ -643,7 +736,7 @@ public class ProfileFragment extends Fragment {
      */
 
     public void uploadProfileImage2Server(String fileName, String stringData) {
-        isImageUploadingOrDownloading =true;
+        isImageUploadingOrDownloading = true;
         // Tag used to cancel the request
         String tag_json_obj = TAG;
 
@@ -651,19 +744,21 @@ public class ProfileFragment extends Fragment {
          * Use google Volley lib to upload an image
          */
 
-        MultiPartRequest multiPartRequest = new MultiPartRequest(ConfigURL.getUploadImageServlet(), new File(profileImagePath), fileName, stringData, new Response.Listener<JSONObject>() {
+        MultiPartRequest multiPartRequest = new MultiPartRequest(ConfigURL.getUploadImageServlet(), bitmapProfileImage /*new File(profileImagePath)*/,fileName, null, stringData, new Response.Listener<JSONObject>() {
 
             @Override
             public void onResponse(JSONObject response) {
                 Log.d(TAG, response.toString());
-                isImageUploadingOrDownloading =false;
+                isImageUploadingOrDownloading = false;
                 if (response.has(ConfigConstant.KEY_ERROR)) {
                     Log.e(TAG, "profile image upload failed!" + response.toString());
 
 
                 } else {
                     //if upload success, update local session
-                    imageViewProfiePhoto.setImageBitmap(bitmapProfileImage);
+                    //imageViewProfiePhoto.setImageBitmap(bitmapProfileImage);
+                    imageViewProfiePhoto.setImageBitmap(Bitmap.createScaledBitmap(bitmapProfileImage, ConfigConstant.PROFILE_IMAGE_WIDTH, ConfigConstant.PROFILE_IMAGE_HEIGHT, false));
+
                     Users.profileImage = Users.tempProfielImageName;
                     Users.tempProfielImageName = "";
 
@@ -678,7 +773,7 @@ public class ProfileFragment extends Fragment {
 
             @Override
             public void onErrorResponse(VolleyError error) {
-                isImageUploadingOrDownloading =false;
+                isImageUploadingOrDownloading = false;
                 MyExceptionHandler.presentError(TAG, "Update profile image failed!", getActivity(), error);
 
             }
@@ -713,19 +808,16 @@ public class ProfileFragment extends Fragment {
                      */
                     File imageFile = imagePicker.getImageFile();
                     profileImagePath = imageFile.getAbsolutePath();
-                    bitmapProfileImage = BitmapFactory.decodeFile(profileImagePath);
-                    // imageViewProfiePhoto.setImageBitmap(bitmapProfileImage);
+                    //compress the image
+                    bitmapProfileImage = ImageDecoder.decodeSampledBitmapFromFile(imageFile, ConfigConstant.PROFILE_IMAGE_WIDTH, ConfigConstant.PROFILE_IMAGE_HEIGHT);
+                    bitmapProfileImage=ImageDecoder.rotateImage(bitmapProfileImage,imageFile.getAbsolutePath());
+                    bitmapProfileImage=ImageDecoder.createScaledBitmap(bitmapProfileImage,ConfigConstant.IMAGE_TYPE_PROFILE);
+
                     fileName = RandomGenerateUniqueIDs.getFileName("png");
 
                     data = Users.getUserJSONForImageUpload(ConfigURL.getServerProfileImageFolderBase() + fileName).toString();
                     uploadProfileImage2Server(fileName, data);
 
-                       /*
-                       //Another method defined by Han. Not encourage to use.
-                        Users.profileImage = ConfigURL.getImagePathBase() + fileName;
-                        data = Users.getUserJSON().toString();
-                        new ImageUploader(imageUploaderReply, bitmapProfileImage, data, REQUEST_CODE_IMAGE_UPLOAD, fileName, null);
-                        */
 
                     break;
                 case SELECT_FILE:
@@ -733,23 +825,16 @@ public class ProfileFragment extends Fragment {
                     Get the image captured by selecting local file
                      */
                     if (intent != null) {
+                        bitmapProfileImage = ImageDecoder.decodeSampledBitmapFromUri(getActivity(), intent.getData(), ConfigConstant.PROFILE_IMAGE_WIDTH, ConfigConstant.PROFILE_IMAGE_HEIGHT);
                         profileImagePath = imagePicker.getImagePath(intent.getData());
-                        bitmapProfileImage = BitmapFactory.decodeFile(profileImagePath);
-                        // imageViewProfiePhoto.setImageBitmap(bitmapProfileImage);
+
+                        bitmapProfileImage=ImageDecoder.createScaledBitmap(bitmapProfileImage,ConfigConstant.IMAGE_TYPE_PROFILE);
 
                         fileName = RandomGenerateUniqueIDs.getFileName("png");
 
                         data = Users.getUserJSONForImageUpload(ConfigURL.getServerProfileImageFolderBase() + fileName).toString();
                         uploadProfileImage2Server(fileName, data);
 
-
-
-                       /*
-                       //Another method defined by Han. Not encourage to use.
-                        Users.profileImage = ConfigURL.getImagePathBase() + fileName;
-                        data = Users.getUserJSON().toString();
-                        new ImageUploader(imageUploaderReply, bitmapProfileImage, data, REQUEST_CODE_IMAGE_UPLOAD, fileName, null);
-                        */
                     } else {
                         Log.e(TAG, "No image file is selected");
                     }
@@ -848,6 +933,8 @@ public class ProfileFragment extends Fragment {
                     str = userJson.getString(Users.KEY_GENDER);
                     textViewGender.setText(str);
                     Users.gender = str;
+                    break;
+                default:
                     break;
             }
         } catch (JSONException e) {

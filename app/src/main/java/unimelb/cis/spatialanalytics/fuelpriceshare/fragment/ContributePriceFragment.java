@@ -36,7 +36,6 @@ import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Response;
 import com.android.volley.RetryPolicy;
 import com.android.volley.VolleyError;
-import com.soundcloud.android.crop.Crop;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -50,12 +49,14 @@ import java.util.Map;
 import unimelb.cis.spatialanalytics.fuelpriceshare.R;
 import unimelb.cis.spatialanalytics.fuelpriceshare.config.ConfigConstant;
 import unimelb.cis.spatialanalytics.fuelpriceshare.config.ConfigURL;
+import unimelb.cis.spatialanalytics.fuelpriceshare.cropimage.Crop;
 import unimelb.cis.spatialanalytics.fuelpriceshare.data.FuelData;
 import unimelb.cis.spatialanalytics.fuelpriceshare.data.Users;
 import unimelb.cis.spatialanalytics.fuelpriceshare.http.AppController;
 import unimelb.cis.spatialanalytics.fuelpriceshare.http.CustomRequest;
 import unimelb.cis.spatialanalytics.fuelpriceshare.http.MultiPartRequest;
 import unimelb.cis.spatialanalytics.fuelpriceshare.http.MyExceptionHandler;
+import unimelb.cis.spatialanalytics.fuelpriceshare.others.ImageDecoder;
 import unimelb.cis.spatialanalytics.fuelpriceshare.others.ImagePicker;
 import unimelb.cis.spatialanalytics.fuelpriceshare.others.RandomGenerateUniqueIDs;
 import unimelb.cis.spatialanalytics.fuelpriceshare.views.CustermizedCanvasView;
@@ -148,7 +149,6 @@ public class ContributePriceFragment extends Fragment implements DialogInterface
         textViewLabel = (TextView) rootView.findViewById(R.id.do_refine_txtLabel);
         imageViewFuel = (ImageView) rootView.findViewById(R.id.do_refine_image_fuel);
 
-
         imageViewTakePhoto.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -240,13 +240,11 @@ public class ContributePriceFragment extends Fragment implements DialogInterface
                 @Override
                 public void onResponse(JSONObject response) {
                     Log.d(TAG, response.toString());
-                    if (response.has(ConfigConstant.KEY_ERROR))
-                    {
-                        Log.e(TAG, "Upload Failed!"+response.toString());
-                        Toast.makeText(getActivity(), "Upload Failed!"+response.toString(), Toast.LENGTH_SHORT).show();
+                    if (response.has(ConfigConstant.KEY_ERROR)) {
+                        Log.e(TAG, "Upload Failed!" + response.toString());
+                        Toast.makeText(getActivity(), "Upload Failed!" + response.toString(), Toast.LENGTH_SHORT).show();
 
-                    }
-                    else {
+                    } else {
                         Log.d(TAG, "Upload Refined Result to Server : Success");
                         /**
                          * Update the views and clean the data for later use
@@ -304,7 +302,7 @@ public class ContributePriceFragment extends Fragment implements DialogInterface
 
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                Log.d(TAG,"Selecting : " + which);
+                                Log.d(TAG, "Selecting : " + which);
                                 selectedStationID = which;
 
                             }
@@ -465,6 +463,8 @@ public class ContributePriceFragment extends Fragment implements DialogInterface
     public void onActivityResult(int requestCode, int resultCode, Intent intent) {
         super.onActivityResult(requestCode, resultCode, intent);
         String imagePath, data, filename;
+        Uri uri;//get the uri of the image
+        Bitmap bitmap;
         if (resultCode == getActivity().RESULT_OK) {
 
             switch (requestCode) {
@@ -474,7 +474,15 @@ public class ContributePriceFragment extends Fragment implements DialogInterface
                      */
 
                     File imageFile = imagePicker.getImageFile();
-                    Uri uri = Uri.fromFile(imageFile);
+
+                    //compress the image
+                    bitmap = ImageDecoder.decodeSampledBitmapFromFile(imageFile, ConfigConstant.MAX_IMAGE_WIDTH, ConfigConstant.MAX_IMAGE_HEIGHT);
+                    bitmap=ImageDecoder.rotateImage(bitmap,imageFile.getAbsolutePath());
+                    bitmap=ImageDecoder.createScaledBitmap(bitmap,ConfigConstant.IMAGE_TYPE_FUEL);
+
+
+                    uri = ImageDecoder.getImageUri(getActivity(), bitmap);
+                    //Uri uri = Uri.fromFile(imageFile);
                     cropImage(uri);
                     //imageFile.delete();
 
@@ -487,7 +495,12 @@ public class ContributePriceFragment extends Fragment implements DialogInterface
                      */
                     if (intent != null) {
 
-                        cropImage(intent.getData());
+                        //compress image
+                        bitmap = ImageDecoder.decodeSampledBitmapFromUri(getActivity(), intent.getData(), ConfigConstant.MAX_IMAGE_WIDTH, ConfigConstant.MAX_IMAGE_HEIGHT);
+                        bitmap=ImageDecoder.createScaledBitmap(bitmap,ConfigConstant.IMAGE_TYPE_FUEL);
+
+                        uri = ImageDecoder.getImageUri(getActivity(), bitmap);
+                        cropImage(uri);
 
                     } else {
                         Log.e(TAG, "No image file is selected");
@@ -510,7 +523,7 @@ public class ContributePriceFragment extends Fragment implements DialogInterface
                             bitmapUpload = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), imageUri);
                             filename = RandomGenerateUniqueIDs.getFuelPriceImageName("png");
                             transactionID = RandomGenerateUniqueIDs.getUniqueID();
-                            data = fuelData.getUploadDataInfo(transactionID);
+                            data = fuelData.getUploadDataInfo(transactionID, getActivity());
 
                             /*
                             upload the image to the server to process
@@ -534,21 +547,20 @@ public class ContributePriceFragment extends Fragment implements DialogInterface
 
                                     if (!response.has(ConfigConstant.KEY_ERROR)) {
 
-                                            pDialog.dismiss();
-                                            //Image was successfully uploaded to the server
-                                            fuelData.parseFuelPriceImageReplyData(response);
-                                            isEditingView = true;
-                                            switchViews(true);
-                                            //The view image might be scaled up to fill the entire view. for more detailed info, please refer
-                                            //the website: https://guides.codepath.com/android/Working-with-the-ImageView
-                                            //imageViewFuel.setImageBitmap(bitmapUpload);
+                                        pDialog.dismiss();
+                                        //Image was successfully uploaded to the server
+                                        fuelData.parseFuelPriceImageReplyData(response);
+                                        isEditingView = true;
+                                        switchViews(true);
+                                        //The view image might be scaled up to fill the entire view. for more detailed info, please refer
+                                        //the website: https://guides.codepath.com/android/Working-with-the-ImageView
+                                        //imageViewFuel.setImageBitmap(bitmapUpload);
 
-                                            /**
-                                             * Initialize canvas view and update current view
-                                             */
-                                            canvasView = new CustermizedCanvasView(getActivity(), bitmapUpload);
-                                            updateCanvasView();
-
+                                        /**
+                                         * Initialize canvas view and update current view
+                                         */
+                                        canvasView = new CustermizedCanvasView(getActivity(), bitmapUpload);
+                                        updateCanvasView();
 
 
                                     } else {
@@ -891,12 +903,14 @@ public class ContributePriceFragment extends Fragment implements DialogInterface
         linearLayout.setOrientation(LinearLayout.VERTICAL);
 
         final NumberPicker numberPicker = (NumberPicker) linearLayout.findViewById(R.id.numberPicker);
-
-        setNumberPickerTextColor(numberPicker, Color.WHITE);//set the text color to be white
+        numberPicker.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
         numberPicker.setMinValue(0);
         numberPicker.setMaxValue(fuelData.getAllFuelTypeList().size() - 1);
-        if (index >= 0)
+
+        if (index >= 0) {
             numberPicker.setValue(index);
+
+        }
 
 
         numberPicker.setFormatter(new NumberPicker.Formatter() {
@@ -907,6 +921,8 @@ public class ContributePriceFragment extends Fragment implements DialogInterface
                 return fuelData.getAllFuelTypeList().get(value);
             }
         });
+        setNumberPickerTextColor(numberPicker, Color.WHITE);//set the text color to be white
+
 
         Button buttonCancel = (Button) linearLayout.findViewById(R.id.button_cancel);
         Button buttonDone = (Button) linearLayout.findViewById(R.id.button_done);

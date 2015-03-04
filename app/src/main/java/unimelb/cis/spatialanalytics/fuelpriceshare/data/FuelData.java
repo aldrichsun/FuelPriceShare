@@ -1,6 +1,6 @@
 package unimelb.cis.spatialanalytics.fuelpriceshare.data;
 
-import android.location.Location;
+import android.content.Context;
 import android.util.Log;
 
 import org.json.JSONArray;
@@ -10,7 +10,6 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 
 import unimelb.cis.spatialanalytics.fuelpriceshare.config.ConfigConstant;
-import unimelb.cis.spatialanalytics.fuelpriceshare.maps.myLocation.MyLocation;
 
 /**
  * Created by hanl4 on 29/01/2015.
@@ -59,15 +58,31 @@ public class FuelData {
      * @param transactionID the transaction id of the action of  contributing price
      * @return JSONObject but encoded in String format
      */
-    public String getUploadDataInfo(String transactionID) {
+    public String getUploadDataInfo(String transactionID,Context context) {
         try {
             final String KEY_ID = "id";
             JSONObject json = new JSONObject();
             json.put(ConfigConstant.KEY_CONTRIBUTE_PRICE_TRANSACTION_ID, transactionID);
             json.put(ConfigConstant.KEY_UID, Users.id);
-            Location currentLocation = MyLocation.getMyLocation();
+
+            GPSTracker gps = new GPSTracker(context);
+            if(gps.canGetLocation()) {
+                json.put(ConfigConstant.KEY_CAN_GET_LOCATION,true);
+                json.put(ConfigConstant.KEY_LATITUDE, gps.getLatitude());
+                json.put(ConfigConstant.KEY_LONGITUDE, gps.getLongitude());
+            }else
+            {
+                json.put(ConfigConstant.KEY_CAN_GET_LOCATION,false);
+                json.put(ConfigConstant.KEY_LATITUDE, gps.getLatitude());
+                json.put(ConfigConstant.KEY_LONGITUDE, gps.getLongitude());
+
+            }
+
+
+            //BY SUN YU
+          /*  Location currentLocation = new MyLocation(context).getMyLocation();
             json.put(ConfigConstant.KEY_LATITUDE, currentLocation.getLatitude());
-            json.put(ConfigConstant.KEY_LONGITUDE, currentLocation.getLongitude());
+            json.put(ConfigConstant.KEY_LONGITUDE, currentLocation.getLongitude());*/
             return json.toString();
         } catch (JSONException e) {
             Log.e(TAG, e.toString());

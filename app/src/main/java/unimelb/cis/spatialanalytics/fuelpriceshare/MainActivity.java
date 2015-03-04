@@ -4,22 +4,18 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
-import android.location.LocationManager;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBar;
+import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBarDrawerToggle;
-
 import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
@@ -28,9 +24,6 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
-import unimelb.cis.spatialanalytics.fuelpriceshare.R;
-import unimelb.cis.spatialanalytics.fuelpriceshare.config.ConfigConstant;
-import unimelb.cis.spatialanalytics.fuelpriceshare.data.UserCookie;
 import unimelb.cis.spatialanalytics.fuelpriceshare.fragment.ContributePriceFragment;
 import unimelb.cis.spatialanalytics.fuelpriceshare.fragment.MapFragment;
 import unimelb.cis.spatialanalytics.fuelpriceshare.fragment.PathFragment;
@@ -163,8 +156,7 @@ public class MainActivity extends ActionBarActivity {
 
     private void setUpCurrentLocation(){
         // Get LocationManager object from System Service LOCATION_SERVICE
-        myLocation = new MyLocation((LocationManager)
-                getSystemService(Context.LOCATION_SERVICE));
+        myLocation = new MyLocation(this);
     }
 
     @Override

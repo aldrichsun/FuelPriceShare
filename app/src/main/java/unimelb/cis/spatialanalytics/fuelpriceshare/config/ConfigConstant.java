@@ -41,6 +41,7 @@ public class ConfigConstant {
     public static final String KEY_CONTRIBUTE_PRICE_TRANSACTION_ID="transaction_id";
     public static final String KEY_LONGITUDE="longitude";
     public static final String KEY_LATITUDE="latitude";
+    public static final String KEY_CAN_GET_LOCATION="can_get_location";
 
 
     /*
@@ -127,6 +128,32 @@ public class ConfigConstant {
      * DecimalFormat for NumberPicker
      */
     public static final String KEY_DecimalFormat="000.0";
+
+
+    /**
+     * Define the maximum width and height of an image
+     */
+    public static final int MAX_IMAGE_WIDTH=1024;
+    public static final int MAX_IMAGE_HEIGHT=1024;
+
+    /**
+     * Define the size of profile image presented in Image View
+     */
+    public static final int PROFILE_IMAGE_WIDTH=800;
+    public static final int PROFILE_IMAGE_HEIGHT=800;
+
+    /**
+     * Image type
+     */
+    public static final String IMAGE_TYPE_PROFILE="profile_image";
+    public static final String IMAGE_TYPE_FUEL="fuel_image";
+
+
+    /**
+     * Minimal size of crop rectangle
+     */
+    public static final int MIN_CROP_RECT_WIDTH=200;
+    public static final int MIN_CROP_RECT_HEIGHT=200;
 
 
 }

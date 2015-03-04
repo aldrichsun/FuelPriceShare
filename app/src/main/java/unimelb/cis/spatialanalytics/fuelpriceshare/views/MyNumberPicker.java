@@ -42,8 +42,9 @@ public class MyNumberPicker {
             nps[i] = (NumberPicker) inflater.inflate(R.layout.my_numberpicker, null);
             //nps[i] = new NumberPicker(context);
             //nps[i].setLayoutParams(params);
-            nps[i].setScaleX(0.95f);//set 0.0-1.0
-            nps[i].setScaleY(0.95f);//set 0.0-1.0
+            nps[i].setScaleX(1f);
+            nps[i].setScaleY(1f);
+            nps[i].setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
 
 
         }

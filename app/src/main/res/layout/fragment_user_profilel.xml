@@ -31,6 +31,7 @@
                     android:layout_height="@dimen/profile_setting_profile_image_height"
                     android:src="@drawable/ic_action_picture"
                     android:layout_gravity="center"
+                    android:padding="15dp"
 
                     android:id="@+id/profile_setting_profile_image" />
 
@@ -56,6 +57,20 @@
 
             </LinearLayout>
 
+
+            <View style="@style/Divider" />
+
+            <LinearLayout
+                style="@style/profile_setting_subLinearLayout"
+                android:id="@+id/profile_setting_linear_layout_password">
+
+                <TextView
+                    android:text="Change Password"
+                    style="@style/profile_setting_left_text_field_names" />
+                <ImageView style="@style/profile_setting_right_edit_image_icon" />
+
+            </LinearLayout>
+
             <View style="@style/Divider" />
 
             <LinearLayout
@@ -63,7 +78,7 @@
                 android:id="@+id/profile_setting_linear_layout_username">
 
                 <TextView
-                    android:text="Username"
+                    android:text="Display Name"
                     style="@style/profile_setting_left_text_field_names" />
 
                 <TextView
@@ -174,6 +189,8 @@
 
             </LinearLayout>
 
+
+
             <View style="@style/Buttom_Devider" />
 
             <LinearLayout
@@ -184,12 +201,12 @@
                 <Button
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
-                    android:text="Logout Me"
+                    android:text="Logout"
                     android:textSize="20dip"
                     android:textColor="#21dbd4"
                     android:textStyle="bold"
                     android:id="@+id/btnLogout"
-                    android:layout_marginTop="80dip"
+                    android:layout_marginTop="20dip"
                     android:background="@color/material_blue_grey_800" />
 
 
