@@ -35,6 +35,7 @@ import unimelb.cis.spatialanalytics.fuelpriceshare.settings.SettingsActivity;
 
 /**
  * Created by Yu Sun on 17/02/2015.
+ * We release the prototype 1.0 on 04/03/2015.
  */
 public class MainActivity extends ActionBarActivity {
 
