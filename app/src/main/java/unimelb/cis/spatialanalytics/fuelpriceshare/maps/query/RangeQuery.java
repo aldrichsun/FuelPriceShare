@@ -16,7 +16,6 @@ import unimelb.cis.spatialanalytics.fuelpriceshare.config.URLConstant;
 import unimelb.cis.spatialanalytics.fuelpriceshare.http.ServerRequest;
 
 /**
- * TODO Improve the server and client API document, especially on handling exceptions and errors.
  * Created by Yu Sun on 30/01/2015.
  * Sample query:
  * http://128.250.26.229:8080/FuelPriceSharingServer/RangeQueryServlet?lng=144.9614&lat=-37.7963&r_dist=2
@@ -25,9 +24,15 @@ import unimelb.cis.spatialanalytics.fuelpriceshare.http.ServerRequest;
  * is centered at the query point and has a radius equals the range radius.
  *
  * Input: Query point -- LatLng, Range radius -- Double
- * Output: 1. A Json array contains all the stations -- Json array.
- *         2. When there are internal server errors, return null. TODO implement this
- *         3. When there are no stations within the range, return an empty Json array.
+ * Output:
+ *         1. A json object containing the fuel stations in the range whose key is the
+ *         table name and value is the fuel stations in a json array, i.e.,
+ *              {"table_name (fuel_station)":["list of points (fuel stations)"]};
+ *         2. if there are no fuel stations in the range, the json array is empty;
+ *         3. json object {"error":3001} if the user doesn't have sufficient credit.
+ *         4. json object {"error":3002} if internal DB error occurs in the process.
+ *         5. null, if any error occurs on the mobile end mostly due to internet failure
+ *
  *         Note: the json format of each station follows the data model design.
  *
  */
@@ -41,6 +46,7 @@ public class RangeQuery {
     private final String LAT_PARAM = "lat"; // Parameter latitude name
     private final String LNG_PARAM = "lng"; // Parameter longitude name
     private final String DIST_PARAM = "r_dist"; // Parameter range distance name
+    private final String USER_PARAM = "user_id"; // Parameter user id
 
     /**
      * Default constructor
@@ -49,24 +55,30 @@ public class RangeQuery {
     }
 
     /**
-     * Return all the points (fuel stations) in the circle that is centered at queryPoint
+     * This function returns all the points (fuel stations) in the circle that is centered at queryPoint
      * and has a radius of rangeDist.
      * @param queryPoint -- the query point
      * @param rangeDist -- the range distance
-     * @return 1. A Json array contains all the stations -- Json array.
-     *         2. When there is any error on this mobile (such as internet connection errors),
-     *         return null. TODO implement this
-     *         3. When there are no stations within the range, return an empty Json array.
+     * @param userId -- the user id
+     * @return
+     *         1. A json object containing the fuel stations in the range whose key is the
+     *         table name and value is the fuel stations in a json array, i.e.,
+     *         {"table_name (fuel_station)":["list of points (fuel stations)"]};
+     *         2. If there are no fuel stations in the range, the json array is empty;
+     *         3. json object {"error":3001} if the user doesn't have sufficient credit.
+     *         4. json object {"error":3002} if internal DB error occurs in the process;
+     *         5. null, if any error occurs on the mobile end mostly due to internet failure
      *
      *         Note: the json format of each station follows the data model design.
      */
-    public JSONArray executeQuery(LatLng queryPoint, Double rangeDist){
+    public JSONObject executeQuery(LatLng queryPoint, Double rangeDist, String userId){
 
         // Build the query URL
         Uri builtUri = Uri.parse(QUERY_BASE_URL).buildUpon()
                 .appendQueryParameter(LAT_PARAM, String.valueOf(queryPoint.latitude))
                 .appendQueryParameter(LNG_PARAM, String.valueOf(queryPoint.longitude))
                 .appendQueryParameter(DIST_PARAM, String.valueOf(rangeDist))
+                .appendQueryParameter(USER_PARAM, userId)
                 .build();
 
         URL url = null;
@@ -82,27 +94,20 @@ public class RangeQuery {
         String res = serverRequest.getResponse(url);
         Log.v(LOG_TAG, "done!");
         if( res == null || res.isEmpty() ){
-            Log.e(LOG_TAG, "Error getting results from server");
+            Log.e(LOG_TAG, "Error getting results from server, which may caused by internet failure");
             return null;
         }
 
-        // res is not null, so we try to parse.
-        // If the query result is empty, the server returns a JSON object with
-        // an empty JSON array.
-        /* TODO Currently, if there are some internal server errors, the server still
-        returns a JSON object with an empty JSON array, which is unacceptable and
-        needs improvement.*/
-
-        JSONArray jsonArray = null;
+        JSONObject jsonObject = null;
         try {
-            JSONObject jsonObject = new JSONObject(res);
-            jsonArray = jsonObject.getJSONArray(this.TABLE_NAME);
+            jsonObject = new JSONObject(res);
         } catch (JSONException e) {
-            Log.e(LOG_TAG, "Error when parsing json array string: " + res, e);
+            Log.e(LOG_TAG, "Error when parsing json array string: " + res +
+                    ", which may caused by internet failure", e);
             return null;
         }
 
-        return jsonArray;
+        return jsonObject;
     }
 
 }

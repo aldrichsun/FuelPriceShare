@@ -35,8 +35,9 @@ public class Users {
     public static String fbId = "";
     public static String whatup = "";
     public static String password = "";
+    public static int credit = 0;
 
-    public static String tempProfielImageName="";
+    public static String tempProfielImageName = "";
 
     private static final String TAG = "Users";
 
@@ -57,6 +58,7 @@ public class Users {
     public static final String KEY_BITMAP = "bitmap";
     public static final String KEY_WHATUP = "whatup";
     public static final String KEY_PASSWORD = "password";
+    public static final String KEY_CREDIT = "credit";
 
 
     /**
@@ -86,18 +88,34 @@ public class Users {
 
     public static void mapJson(JSONObject json) {
         try {
-            id = json.getString(KEY_ID);
-            fbId = json.getString(KEY_FBID);
-            profileImage = json.getString(KEY_PROFILEIMAGE);
-            gender = json.getString(KEY_GENDER);
-            firstName = json.getString(KEY_FIRST_NAME);
-            lastName = json.getString(KEY_LAST_NAME);
-            middleName = json.getString(KEY_MIDDLE_NAME);
-            userName = json.getString(KEY_USERNAME);
-            email = json.getString(KEY_EMAIL);
-            phone = json.getString(KEY_PHONE);
-            birth = json.getString(KEY_BIRTH);
-            whatup = json.getString(KEY_WHATUP);
+            if (json.has(KEY_ID))
+                id = json.getString(KEY_ID);
+            if (json.has(KEY_FBID))
+                fbId = json.getString(KEY_FBID);
+            if (json.has(KEY_PROFILEIMAGE))
+                profileImage = json.getString(KEY_PROFILEIMAGE);
+            if (json.has(KEY_GENDER))
+                gender = json.getString(KEY_GENDER);
+            if (json.has(KEY_FIRST_NAME))
+                firstName = json.getString(KEY_FIRST_NAME);
+            if (json.has(KEY_LAST_NAME))
+                lastName = json.getString(KEY_LAST_NAME);
+            if (json.has(KEY_MIDDLE_NAME))
+                middleName = json.getString(KEY_MIDDLE_NAME);
+            if (json.has(KEY_USERNAME))
+                userName = json.getString(KEY_USERNAME);
+            if (json.has(KEY_EMAIL))
+                email = json.getString(KEY_EMAIL);
+            if (json.has(KEY_PHONE))
+                phone = json.getString(KEY_PHONE);
+            if (json.has(KEY_BIRTH))
+                birth = json.getString(KEY_BIRTH);
+            if (json.has(KEY_WHATUP))
+                whatup = json.getString(KEY_WHATUP);
+            if (json.has(KEY_CREDIT))
+                credit = json.getInt(KEY_CREDIT);
+            else
+                Log.i(TAG, "JSON missing the field of KEY_CREDIT");
             //please notice that, it the user was registered by facebook login, he or she probably doesn't have the field
             //of password
             if (json.has(KEY_PASSWORD))
@@ -113,6 +131,7 @@ public class Users {
 
     /**
      * Get user JSONObject
+     *
      * @return
      */
 
@@ -132,6 +151,7 @@ public class Users {
             json.put(KEY_PROFILEIMAGE, profileImage);
             json.put(KEY_WHATUP, whatup);
             json.put(KEY_PASSWORD, password);
+            json.put(KEY_CREDIT, credit);
 
             //     json.put(KEY_BITMAP,bitmap);
 
@@ -145,12 +165,13 @@ public class Users {
 
     /**
      * Get user JSONObject for uploading image to the server
+     *
      * @param profileImageTemp profile image name
      * @return JSONObject
      */
     public static JSONObject getUserJSONForImageUpload(String profileImageTemp) {
 
-        tempProfielImageName=profileImageTemp;
+        tempProfielImageName = profileImageTemp;
 
         JSONObject json = new JSONObject();
         try {
@@ -167,6 +188,7 @@ public class Users {
             json.put(KEY_PROFILEIMAGE, profileImageTemp);
             json.put(KEY_WHATUP, whatup);
             json.put(KEY_PASSWORD, password);
+            json.put(KEY_CREDIT, credit);
 
             //     json.put(KEY_BITMAP,bitmap);
 
@@ -176,7 +198,6 @@ public class Users {
         return json;
 
     }
-
 
 
     /**
@@ -200,6 +221,7 @@ public class Users {
             json.put(KEY_BIRTH, birth);
             json.put(KEY_PROFILEIMAGE, profileImage);
             json.put(KEY_WHATUP, whatup);
+            json.put(KEY_CREDIT, credit);
 
 
         } catch (JSONException e) {
@@ -233,18 +255,32 @@ public class Users {
 
         try {
             JSONObject json = new JSONObject(user);
+            if (json.has(KEY_ID))
             id = json.getString(KEY_ID);
-            fbId = json.getString(KEY_FBID);
-            profileImage = json.getString(KEY_PROFILEIMAGE);
-            gender = json.getString(KEY_GENDER);
-            firstName = json.getString(KEY_FIRST_NAME);
-            lastName = json.getString(KEY_LAST_NAME);
-            middleName = json.getString(KEY_MIDDLE_NAME);
-            userName = json.getString(KEY_USERNAME);
-            email = json.getString(KEY_EMAIL);
-            phone = json.getString(KEY_PHONE);
-            birth = json.getString(KEY_BIRTH);
-            whatup = json.getString(KEY_WHATUP);
+            if (json.has(KEY_FBID))
+                fbId = json.getString(KEY_FBID);
+            if (json.has(KEY_PROFILEIMAGE))
+                profileImage = json.getString(KEY_PROFILEIMAGE);
+            if (json.has(KEY_GENDER))
+                gender = json.getString(KEY_GENDER);
+            if (json.has(KEY_FIRST_NAME))
+                firstName = json.getString(KEY_FIRST_NAME);
+            if (json.has(KEY_LAST_NAME))
+                lastName = json.getString(KEY_LAST_NAME);
+            if (json.has(KEY_MIDDLE_NAME))
+                middleName = json.getString(KEY_MIDDLE_NAME);
+            if (json.has(KEY_MIDDLE_NAME))
+                userName = json.getString(KEY_USERNAME);
+            if (json.has(KEY_EMAIL))
+                email = json.getString(KEY_EMAIL);
+            if (json.has(KEY_PHONE))
+                phone = json.getString(KEY_PHONE);
+            if (json.has(KEY_BIRTH))
+                birth = json.getString(KEY_BIRTH);
+            if (json.has(KEY_WHATUP))
+                whatup = json.getString(KEY_WHATUP);
+            if (json.has(KEY_CREDIT))
+                credit = json.getInt(KEY_CREDIT);
 
         } catch (JSONException e) {
             e.printStackTrace();
@@ -267,10 +303,11 @@ public class Users {
         phone = "";
         gender = "";
         birth = "";
-        profileImage ="";
+        profileImage = "";
         bitmap = null;
         fbId = "";
         whatup = "";
         password = "";
+        credit=0;
     }
 }

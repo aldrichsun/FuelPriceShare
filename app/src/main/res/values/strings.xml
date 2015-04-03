@@ -34,6 +34,7 @@
     <string name="column_fuel">fuel_name</string>
     <string name="column_price">price</string>
     <string name="column_station_name">name</string>
+    <string name="column_station_short_name">short_name</string>
     <string name="title_activity_path">PathActivity</string>
     <string name="route_button">Route</string>
     <string name="origin_autoComplete_hint">Enter your origin here</string>
@@ -47,7 +48,7 @@
     <string name="APP_ID">1589475934622660</string>
 
     <!-- for my location -->
-    <string name="Your_location">Current location</string>
+    <string name="Your_location">Current Location</string>
 
 
     <!--CROP IMAGE-->

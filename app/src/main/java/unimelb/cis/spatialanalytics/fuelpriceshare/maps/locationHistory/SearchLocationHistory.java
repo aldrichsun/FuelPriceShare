@@ -73,7 +73,7 @@ public class SearchLocationHistory {
             JSONObject jsonObj = new JSONObject(res);
             if( jsonObj.optString(
                     LOCATION_HISTORY_COLUMN_LOCATION_HISTORY ).equals(ERROR_VALUE) ){
-                return null;
+                return result;
             }
             //else we have gotten the address in a json array
             JSONArray jsonArray = jsonObj.getJSONArray(LOCATION_HISTORY_COLUMN_LOCATION_HISTORY);

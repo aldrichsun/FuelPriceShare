@@ -8,16 +8,16 @@ package unimelb.cis.spatialanalytics.fuelpriceshare.config;
 public class ConfigURL {
 
 
-    private static String ip = "http://128.250.26.229";//server IP address
-    private static String tomPort = "8080";//Tomcat port number
+    //private static String ip = "http://128.250.26.229";//server IP address
+    //private static String tomPort = "8080";//Tomcat port number
 
-    /*private static String ip="http://spatialanalytics.cis.unimelb.edu.au";
-    private static String tomPort="8082";*/
+    private static String ip="http://spatialanalytics.cis.unimelb.edu.au";
+    private static String tomPort="8082";
 
-/*    private static String ip = "http://128.250.26.52";
-    private static String tomPort = "8080";*/
+    //private static String ip = "http://128.250.26.52";
+    //private static String tomPort = "8080";
 
-    private static String serverProject = "FuelPriceShare";//server project name
+    private static String serverProject = "FuelPriceShareServer";//server project name
 
     private static String couchDBServlet = "CouchDBHandlerServlet";//talk to CouchDB servlet
 
@@ -29,6 +29,10 @@ public class ConfigURL {
     private static String fuelPriceImageProcessServlet = "FuelPriceImageProcessServlet";//process fuel image servlet
     private static String uploadRefinedResultServlet = "UploadRefinedResultServlet";//upload refined fuel information servlet
 
+    /************** Added by Yu Sun 02/04/2015 ****************/
+    private static String rangeQueryServlet = "RangeQueryServlet"; //process range query
+    private static String pathQueryServlet = "PathQueryServlet"; //process path query
+    private static String locationHistoryServlet = "LocationHistoryServlet"; //retrieve and record location history
 
     /**
      * get upload refined fuel information servlet
@@ -105,6 +109,19 @@ public class ConfigURL {
     public static String getFuelPriceImageProcessServlet() {
         return ip + ":" + tomPort + "/" + serverProject + "/" + fuelPriceImageProcessServlet;
 
+    }
+
+    /************** Added by Yu Sun 02/04/2015 ****************/
+    public static String getRangeQueryServlet() {
+        return ip + ":" + tomPort + "/" + serverProject + "/" + rangeQueryServlet;
+    }
+
+    public static String getPathQueryServlet() {
+        return ip + ":" + tomPort + "/" + serverProject + "/" + pathQueryServlet;
+    }
+
+    public static String getLocationHistoryServlet() {
+        return ip + ":" + tomPort + "/" + serverProject + "/" + locationHistoryServlet;
     }
 
 

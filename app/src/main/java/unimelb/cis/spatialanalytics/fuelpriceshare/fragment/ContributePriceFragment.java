@@ -17,6 +17,7 @@ import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -213,9 +214,17 @@ public class ContributePriceFragment extends Fragment implements DialogInterface
         JSONObject userJson = Users.getUserJSONWithoutPassword();
         try {
             json.put(ConfigConstant.KEY_CONTRIBUTE_PRICE_TRANSACTION_ID, transactionID);
-            json.put(ConfigConstant.KEY_USER, userJson);
+            json.put(ConfigConstant.KEY_USER, Users.id);
+            json.put(ConfigConstant.KEY_LATITUDE,fuelData.getLatitude());
+            json.put(ConfigConstant.KEY_LONGITUDE,fuelData.getLongitude());
+          /*
             json.put(ConfigConstant.KEY_FUEL, fuelData.getFuelJsonList());
             json.put(ConfigConstant.KEY_PETROL_STATION, fuelData.getPetrolStationsJsonList().size() > 0 ? fuelData.getPetrolStationsJsonList().get(selectedStationID) : fuelData.getPetrolStationsJsonList());
+           */
+
+            json.put(ConfigConstant.KEY_FUEL, fuelData.getFuelJsonArray());
+            json.put(ConfigConstant.KEY_PETROL_STATION, fuelData.getPetrolStationsJsonList().size() > 0 ? fuelData.getPetrolStationsJsonList().get(selectedStationID) : fuelData.getFuelJsonArray());
+
 
             /**
              * User Volley API developed by Google to handle the request!
@@ -242,7 +251,8 @@ public class ContributePriceFragment extends Fragment implements DialogInterface
                     Log.d(TAG, response.toString());
                     if (response.has(ConfigConstant.KEY_ERROR)) {
                         Log.e(TAG, "Upload Failed!" + response.toString());
-                        Toast.makeText(getActivity(), "Upload Failed!" + response.toString(), Toast.LENGTH_SHORT).show();
+                        if (getActivity() != null)
+                            Toast.makeText(getActivity(), "Upload Failed!" + response.toString(), Toast.LENGTH_SHORT).show();
 
                     } else {
                         Log.d(TAG, "Upload Refined Result to Server : Success");
@@ -251,10 +261,13 @@ public class ContributePriceFragment extends Fragment implements DialogInterface
                          */
                         isEditingView = false;
                         switchViews(false);
-
-                        Toast.makeText(getActivity(), "Upload Success!", Toast.LENGTH_SHORT).show();
-
-
+                        if (getActivity() != null) {
+                            /* modifyed by Yu Sun 03/04/2015 to show user the added credit */
+                            //Toast.makeText(getActivity(), "Upload Success!", Toast.LENGTH_SHORT).show();
+                            Toast toast = Toast.makeText(getActivity(), "Upload Success! +10 credits", Toast.LENGTH_SHORT);
+                            toast.setGravity(Gravity.BOTTOM, 0, 0);
+                            toast.show();
+                        }
                     }
                     pDialog.dismiss();
                 }
@@ -477,8 +490,8 @@ public class ContributePriceFragment extends Fragment implements DialogInterface
 
                     //compress the image
                     bitmap = ImageDecoder.decodeSampledBitmapFromFile(imageFile, ConfigConstant.MAX_IMAGE_WIDTH, ConfigConstant.MAX_IMAGE_HEIGHT);
-                    bitmap=ImageDecoder.rotateImage(bitmap,imageFile.getAbsolutePath());
-                    bitmap=ImageDecoder.createScaledBitmap(bitmap,ConfigConstant.IMAGE_TYPE_FUEL);
+                    bitmap = ImageDecoder.rotateImage(bitmap, imageFile.getAbsolutePath());
+                    bitmap = ImageDecoder.createScaledBitmap(bitmap, ConfigConstant.IMAGE_TYPE_FUEL);
 
 
                     uri = ImageDecoder.getImageUri(getActivity(), bitmap);
@@ -497,7 +510,7 @@ public class ContributePriceFragment extends Fragment implements DialogInterface
 
                         //compress image
                         bitmap = ImageDecoder.decodeSampledBitmapFromUri(getActivity(), intent.getData(), ConfigConstant.MAX_IMAGE_WIDTH, ConfigConstant.MAX_IMAGE_HEIGHT);
-                        bitmap=ImageDecoder.createScaledBitmap(bitmap,ConfigConstant.IMAGE_TYPE_FUEL);
+                        bitmap = ImageDecoder.createScaledBitmap(bitmap, ConfigConstant.IMAGE_TYPE_FUEL);
 
                         uri = ImageDecoder.getImageUri(getActivity(), bitmap);
                         cropImage(uri);

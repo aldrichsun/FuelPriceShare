@@ -35,6 +35,10 @@ public class CustomizeMapMarker {
      */
     public static Bitmap generateBitmapFromText( Context context, String text, int color ){
 
+        if( text == null || text.isEmpty() )
+            return generateDotBitmap();
+
+
         Typeface tf = Typeface.create("Helvetica", Typeface.BOLD);
 
         Paint paint = new Paint();
@@ -83,6 +87,35 @@ public class CustomizeMapMarker {
         // draw circle with radius 30
         int c_xPos = (rect_width / 2);
         int c_yPos = rect_height + radius;
+        canvas.drawCircle(c_xPos, c_yPos, radius, circlePaint);
+        //////////////////////////////////////////////////////////////////////////
+
+        return bm;
+    }
+
+    /**
+     * This function generates a bitmap with a single red dot of radius 5.
+     * @return a bitmap with a single red dot of radius 5.
+     */
+    private static Bitmap generateDotBitmap( ){
+
+        int radius = 5; // the dot radius in pixels
+        int color = Color.RED; //the color of the dot
+
+        Bitmap bm = Bitmap.createBitmap( 2*radius, 2*radius, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bm);
+
+        ////////////////// draw the dot to show the exact location //////////////
+        Paint circlePaint = new Paint();
+        // set color
+        //circlePaint.setColor(context.getResources().getColor(R.color.orange));
+        //circlePaint.setColor(context.getResources().getColor(R.color.red));
+        circlePaint.setColor( color );
+        // set style
+        circlePaint.setStyle(Style.FILL);
+        // draw circle with radius 30
+        int c_xPos = radius;
+        int c_yPos = radius;
         canvas.drawCircle(c_xPos, c_yPos, radius, circlePaint);
         //////////////////////////////////////////////////////////////////////////
 

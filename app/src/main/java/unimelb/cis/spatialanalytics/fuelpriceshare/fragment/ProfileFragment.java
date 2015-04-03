@@ -46,6 +46,7 @@ import unimelb.cis.spatialanalytics.fuelpriceshare.http.AppController;
 import unimelb.cis.spatialanalytics.fuelpriceshare.http.CustomRequest;
 import unimelb.cis.spatialanalytics.fuelpriceshare.http.MultiPartRequest;
 import unimelb.cis.spatialanalytics.fuelpriceshare.http.MyExceptionHandler;
+import unimelb.cis.spatialanalytics.fuelpriceshare.maps.DrawOnMap.DrawMarkersOnMap;
 import unimelb.cis.spatialanalytics.fuelpriceshare.others.ImageDecoder;
 import unimelb.cis.spatialanalytics.fuelpriceshare.others.ImagePicker;
 import unimelb.cis.spatialanalytics.fuelpriceshare.others.RandomGenerateUniqueIDs;
@@ -69,6 +70,7 @@ public class ProfileFragment extends Fragment {
     private TextView textViewGender;
     private TextView textViewBirth;
     private TextView textViewWhatUp;
+    public static TextView textViewCredit;
 
     private Button buttonLotOut;
 
@@ -82,6 +84,7 @@ public class ProfileFragment extends Fragment {
     private LinearLayout linearLayoutGender;
     private LinearLayout linearLayoutBirth;
     private LinearLayout linearLayoutWhatUp;
+    private LinearLayout linearLayoutCredit;
 
     /**
      * Select image by camera or local files (photos, library, folder)
@@ -143,7 +146,7 @@ public class ProfileFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        View rootView = inflater.inflate(R.layout.fragment_user_profilel, container, false);
+        View rootView = inflater.inflate(R.layout.fragment_user_profile, container, false);
 
 
         pref = PreferenceManager.getDefaultSharedPreferences(getActivity());
@@ -158,6 +161,7 @@ public class ProfileFragment extends Fragment {
         textViewGender = (TextView) rootView.findViewById(R.id.profile_setting_gender);
         textViewBirth = (TextView) rootView.findViewById(R.id.profile_setting_birth);
         textViewWhatUp = (TextView) rootView.findViewById(R.id.profile_setting_whatup);
+        textViewCredit = (TextView) rootView.findViewById(R.id.profile_setting_credit);
 
         buttonLotOut = (Button) rootView.findViewById(R.id.btnLogout);
         buttonLotOut.setOnClickListener(new View.OnClickListener() {
@@ -181,6 +185,7 @@ public class ProfileFragment extends Fragment {
         linearLayoutBirth = (LinearLayout) rootView.findViewById(R.id.profile_setting_linear_layout_birth);
         linearLayoutGender = (LinearLayout) rootView.findViewById(R.id.profile_setting_linear_layout_gender);
         linearLayoutWhatUp = (LinearLayout) rootView.findViewById(R.id.profile_setting_linear_layout_whatup);
+        linearLayoutCredit = (LinearLayout) rootView.findViewById(R.id.profile_setting_linear_layout_credit);
 
 
         imagePicker = new ImagePicker(getActivity(), "Change Profile Photo");
@@ -295,6 +300,7 @@ public class ProfileFragment extends Fragment {
             }
         });
 
+
         return rootView;
 
     }
@@ -382,6 +388,8 @@ public class ProfileFragment extends Fragment {
         textViewGender.setText(Users.gender);
         textViewBirth.setText(Users.birth);
         textViewWhatUp.setText(Users.whatup);
+        // Han and Yu 02/04/2015, we set the credit value only by the function updateCredit()
+        // textViewCredit.setText( String.valueOf(Users.credit) );
 
 
         if (Users.bitmap != null)
@@ -418,7 +426,7 @@ public class ProfileFragment extends Fragment {
                         if (response.getBitmap() != null) {
                             // load image into imageview
                             isImageUploadingOrDownloading = false;
-                             imageViewProfiePhoto.setImageBitmap(response.getBitmap());
+                            imageViewProfiePhoto.setImageBitmap(response.getBitmap());
                             //imageViewProfiePhoto.setImageBitmap(Bitmap.createScaledBitmap(response.getBitmap(), ConfigConstant.PROFILE_IMAGE_WIDTH, ConfigConstant.PROFILE_IMAGE_HEIGHT, false));
 
                             Users.bitmap = response.getBitmap();
@@ -744,7 +752,7 @@ public class ProfileFragment extends Fragment {
          * Use google Volley lib to upload an image
          */
 
-        MultiPartRequest multiPartRequest = new MultiPartRequest(ConfigURL.getUploadImageServlet(), bitmapProfileImage /*new File(profileImagePath)*/,fileName, null, stringData, new Response.Listener<JSONObject>() {
+        MultiPartRequest multiPartRequest = new MultiPartRequest(ConfigURL.getUploadImageServlet(), bitmapProfileImage /*new File(profileImagePath)*/, fileName, null, stringData, new Response.Listener<JSONObject>() {
 
             @Override
             public void onResponse(JSONObject response) {
@@ -809,8 +817,8 @@ public class ProfileFragment extends Fragment {
                     File imageFile = imagePicker.getImageFile();
                     //compress the image
                     bitmapProfileImage = ImageDecoder.decodeSampledBitmapFromFile(imageFile, ConfigConstant.PROFILE_IMAGE_WIDTH, ConfigConstant.PROFILE_IMAGE_HEIGHT);
-                    bitmapProfileImage=ImageDecoder.rotateImage(bitmapProfileImage,imageFile.getAbsolutePath());
-                    bitmapProfileImage=ImageDecoder.createScaledBitmap(bitmapProfileImage,ConfigConstant.IMAGE_TYPE_PROFILE);
+                    bitmapProfileImage = ImageDecoder.rotateImage(bitmapProfileImage, imageFile.getAbsolutePath());
+                    bitmapProfileImage = ImageDecoder.createScaledBitmap(bitmapProfileImage, ConfigConstant.IMAGE_TYPE_PROFILE);
 
                     fileName = RandomGenerateUniqueIDs.getFileName("png");
 
@@ -825,7 +833,7 @@ public class ProfileFragment extends Fragment {
                      */
                     if (intent != null) {
                         bitmapProfileImage = ImageDecoder.decodeSampledBitmapFromUri(getActivity(), intent.getData(), ConfigConstant.PROFILE_IMAGE_WIDTH, ConfigConstant.PROFILE_IMAGE_HEIGHT);
-                        bitmapProfileImage=ImageDecoder.createScaledBitmap(bitmapProfileImage,ConfigConstant.IMAGE_TYPE_PROFILE);
+                        bitmapProfileImage = ImageDecoder.createScaledBitmap(bitmapProfileImage, ConfigConstant.IMAGE_TYPE_PROFILE);
 
                         fileName = RandomGenerateUniqueIDs.getFileName("png");
 
@@ -947,6 +955,68 @@ public class ProfileFragment extends Fragment {
      */
     public void logMeOut(View view) {
         UserCookie.logOut(pref, getActivity());//clear local session
+
+        ///// added by Yu Sun on 04/04/2015
+        DrawMarkersOnMap.clearStations();
+    }
+
+
+    /**
+     * show the latest information of the credit from the server user table.
+     * Every time the ProfileFragment is visited, this function will be called.
+     */
+    public void updateCredit() {
+
+        // Tag used to cancel the request
+        String tag_json_obj = TAG + " : Fetch User Doc";
+
+        Map<String, String> params = new HashMap<String, String>();
+        params.put(ConfigConstant.KEY_COUCHDB_DOC_ACTION, "GET");
+        params.put(ConfigConstant.KEY_COUCHDB_DOC_ID, Users.id);
+        CustomRequest customRequest = new CustomRequest(ConfigURL.getCouchDBURL(), params, new Response.Listener<JSONObject>() {
+
+            @Override
+            public void onResponse(JSONObject response) {
+                Log.d(TAG, response.toString());
+                try {
+                    //Update User information from the server to make sure that, the local stored user info is latest.
+                    if (!response.has(ConfigConstant.KEY_ERROR)) {
+
+                        if ( response.has(ConfigConstant.KEY_CREDIT) )
+                        {
+
+                            Users.credit = response.getInt(ConfigConstant.KEY_CREDIT);
+                            textViewCredit.setText( String.valueOf(Users.credit) );
+                        }
+                        else
+                        Log.e(TAG, "Can not get the field of Credit in user table");
+                        UserCookie.storeUserLocal(pref);
+
+                    } else
+                        Log.e(TAG, "failed to update the local session from the server");
+
+                } catch (JSONException e)
+
+                {
+                    e.printStackTrace();
+                    Log.e(TAG, e.toString());
+                }
+            }
+
+
+        }, new Response.ErrorListener() {
+
+            @Override
+            public void onErrorResponse(VolleyError error) {
+
+                MyExceptionHandler.presentError(TAG,
+                        "read user table from server failed!", getActivity(), error);
+
+            }
+        });
+        // Adding request to request queue
+        AppController.getInstance().addToRequestQueue(customRequest, tag_json_obj);
+
     }
 }
 

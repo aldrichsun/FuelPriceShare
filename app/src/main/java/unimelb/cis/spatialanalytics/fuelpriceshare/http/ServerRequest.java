@@ -54,7 +54,7 @@ public class ServerRequest {
      * This function submits the request represented by url, return the server response.
      * @param url -- a request url (regardless of which server and and what GET request).
      * @return A string represent the response of the server.
-     * If any error (such as no internet connection) occurs, it returns null.
+     * If any error (mostly no internet connection) occurs, it returns null.
      */
     public String getResponse( URL url ){
 
@@ -77,7 +77,7 @@ public class ServerRequest {
             InputStream inputStream = urlConnection.getInputStream();
             StringBuffer buffer = new StringBuffer();
             if ( inputStream == null ) {
-                Log.e(LOG_TAG, "The obtained input stream is empty");
+                Log.e(LOG_TAG, "Error the obtained input stream is empty");
                 // Nothing to do
                 return null;
             }
@@ -95,6 +95,7 @@ public class ServerRequest {
             //Log.v(LOG_TAG, "The returned content length is: " + String.valueOf(buffer.length()));
 
             if (buffer.length() == 0) {
+                Log.e(LOG_TAG, "Error the stream read buffer is empty");
                 // Stream was empty.
                 return null;
             }

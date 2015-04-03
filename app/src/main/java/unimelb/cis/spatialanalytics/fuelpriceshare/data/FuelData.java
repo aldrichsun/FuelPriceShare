@@ -25,6 +25,16 @@ public class FuelData {
     private ArrayList<String> allFuelTypeList = new ArrayList<String>();// all the fuel types
     private ArrayList<String> petrolStationsNameList = new ArrayList<String>();//only contain the name info of all the detected petrol station
 
+    private double latitude;
+    private double longitude;
+
+    public double getLatitude() {
+        return latitude;
+    }
+
+    public double getLongitude() {
+        return longitude;
+    }
 
     private final String TAG = "FuelData";
 
@@ -70,15 +80,17 @@ public class FuelData {
             gps.getLocation(); //added by Yu Sun on 04/03/2015
             if(gps.canGetLocation()) {
                 json.put(ConfigConstant.KEY_CAN_GET_LOCATION,true);
-                json.put(ConfigConstant.KEY_LATITUDE, gps.getLatitude());
-                json.put(ConfigConstant.KEY_LONGITUDE, gps.getLongitude());
+
             }else
             {
                 json.put(ConfigConstant.KEY_CAN_GET_LOCATION,false);
-                json.put(ConfigConstant.KEY_LATITUDE, gps.getLatitude());
-                json.put(ConfigConstant.KEY_LONGITUDE, gps.getLongitude());
-
             }
+
+            latitude = gps.getLatitude();
+            longitude = gps.getLongitude();
+            json.put(ConfigConstant.KEY_LATITUDE, latitude);
+            json.put(ConfigConstant.KEY_LONGITUDE, longitude);
+
 
 
             //BY SUN YU
@@ -148,6 +160,20 @@ public class FuelData {
         return petrolStationsJsonList;
     }
 
+    public JSONArray getPetrolStationJSONArray()
+    {
+        JSONArray jsonArray = new JSONArray();
+        for(JSONObject jsonObject:petrolStationsJsonList)
+        {
+            jsonArray.put(jsonObject);
+        }
+
+        return jsonArray;
+
+
+    }
+
+
     public void setPetrolStationsJsonList(ArrayList<JSONObject> petrolStationsJsonList) {
         this.petrolStationsJsonList = petrolStationsJsonList;
     }
@@ -162,6 +188,20 @@ public class FuelData {
 
     public ArrayList<JSONObject> getFuelJsonList() {
         return fuelJsonList;
+    }
+
+
+    public JSONArray getFuelJsonArray()
+    {
+        JSONArray jsonArray = new JSONArray();
+        for(JSONObject jsonObject:fuelJsonList)
+        {
+            jsonArray.put(jsonObject);
+        }
+
+        return jsonArray;
+
+
     }
 
     public void setFuelJsonList(ArrayList<JSONObject> fuelJsonList) {

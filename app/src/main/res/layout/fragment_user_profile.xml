@@ -41,6 +41,25 @@
 
             <View style="@style/Divider" />
 
+            <!-- Added by Yu Sun 02/04/2015 to show the credit -->
+            <LinearLayout
+                style="@style/profile_setting_subLinearLayout"
+                android:id="@+id/profile_setting_linear_layout_credit">
+
+                <TextView
+                    android:text="Total Credit"
+                    style="@style/profile_setting_left_text_field_names" />
+
+                <TextView
+                    android:text="Total Credit"
+                    android:id="@+id/profile_setting_credit"
+                    style="@style/profile_setting_right_text" />
+
+            </LinearLayout>
+            <!-- End of added by Yu Sun 02/04/2015 to show the credit -->
+
+            <View style="@style/SectionDiver" />
+
             <LinearLayout
                 style="@style/profile_setting_subLinearLayout"
                 android:id="@+id/profile_setting_linear_layout_userid">

@@ -907,7 +907,7 @@ public class PathFragment extends Fragment {
                 stations = result.getJSONArray(RESULT_STATION_KEY);
 
                 //Else show all the stations
-                DrawMarkersOnMap.drawOnMapMaxTenDifferentColor(
+                DrawMarkersOnMap.drawOnMap(
                         (android.support.v7.app.ActionBarActivity) getActivity(),
                         pathMap,
                         stations,

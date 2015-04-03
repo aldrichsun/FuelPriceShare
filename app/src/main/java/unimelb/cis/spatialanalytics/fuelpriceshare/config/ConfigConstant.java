@@ -80,6 +80,7 @@ public class ConfigConstant {
     public static final String KEY_PHONE = "phone";
     public static final String KEY_CREATED_AT = "created_at";
     public static final String KEY_Password = "password";
+    public static final String KEY_CREDIT="credit";
 
 
     /**

@@ -48,6 +48,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import unimelb.cis.spatialanalytics.fuelpriceshare.R;
+import unimelb.cis.spatialanalytics.fuelpriceshare.config.ConfigConstant;
+import unimelb.cis.spatialanalytics.fuelpriceshare.data.Users;
 import unimelb.cis.spatialanalytics.fuelpriceshare.maps.myLocation.GPSTracker;
 import unimelb.cis.spatialanalytics.fuelpriceshare.maps.DrawOnMap.DecodeDirection;
 import unimelb.cis.spatialanalytics.fuelpriceshare.maps.DrawOnMap.DrawMarkersOnMap;
@@ -185,11 +187,33 @@ public class MapFragment extends Fragment{
             destinLatLng = new LatLng(0.0, 0.0);
         }
         ////mMap.addMarker(new MarkerOptions().position(latLng).title("Melbourne Uni"));
-        CameraPosition cameraPosition = new CameraPosition.Builder()
+        CameraPosition initialCameraPosition = new CameraPosition.Builder()
                 .target(destinLatLng)
                 .zoom(14)
                 .build();
-        mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+        mMap.animateCamera(CameraUpdateFactory.newCameraPosition(initialCameraPosition));
+
+        ////////////////////// Zoom level change listener /////////////////////////////
+        // Created by Nurlan Kenzhebekov on 19/03/2015.
+        // Modified by Yu Su on 03/04/2015.
+        // Added zoom in/out listener to the map to redraw markers
+        mMap.setOnCameraChangeListener(new GoogleMap.OnCameraChangeListener() {
+
+            private float previousZoom = -1;
+            @Override
+            public void onCameraChange(CameraPosition cameraPosition) {
+
+                if ( cameraPosition.zoom != previousZoom && !showResult ){
+                    Log.d(LOG_TAG, "Zoom to level: " + cameraPosition.zoom);
+                    previousZoom = cameraPosition.zoom;
+                    DrawMarkersOnMap.reDrawOnMap(
+                        (android.support.v7.app.ActionBarActivity) getActivity(),
+                        mMap);
+                }
+            }
+        });
+        ////////////////////////////////////////////////////////////////////////////////
+
         ////////////////////////////////////////////////////////////////////////
 
         ///////////////////// Set up view adapters and event listeners ////////////////////////
@@ -205,9 +229,11 @@ public class MapFragment extends Fragment{
         // Set the auto complete text view item click listener
         autoCompleteTextView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
-            // i) use the searched address the user input as the query point, and use the user
-            // preferred range distance to issue the range query; ii) draw the returned points
-            // on the map with customized marker icon
+            // Once the item is clicked, we i) close the input pad ii) geocode the input address
+            // iii) add a marker on the map and move focus to the marker iv) store the search location
+            // history.
+            // Tasks ii) and iii) are completed by RangeQueryTask
+            // Task iv) is completed by the AddressHistoryTask
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 // Get user input location
@@ -229,19 +255,6 @@ public class MapFragment extends Fragment{
                 ////////// store the location history ////////////
                 new AddressHistoryTask().execute(location);
                 //////////////////////////////////////////////////
-
-                // Show the direction floating action button (fab)
-                if (pathFuelJumpButton.isHidden()) {
-                    // first hide the way point jump button
-                    if (!wayPointJumpButton.isHidden()) {
-                        wayPointJumpButton.setHideAnimation(ActionButton.Animations.JUMP_TO_DOWN);
-                        wayPointJumpButton.hide();
-                    }
-                    pathFuelJumpButton.setShowAnimation(ActionButton.Animations.JUMP_FROM_RIGHT);
-                    pathFuelJumpButton.show();
-                }
-                // re-initialize the operation series (cycles)
-                showResult = false;
             }
         });
         autoCompleteTextView.setOnLongClickListener(new myOnLongClickListener(
@@ -259,8 +272,10 @@ public class MapFragment extends Fragment{
         View.OnClickListener findClickListener = new View.OnClickListener() {
 
             // Once the button is clicked, we i) close the input pad ii) geocode the input address
-            // iii) add a marker on the map and move focus to the marker
-            // Tasks ii) and iii) is completed by GeocoderTask
+            // iii) add a marker on the map and move focus to the marker iv) store the search location
+            // history.
+            // Tasks ii) and iii) are completed by RangeQueryTask
+            // Task iv) is completed by the AddressHistoryTask
             @Override
             public void onClick(View v) {
 
@@ -291,19 +306,6 @@ public class MapFragment extends Fragment{
                 ////////// store the location history ////////////
                 new AddressHistoryTask().execute(location);
                 //////////////////////////////////////////////////
-
-                // Show the direction floating action button (fab)
-                if (pathFuelJumpButton.isHidden()) {
-                    // first hide the way point jump button
-                    if (!wayPointJumpButton.isHidden()) {
-                        wayPointJumpButton.setHideAnimation(ActionButton.Animations.JUMP_TO_DOWN);
-                        wayPointJumpButton.hide();
-                    }
-                    pathFuelJumpButton.setShowAnimation(ActionButton.Animations.JUMP_FROM_RIGHT);
-                    pathFuelJumpButton.show();
-                }
-                // re-initialize the operation series
-                showResult = false;
             }
         };
         // Setting button click event listener for the find button
@@ -600,7 +602,21 @@ public class MapFragment extends Fragment{
         pathFuelButton.setOnClickListener(new View.OnClickListener() {
 
             /**
-             * TODO add comments
+             * 03/03/2015 Yu Sun
+             * On clicking the button, we obtain the origin and destination addresses from the
+             * corresponding text view, close the soft keypad, issue the path query (which will do
+             * the following:
+             * i) geocode the origin and destination addresses,
+             * ii) compute the direction (or called path or route) between the origin
+             * and destination and the fuel stations near to the path
+             * iii) draw the path and fuel stations on the map
+             * and iv) move the focus of the map to the path.
+             * v) store the destination address and location in the instance variable
+             * 'destinLatLng' and 'destinAddressText', respectively, if the destination
+             * address is changed at this stage.
+             * vi) close the direction sliding up panel if the query executes successfully. )
+             * and then we store the origin and destination addresses in the database.
+             *
              * @param v
              */
             @Override
@@ -946,7 +962,7 @@ public class MapFragment extends Fragment{
      * iv) store the destination address and location in the instance variable
      * 'destinLatLng' and 'destinAddressText', respectively.
      */
-    private class RangeQueryTask extends AsyncTask<String, Void, JSONArray>{
+    private class RangeQueryTask extends AsyncTask<String, Void, JSONObject>{
 
         // The range query search distance
         private double range_radius = 3.0;
@@ -1000,11 +1016,12 @@ public class MapFragment extends Fragment{
          * ii) null, if geo-coding error or query error occurs.
          */
         @Override
-        protected JSONArray doInBackground(String... locationName) {
+        protected JSONObject doInBackground(String... locationName) {
 
-            if( locationName[0].equals( currentLocationName ) ){
+            if( locationName[0].equalsIgnoreCase(currentLocationName) ){
                 if( currentLocation == null ){
                     curLocationError = true;
+                    Log.e(LOG_TAG, "Error getting current location");
                     return null;
                 }
                 //else
@@ -1031,33 +1048,51 @@ public class MapFragment extends Fragment{
                 // First store it as the destination
                 Address address = (Address) addresses.get(0);
                 destinLatLng = new LatLng(address.getLatitude(), address.getLongitude());
+
+                /* Changed to the following code block by Yu Sun on 09/03/2015
+                Log.v(LOG_TAG, "Max address index: " + address.getMaxAddressLineIndex());
+                Log.v(LOG_TAG, "Line 0: " + address.getAddressLine(0));
+                Log.v(LOG_TAG, "Line 1: " + address.getAddressLine(1));
+                Log.v(LOG_TAG, "Country Name: " + address.getCountryName());
+                Log.v(LOG_TAG, "Full address: " + address.toString());
+
                 destinAddressText = String.format("%s, %s",
                         address.getMaxAddressLineIndex() > 0 ? address.getAddressLine(0) : "",
                         address.getCountryName());
+                */
+                if( address.getMaxAddressLineIndex() >= 0 ) {
+                    destinAddressText = address.getAddressLine(0);
+                    for (int i = 1; i <= address.getMaxAddressLineIndex(); i++)
+                        destinAddressText += ", " + address.getAddressLine(i);
+                } else {
+                    destinAddressText = "";
+                }
             }
 
             // Then start the range query
             //Log.v(LOG_TAG, "Starting the range query...");
             RangeQuery rangeQuery = new RangeQuery();
-            JSONArray stations = rangeQuery.executeQuery(destinLatLng,
-                    Double.valueOf(range_radius));
+            JSONObject stations = rangeQuery.executeQuery(
+                    destinLatLng,
+                    Double.valueOf(range_radius),
+                    Users.id);
             //Log.v(LOG_TAG, "The results are: " + stations.toString());
             return stations;
         }
 
         // Draw the returned points on the map with customized marker icon
         @Override
-        protected void onPostExecute(JSONArray jsonArray) {
+        protected void onPostExecute(JSONObject jsonObj) {
 
             progressDialog.dismiss();
-            // 06/02/2015 Yu Sun: It may be wrong that we do NOT distinguish null and empty.
+
             if( geocodeError ) {
                 if( getActivity() != null ) {
                     Toast toast = Toast.makeText(
                             getActivity(), "Internet error or wrong address, " +
                                     "please check and try later",
                             Toast.LENGTH_SHORT);
-                    toast.setGravity(Gravity.CENTER, 0, 0);
+                    toast.setGravity(Gravity.BOTTOM, 0, 0);
                     toast.show();
                 }
                 return;
@@ -1067,14 +1102,17 @@ public class MapFragment extends Fragment{
                     Toast toast = Toast.makeText(
                             getActivity(), "Sorry, cannot get current location",
                             Toast.LENGTH_SHORT);
-                    toast.setGravity(Gravity.CENTER, 0, 0);
+                    toast.setGravity(Gravity.BOTTOM, 0, 0);
                     toast.show();
                 }
                 return;
             }
 
+            // Now, at least we can move the camera to the input destination and set the clicked marker
+
             // Clears all the existing markers on the map
             mMap.clear();
+            DrawMarkersOnMap.clearStations();
 
             // Add the destination marker
             MarkerOptions markerOptions = new MarkerOptions();
@@ -1084,7 +1122,58 @@ public class MapFragment extends Fragment{
             // by default, we make the user 'click' the destination marker
             clickedMarer = mMap.addMarker(markerOptions);
 
-            if( jsonArray == null ){
+            // Show the direction floating action button (fab)
+            if (pathFuelJumpButton.isHidden()) {
+                // first hide the way point jump button
+                if (!wayPointJumpButton.isHidden()) {
+                    wayPointJumpButton.setHideAnimation(ActionButton.Animations.JUMP_TO_DOWN);
+                    wayPointJumpButton.hide();
+                }
+                pathFuelJumpButton.setShowAnimation(ActionButton.Animations.JUMP_FROM_RIGHT);
+                pathFuelJumpButton.show();
+            }
+            // re-initialize the operation series
+            showResult = false;
+
+            ////////////// SHOW THE QUERY RESULT ///////////////////
+            ///////////////////////// query errors /////////////////////////
+            if( jsonObj == null ){
+                if( getActivity() != null ) {
+                    Toast toast = Toast.makeText(
+                            getActivity(), "Internet error please check and try again",
+                            Toast.LENGTH_SHORT);
+                    toast.setGravity(Gravity.BOTTOM, 0, 0);
+                    toast.show();
+                }
+                return;
+            }
+            if( jsonObj.optInt("error") == 3001 ){
+                if( getActivity() != null ) {
+                    Toast toast = Toast.makeText(
+                            getActivity(), "No sufficient credit, please contribute fuel price " +
+                                    "to gain more credits",
+                            Toast.LENGTH_LONG);
+                    toast.setGravity(Gravity.CENTER, 0, 0);
+                    toast.show();
+                }
+                return;
+            }
+            if( jsonObj.optInt("error") == 3002 ){
+                if( getActivity() != null ) {
+                    Toast toast = Toast.makeText(
+                            getActivity(), "Internal server error, please try again later",
+                            Toast.LENGTH_SHORT);
+                    toast.setGravity(Gravity.BOTTOM, 0, 0);
+                    toast.show();
+                }
+                return;
+            }
+            /////////////////////////////////////////////////////////////////
+            JSONArray jsonArray = null;
+            try {
+                jsonArray = jsonObj.getJSONArray( ConfigConstant.KEY_PETROL_STATION );
+            } catch (JSONException e) {
+                Log.e(LOG_TAG, "Error when parsing json array " + jsonObj.toString(), e);
 
                 CameraPosition cameraPosition = new CameraPosition.Builder()
                         .target(destinLatLng)
@@ -1093,13 +1182,15 @@ public class MapFragment extends Fragment{
                 mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
 
                 if( getActivity() != null ) {
-                    Toast toast = Toast.makeText(getActivity(), "Station request errors," +
-                            " please check the address or the internet connection and try later", Toast.LENGTH_LONG);
-                    toast.setGravity(Gravity.CENTER, 0, 0);
+                    Toast toast = Toast.makeText(
+                            getActivity(), "Internet error please check and try again",
+                            Toast.LENGTH_SHORT);
+                    toast.setGravity(Gravity.BOTTOM, 0, 0);
                     toast.show();
                 }
                 return;
             }
+
             if( jsonArray.length() <= 0 ){
 
                 CameraPosition cameraPosition = new CameraPosition.Builder()
@@ -1118,8 +1209,16 @@ public class MapFragment extends Fragment{
                 return;
             }
 
+            // Show user that credit - 1, although logically we didn't tell the server to
+            // deduct the credit at precisely this step.
+            if( getActivity() != null ) {
+                Toast toast = Toast.makeText(getActivity(), "-1 credit", Toast.LENGTH_SHORT);
+                toast.setGravity(Gravity.BOTTOM, 0, 0);
+                toast.show();
+            }
+
             //Else show all the station markers as well and move the map camera accordingly
-            DrawMarkersOnMap.drawOnMapMaxTenDifferentColor(
+            DrawMarkersOnMap.drawOnMap(
                     (android.support.v7.app.ActionBarActivity) getActivity(),
                     mMap,
                     jsonArray,
@@ -1217,7 +1316,7 @@ public class MapFragment extends Fragment{
             try {
                 /////// If any error occurs, we don't do the path query and return ///////
                 /////// the error object directly ////////////////////////////////////////
-                Log.v(LOG_TAG, "Geocoding the origin...");
+                //Log.v(LOG_TAG, "Geocoding the origin...");
                 if( origin_addr.equals( currentLocationName ) ){
                     if( currentLocation == null ){
                         try {
@@ -1260,7 +1359,7 @@ public class MapFragment extends Fragment{
                     o_lng = addresses_o.get(0).getLongitude();
                 }
                 //////////////// For destination /////////////////
-                Log.v(LOG_TAG, "Geocoding the destination...");
+                //Log.v(LOG_TAG, "Geocoding the destination...");
                 if( destin_addr.equals( currentLocationName ) ){
                     if( currentLocation == null ){
                         try {
@@ -1302,9 +1401,13 @@ public class MapFragment extends Fragment{
                     // First store it as the private instance variable
                     Address address = (Address) addresses_d.get(0);
                     destinLatLng = new LatLng(address.getLatitude(), address.getLongitude());
-                    destinAddressText = String.format("%s, %s",
-                            address.getMaxAddressLineIndex() > 0 ? address.getAddressLine(0) : "",
-                            address.getCountryName());
+                    if( address.getMaxAddressLineIndex() >= 0 ) {
+                        destinAddressText = address.getAddressLine(0);
+                        for (int i = 1; i <= address.getMaxAddressLineIndex(); i++)
+                            destinAddressText += ", " + address.getAddressLine(i);
+                    } else {
+                        destinAddressText = "";
+                    }
                     //
                     d_lat = addresses_d.get(0).getLatitude();
                     d_lng = addresses_d.get(0).getLongitude();
@@ -1312,7 +1415,7 @@ public class MapFragment extends Fragment{
                 ///////////////////////////////////////////////////////////////////////////////
 
                 PathQuery pq = new PathQuery();
-                Log.v(LOG_TAG, "Retrieving results from server...");
+                //Log.v(LOG_TAG, "Retrieving results from server...");
                 result = pq.executeQuery(
                         o_lat,
                         o_lng,
@@ -1320,7 +1423,7 @@ public class MapFragment extends Fragment{
                         d_lng,
                         this.path_distance
                 );
-                Log.v(LOG_TAG, "done!");
+                //Log.v(LOG_TAG, "done!");
                 if( result == null ){
                     try {
                         errorObj.put(RESULT_STATION_KEY, ERROR);
@@ -1393,6 +1496,7 @@ public class MapFragment extends Fragment{
 
             // Clears all the existing markers on the map
             mMap.clear();
+            DrawMarkersOnMap.clearStations();
 
             // Add the destination marker
             MarkerOptions markerOptions = new MarkerOptions();
@@ -1455,7 +1559,7 @@ public class MapFragment extends Fragment{
                 stations = result.getJSONArray(RESULT_STATION_KEY);
 
                 //Else show all the stations
-                DrawMarkersOnMap.drawOnMapMaxTenDifferentColor(
+                DrawMarkersOnMap.drawOnMap(
                         (android.support.v7.app.ActionBarActivity) getActivity(),
                         mMap,
                         stations,
@@ -1482,8 +1586,8 @@ public class MapFragment extends Fragment{
      * and iv) move the focus of the map to the path.
      * v) We DONOT store the destination address or location in the instance variable
      * 'destinLatLng' or 'destinAddressText'. Instead we set the instance variable
-     * 'showResult' to true if the execution succeeds, which ends the quering cicle by
-     * terminating all interaction operations except the 'find' button (an the
+     * 'showResult' to true if the execution succeeds, which ends the querying cycle by
+     * terminating all interactive operations except the 'find' button (an the
      * autoCompleteTextView). When the user 'find' again, we set the 'showResult' to false.
      * vi) close the direction sliding up panel if the query executes successfully.
      */
@@ -1531,7 +1635,23 @@ public class MapFragment extends Fragment{
         }
 
         /**
-         * TODO add comments
+         * This function does the following tasks:
+         * i) geocode the origin and destination addresses,
+         *
+         *  ii) compute the direction (or called path or route) from the origin to the way point
+         * and from the way point to the destination.
+         *
+         * iii) draw the path and the selected fuel station as a regular marker on the map
+         * and iv) move the focus of the map to the path.
+         *
+         * v) We DONOT store the destination address or location in the instance variable
+         * 'destinLatLng' or 'destinAddressText'. Instead we set the instance variable
+         * 'showResult' to true if the execution succeeds, which ends the querying cycle by
+         * terminating all interactive operations except the 'find' button (an the
+         * autoCompleteTextView). When the user 'find' again, we set the 'showResult' to false.
+         *
+         * vi) close the direction sliding up panel if the query executes successfully.
+         *
          */
         @Override
         protected JSONObject doInBackground(String... originWayPointDestination) {
@@ -1554,7 +1674,7 @@ public class MapFragment extends Fragment{
                 /////// If any error occurs, we don't do the path query and return ///////
                 /////// the error object directly ////////////////////////////////////////
                 //////////////// For origin /////////////////
-                Log.v(LOG_TAG, "Geocoding the origin...");
+                //Log.v(LOG_TAG, "Geocoding the origin...");
                 if( origin_addr.equals( currentLocationName ) ){
                     if( currentLocation == null ){
                         try {
@@ -1604,7 +1724,7 @@ public class MapFragment extends Fragment{
                     o_lng = addresses_o.get(0).getLongitude();
                 }
                 //////////////// For way point ///////////////////
-                Log.v(LOG_TAG, "Geocoding the waypoint...");
+                //Log.v(LOG_TAG, "Geocoding the waypoint...");
                 if( waypoint_addr.equals( currentLocationName ) ){
                     if( currentLocation == null ){
                         try {
@@ -1655,7 +1775,7 @@ public class MapFragment extends Fragment{
                     w_lng = addresses_w.get(0).getLongitude();
                 }
                 //////////////// For destination /////////////////
-                Log.v(LOG_TAG, "Geocoding the destination...");
+                //Log.v(LOG_TAG, "Geocoding the destination...");
                 if( destin_addr.equals( wayPointName ) ){
                     if( wayPointLatLng == null ){
                         try {
@@ -1708,7 +1828,7 @@ public class MapFragment extends Fragment{
                 ///////////////////////////////////////////////////////////////////////////////
 
                 PathQuery pq = new PathQuery();
-                Log.v(LOG_TAG, "Retrieving results from server...");
+                //Log.v(LOG_TAG, "Retrieving results from server...");
                 result_one = pq.executeQuery(
                         o_lat,
                         o_lng,
@@ -1723,7 +1843,7 @@ public class MapFragment extends Fragment{
                         d_lng,
                         0.0 // for direction only
                 );
-                Log.v(LOG_TAG, "done!");
+                //Log.v(LOG_TAG, "done!");
 
                 try{
                     result = new JSONObject();
@@ -1822,6 +1942,7 @@ public class MapFragment extends Fragment{
 
             // Clears all the existing markers on the map
             mMap.clear();
+            DrawMarkersOnMap.clearStations();
 
             ////////////////// Draw the two paths on the map //////////////////
             // At this step, the google directions API call (must) have returned the valid route
@@ -1865,6 +1986,7 @@ public class MapFragment extends Fragment{
             mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
             /////////////////////////////////////////////////////////////////////////////////
             showResult = true;
+
             progressDialog.dismiss();
             // Hide the sliding up panel
             directionSliding.setPanelState(SlidingUpPanelLayout.PanelState.HIDDEN);

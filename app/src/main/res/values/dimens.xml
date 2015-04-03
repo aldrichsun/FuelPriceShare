@@ -24,15 +24,19 @@
     <dimen name="bottom_text_view">8dp</dimen>
     <dimen name="Route_top_padding">8dp</dimen>
     <dimen name="query_button_linear_layout_bottom_margin">8dp</dimen>
-    <dimen name="name_auto_complete_text_size">20dp</dimen>
-    <dimen name="other_auto_complete_text_size">12dp</dimen>
 
     <!-- Floating action button -->
     <dimen name="direction_fab_margin">96dp</dimen>
     <dimen name="my_fab_margin">32dp</dimen>
     <dimen name="close_fab_margin">16dp</dimen>
 
-
+    <!-- Address auto-complete drop down list -->
+    <dimen name="name_auto_complete_text_size">20dp</dimen>
+    <dimen name="other_auto_complete_text_size">12dp</dimen>
+    <dimen name="auto_complete_icon_height">24dp</dimen>
+    <dimen name="auto_complete_icon_width">24dp</dimen>
+    <dimen name="auto_complete_text_margin">8dp</dimen>
+    <dimen name="auto_complete_icon_margin">16dp</dimen>
 
     <!--CROP IMAGE-->
     <dimen name="crop__bar_height">56dp</dimen>

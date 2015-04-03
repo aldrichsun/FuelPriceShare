@@ -17,7 +17,6 @@ import unimelb.cis.spatialanalytics.fuelpriceshare.http.ServerRequest;
 /**
  * Created by Yu Sun on 5/02/2015.
  * For user input automatic completion.
- * TODO Optimize the auto complete by the user's historical search and current location
  */
 public class GoogleSuggestion {
 
@@ -59,7 +58,6 @@ public class GoogleSuggestion {
         String jsonResults = null;
         try {
 
-            //TODO change to Uri methods
             StringBuilder sb = new StringBuilder(PLACES_API_BASE + TYPE_AUTOCOMPLETE + OUT_JSON);
             sb.append("?key=" + API_KEY);
             ///////// 05/02/2015 Yu Sun: Should be changed after debug and testing //////////////

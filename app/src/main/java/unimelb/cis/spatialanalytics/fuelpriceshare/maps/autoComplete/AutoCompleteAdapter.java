@@ -2,7 +2,10 @@ package unimelb.cis.spatialanalytics.fuelpriceshare.maps.autoComplete;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.location.Location;
 import android.support.v7.app.ActionBarActivity;
+import android.test.LoaderTestCase;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
@@ -25,13 +28,23 @@ import unimelb.cis.spatialanalytics.fuelpriceshare.maps.locationHistory.SearchLo
  */
 public class AutoCompleteAdapter extends ArrayAdapter<String> implements Filterable {
 
+    private static final String LOG_TAG = AutoCompleteAdapter.class.getSimpleName();
+
     private Context mContext;
     private ArrayList<String> resultList; // the result list storing the auto complete
 
     private int HISTORY_COUNT = 0;
     private int MAX_HISTORY_RESULT = 2; // the maximum number of history results we shown
-    private String HISTORY_TAG = "";
+
+    private int TYPE_HISTORY = 0; // the type of historical address list view
+    private int TYPE_API = 1; // the type of api address list view
+
     private String SEP_TOKEN = ", "; // the separation token for addresses
+
+    //private boolean BLACK_TEXT = true; // Added by Yu Sun on 09/03/2015: used for avoiding
+                // non-historical results shown as a 'Dark Green' color. We also cannot set
+                // the text color for each drop down list entry, as that will produce a
+                // significant delay in the text color change for historical results.
 
     /**
      * Constructor of the adapter
@@ -50,6 +63,9 @@ public class AutoCompleteAdapter extends ArrayAdapter<String> implements Filtera
 
     @Override
     public String getItem(int index) {
+
+        //Log.e(LOG_TAG, "In getItem, the result size is: " + resultList.size());
+        //Log.e(LOG_TAG, "In getItem, the position is: " + index);
         return resultList.get(index);
     }
 
@@ -73,11 +89,17 @@ public class AutoCompleteAdapter extends ArrayAdapter<String> implements Filtera
                 FilterResults filterResults = new FilterResults();
                 if (constraint != null) {
 
-                    resultList = new ArrayList<>();
+//                    if( resultList != null ){ // clear the
+//
+//                    }
+                    ArrayList<String> newResultList = new ArrayList<>();
                     if( constraint.equals( mContext.getString(R.string.Your_location) ) ){
+
+                        resultList = newResultList;
                         // Assign the data to the FilterResults
-                        filterResults.values = resultList;
-                        filterResults.count = resultList.size();
+                        filterResults.values = newResultList;
+                        filterResults.count = newResultList.size();
+
                         return filterResults;
                     }
 
@@ -91,12 +113,13 @@ public class AutoCompleteAdapter extends ArrayAdapter<String> implements Filtera
 
                         String address = history.get(i);
                         if( address.startsWith( constraint_string ) ){
-                            resultList.add( address );
+                            newResultList.add( address );
                             ++HISTORY_COUNT;
                             if( HISTORY_COUNT >= MAX_HISTORY_RESULT )
                                 break;
                         }
                     }
+
                     /////////////////////////////////////////////////////////
                     //////////////// Google auto complete addresses ///////////////
 
@@ -111,20 +134,21 @@ public class AutoCompleteAdapter extends ArrayAdapter<String> implements Filtera
                         // Since there are very few history results, we use the simple nested loop.
                         // If there are more history results, we could use a TreeSet.
                         for(int j = 0; j < HISTORY_COUNT; j++){
-                            if( googleResult.get(i).equals( resultList.get(j) ) ){
+                            if( googleResult.get(i).equals( newResultList.get(j) ) ){
                                 added = true; break;
                             }
                         }
                         if( !added )
-                            resultList.add( googleResult.get(i) );
+                            newResultList.add( googleResult.get(i) );
                     }
                     ///////////////////////////////////////////////////////
 
+                    resultList = newResultList;
                     // Assign the data to the FilterResults
-                    filterResults.values = resultList;
-                    filterResults.count = resultList.size();
+                    filterResults.values = newResultList;
+                    filterResults.count = newResultList.size();
                 }
-                else{ // 03/03/2015 Yu Sun: TODO show the search history
+                else{ // 03/03/2015 Yu Sun: TODO show the search history when nothing is input
 
                 }
                 return filterResults;
@@ -146,27 +170,39 @@ public class AutoCompleteAdapter extends ArrayAdapter<String> implements Filtera
     }
 
     /**
-     * Overrided by Yu Sun on 03/03/2015:
+     * Override by Yu Sun on 03/03/2015:
      * to customize the auto complete drop down list view
-     * TODO modify the hardcode part
-     * @param position
-     * @param convertView
-     * @param parent
-     * @return
+     * @param position -- the position (index) of the item in the list
+     * @param convertView -- the UI view where we obtain UI components to manipulate
+     * @param parent -- (not used in current implementation)
+     * @return the UI view
+     *
+     * revise the list view according to
+     * http://www.survivingwithandroid.com/2014/08/android-listview-with-multiple-row.html
+     * http://android.amberfog.com/?p=296
+     * in order to show the history addresses with a different ICON
+     *
      */
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        //return super.getView(position, convertView, parent);
 
-        if( convertView == null )
-            convertView = ((ActionBarActivity)mContext).getLayoutInflater()
-                    .inflate(R.layout.list_item, parent, false);
+        int type = getItemViewType(position);
+        if( convertView == null ) {
+
+            if( type == TYPE_HISTORY )
+                convertView = ((ActionBarActivity) mContext).getLayoutInflater()
+                        .inflate(R.layout.address_historical_list_item, parent, false);
+            else // type == TYPE_API
+                convertView = ((ActionBarActivity) mContext).getLayoutInflater()
+                        .inflate(R.layout.address_api_list_item, parent, false);
+        }
 
         TextView nameView = (TextView) convertView.findViewById(R.id.location_name);
         TextView otherView = (TextView) convertView.findViewById(R.id.location_suburb_country);
 
         String address = getItem(position);
-        // TODO use the regular expression that can also recognize the user input or modify the user input when storing
+
+        // TODO either use the regular expression that can recognize the user input or modify the user input when storing
         String[] addrArray = address.split( SEP_TOKEN );
 
         String first_line;
@@ -183,20 +219,30 @@ public class AutoCompleteAdapter extends ArrayAdapter<String> implements Filtera
                 second_line += SEP_TOKEN + addrArray[i];
         }
         else{ // length >= 5
-            first_line = addrArray[0] + SEP_TOKEN + addrArray[1];
-            second_line = addrArray[2];
-            for(int i = 3; i < addrArray.length; i++)
+            /* changed by Yu Sun on 03/04/2015 */
+//            first_line = addrArray[0] + SEP_TOKEN + addrArray[1];
+//            second_line = addrArray[2];
+//            for(int i = 3; i < addrArray.length; i++)
+//                second_line += SEP_TOKEN + addrArray[i];
+            first_line = addrArray[0];
+            second_line = addrArray[1];
+            for(int i = 2; i < addrArray.length; i++)
                 second_line += SEP_TOKEN + addrArray[i];
         }
 
         nameView.setText(first_line);
-        // Temporarily shown the history with a different color
-        // TODO show the history addresses with a different ICON
-        if( position < HISTORY_COUNT )
-            nameView.setTextColor( mContext.getResources().getColor(R.color.darkGreen) );
-
         otherView.setText(second_line);
 
         return convertView;
+    }
+
+    @Override
+    public int getViewTypeCount() {
+        return 2;
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+        return ( position < HISTORY_COUNT ) ? TYPE_HISTORY : TYPE_API;
     }
 }

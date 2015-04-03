@@ -62,7 +62,7 @@ public class MainActivity extends ActionBarActivity {
 
     private Fragment fragment = null;
     private Fragment mapFragment = null;
-//    private Fragment rangeFragment = null;
+    //    private Fragment rangeFragment = null;
 //    private Fragment pathFragment = null;
     private Fragment profileFragment = null;
     private Fragment contributeFragment = null;
@@ -139,7 +139,7 @@ public class MainActivity extends ActionBarActivity {
 
             int launchTime = pref.getInt(LAUNCH_TIME_KEY, 0);
             //Log.v(LOG_TAG, "Launch time:" + launchTime);
-            if( launchTime < MAX_TIME_SHOW_DRAWER_AFTER_LAUNCH ) {
+            if (launchTime < MAX_TIME_SHOW_DRAWER_AFTER_LAUNCH) {
                 mDrawerLayout.openDrawer(Gravity.LEFT);
                 pref.edit().putInt(LAUNCH_TIME_KEY, ++launchTime).commit();
                 pref.edit().apply();
@@ -147,7 +147,7 @@ public class MainActivity extends ActionBarActivity {
         }
     }
 
-    private void setUpFragments(){
+    private void setUpFragments() {
 
         /////////// Create all the fragments to be used ////////////
         mapFragment = new MapFragment();
@@ -157,12 +157,12 @@ public class MainActivity extends ActionBarActivity {
         contributeFragment = new ContributePriceFragment();
     }
 
-    private void setUpCurrentLocation(){
+    private void setUpCurrentLocation() {
         // Get LocationManager object from System Service LOCATION_SERVICE
         //myLocation = new MyLocation(this);
 
         // remind the user to open the GPS settings
-        GPSTracker gpsTracker = new GPSTracker( this );
+        GPSTracker gpsTracker = new GPSTracker(this);
         gpsTracker.checkGetLocationStatus();
     }
 
@@ -170,9 +170,8 @@ public class MainActivity extends ActionBarActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
 
         // Inflate the menu items for use in the action bar
-        // TODO may check it: 20/02/2015
-     // MenuInflater inflater = getMenuInflater();
-     //   inflater.inflate(R.menu.menu_navdrawer, menu);
+        // MenuInflater inflater = getMenuInflater();
+        // inflater.inflate(R.menu.menu_navdrawer, menu);
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return super.onCreateOptionsMenu(menu);
     }
@@ -181,7 +180,6 @@ public class MainActivity extends ActionBarActivity {
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
 
-        // TODO may check it: 20/02/2015
 //        // If the nav drawer is open, hide action items related to the content view
 //        boolean drawerOpen = mDrawerLayout.isDrawerOpen(mDrawerList);
 //        menu.findItem(R.id.action_settings).setVisible(!drawerOpen);
@@ -204,7 +202,7 @@ public class MainActivity extends ActionBarActivity {
             case FRAGMENT_CONTRIBUTE:
                 if (drawerOpen)
                     menu.setGroupVisible(R.id.menu_group, false);
-                else // TODO discuss with Han
+                else
                     menu.setGroupVisible(R.id.menu_group, ContributePriceFragment.isMenuVisible);
                 break;
             case FRAGMENT_PROFILE:
@@ -226,7 +224,7 @@ public class MainActivity extends ActionBarActivity {
             return true;
         }
         // Handle action buttons
-        switch(item.getItemId()) {
+        switch (item.getItemId()) {
             case R.id.action_settings:
                 startActivity(new Intent(this, SettingsActivity.class));
                 return true;
@@ -248,18 +246,18 @@ public class MainActivity extends ActionBarActivity {
         // update the main content by replacing fragments
 
         // Han Li and Yu Sun 26/02/2015: close the soft keypad
-        if( getCurrentFocus() != null && getCurrentFocus().getWindowToken() != null) {
+        if (getCurrentFocus() != null && getCurrentFocus().getWindowToken() != null) {
             InputMethodManager keyboard = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
             keyboard.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
         }
 
         PRESENT_FRAGMENT_ID = position;
         //if(position!=FRAGMENT_CONTRIBUTE)
-           // ContributePriceFragment.isMenuVisible=false;
+        // ContributePriceFragment.isMenuVisible=false;
 
 //        if (mapFragment != null && rangeFragment != null && pathFragment != null
 //                && contributeFragment != null && profileFragment != null ) {
-        if (mapFragment != null && contributeFragment != null && profileFragment != null ) {
+        if (mapFragment != null && contributeFragment != null && profileFragment != null) {
 
             //FragmentManager fragmentManager = getSupportFragmentManager();
             FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
@@ -273,13 +271,17 @@ public class MainActivity extends ActionBarActivity {
             fragment = null;
             switch (position) {
                 case FRAGMENT_MAP:
-                    if( mapFragment.isAdded() ){
+                    if (mapFragment.isAdded()) {
                         fragmentTransaction.show(mapFragment);
-                    }else{
+                    } else {
                         fragmentTransaction.add(R.id.content_frame, mapFragment);
                     }
-                    if(profileFragment.isAdded()){fragmentTransaction.hide(profileFragment);}
-                    if(contributeFragment.isAdded()){fragmentTransaction.hide(contributeFragment);}
+                    if (profileFragment.isAdded()) {
+                        fragmentTransaction.hide(profileFragment);
+                    }
+                    if (contributeFragment.isAdded()) {
+                        fragmentTransaction.hide(contributeFragment);
+                    }
                     fragment = mapFragment;
                     break;
 //                case FRAGMENT_RANGE_SEARCH:
@@ -305,27 +307,37 @@ public class MainActivity extends ActionBarActivity {
 //                    fragment = pathFragment;
 //                    break;
                 case FRAGMENT_PROFILE:
-                    if(profileFragment.isAdded()){
+                    if (profileFragment != null)
+                        ((ProfileFragment) profileFragment).updateCredit();
+                    if (profileFragment.isAdded()) {
                         fragmentTransaction.show(profileFragment);
-                    }else{
+                    } else {
                         fragmentTransaction.add(R.id.content_frame, profileFragment);
                     }
 //                    if(rangeFragment.isAdded()){fragmentTransaction.hide(rangeFragment);}
 //                    if(pathFragment.isAdded()){fragmentTransaction.hide(pathFragment);}
-                    if(mapFragment.isAdded()){fragmentTransaction.hide(mapFragment);}
-                    if(contributeFragment.isAdded()){fragmentTransaction.hide(contributeFragment);}
+                    if (mapFragment.isAdded()) {
+                        fragmentTransaction.hide(mapFragment);
+                    }
+                    if (contributeFragment.isAdded()) {
+                        fragmentTransaction.hide(contributeFragment);
+                    }
                     fragment = profileFragment;
                     break;
                 case FRAGMENT_CONTRIBUTE:
-                    if(contributeFragment.isAdded()){
+                    if (contributeFragment.isAdded()) {
                         fragmentTransaction.show(contributeFragment);
-                    }else{
+                    } else {
                         fragmentTransaction.add(R.id.content_frame, contributeFragment);
                     }
 //                    if(rangeFragment.isAdded()){fragmentTransaction.hide(rangeFragment);}
 //                    if(pathFragment.isAdded()){fragmentTransaction.hide(pathFragment);}
-                    if(mapFragment.isAdded()){fragmentTransaction.hide(mapFragment);}
-                    if(profileFragment.isAdded()){fragmentTransaction.hide(profileFragment);}
+                    if (mapFragment.isAdded()) {
+                        fragmentTransaction.hide(mapFragment);
+                    }
+                    if (profileFragment.isAdded()) {
+                        fragmentTransaction.hide(profileFragment);
+                    }
                     fragment = contributeFragment;
                     break;
 //                case ACTIVITY_SETTING:
@@ -387,7 +399,7 @@ public class MainActivity extends ActionBarActivity {
 //            contributeFragment.onActivityResult(requestCode, resultCode, intent);
 //        if( profileFragment.isAdded() )
 //            profileFragment.onActivityResult(requestCode, resultCode, intent);
-        if( fragment != null )
+        if (fragment != null)
             fragment.onActivityResult(requestCode, resultCode, intent);
 
     }

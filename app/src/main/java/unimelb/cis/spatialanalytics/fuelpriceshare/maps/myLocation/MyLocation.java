@@ -31,8 +31,10 @@ public class MyLocation {
     }
 
     /**
-     * TODO add comments
+     * Get the current location from the best location service provider.
      * @return
+     * i) the current location
+     * ii) null if error ocurs
      */
     public static Location getMyLocation(){
         //before fetching the location, we need to enable the GPS server.

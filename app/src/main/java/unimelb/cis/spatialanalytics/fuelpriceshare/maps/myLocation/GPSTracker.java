@@ -248,7 +248,7 @@ public class GPSTracker implements LocationListener {
         alertDialog.show();
     }
 
-    // TODO implement a more efficient method to get current locaiton
+    // TODO implement a more efficient method to get current location
     @Override
     public void onLocationChanged(Location location) {
     }

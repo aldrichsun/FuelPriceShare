@@ -47,6 +47,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import unimelb.cis.spatialanalytics.fuelpriceshare.config.ConfigConstant;
+import unimelb.cis.spatialanalytics.fuelpriceshare.data.Users;
 import unimelb.cis.spatialanalytics.fuelpriceshare.maps.autoComplete.AutoCompleteAdapter;
 import unimelb.cis.spatialanalytics.fuelpriceshare.maps.query.PathQuery;
 import unimelb.cis.spatialanalytics.fuelpriceshare.maps.query.RangeQuery;
@@ -723,7 +725,7 @@ public class RangeFragment extends Fragment {
      * to issue the range query; ii) draw the returned points on the map with customized
      * marker icon
      */
-    private class RangeQueryTask extends AsyncTask<LatLng, Void, JSONArray>{
+    private class RangeQueryTask extends AsyncTask<LatLng, Void, JSONObject>{
 
         // The range query search distance
         private double range_radius = 3.0;
@@ -756,36 +758,67 @@ public class RangeFragment extends Fragment {
         // address the user input, as the query point, and use the user preferred range
         // distance to issue the range query
         @Override
-        protected JSONArray doInBackground(LatLng... params) {
+        protected JSONObject doInBackground(LatLng... params) {
 
             //Log.v(LOG_TAG, "Starting the range query...");
             RangeQuery rangeQuery = new RangeQuery();
-            JSONArray stations = rangeQuery.executeQuery(params[0],
-                    Double.valueOf(range_radius));
+            JSONObject stations = rangeQuery.executeQuery(
+                    params[0],
+                    Double.valueOf(range_radius),
+                    Users.id);
             //Log.v(LOG_TAG, "The results are: " + stations.toString());
             return stations;
         }
 
         // Draw the returned points on the map with customized marker icon
         @Override
-        protected void onPostExecute(JSONArray jsonArray) {
+        protected void onPostExecute(JSONObject jsonObj) {
 
             progressDialog.dismiss();
-            if( jsonArray == null ){
+
+            if( jsonObj == null ){
                 if( getActivity() != null ) {
-                    Toast toast = Toast.makeText(getActivity(), "Server request errors," +
-                            " please check the addresses or the internet connection and try later", Toast.LENGTH_LONG);
+                    Toast toast = Toast.makeText(
+                            getActivity(), "Internet error please check and try again",
+                            Toast.LENGTH_SHORT);
+                    toast.setGravity(Gravity.BOTTOM, 0, 0);
+                    toast.show();
+                }
+                return;
+            }
+            if( jsonObj.optInt("error") == 3001 ){
+                if( getActivity() != null ) {
+                    Toast toast = Toast.makeText(
+                            getActivity(), "No sufficient credit, please contribute fuel price " +
+                                    "to gain more credits",
+                            Toast.LENGTH_LONG);
                     toast.setGravity(Gravity.CENTER, 0, 0);
                     toast.show();
                 }
                 return;
             }
-            if( jsonArray.length() <= 0 ){
+            if( jsonObj.optInt("error") == 3002 ){
                 if( getActivity() != null ) {
-                    Toast toast = Toast.makeText(getActivity(), "No stations within " +
-                            this.range_radius + "km, " +
-                            "please increase the radius", Toast.LENGTH_LONG);
-                    toast.setGravity(Gravity.CENTER, 0, 0);
+                    Toast toast = Toast.makeText(
+                            getActivity(), "Internal server error, please try again later",
+                            Toast.LENGTH_SHORT);
+                    toast.setGravity(Gravity.BOTTOM, 0, 0);
+                    toast.show();
+                }
+                return;
+            }
+            /////////////////////////////////////////////////////////////////
+            JSONArray jsonArray = null;
+            try {
+                jsonArray = jsonObj.getJSONArray( ConfigConstant.KEY_PETROL_STATION );
+            } catch (JSONException e) {
+                Log.e(LOG_TAG, "Error when parsing json array " + jsonObj.toString(), e);
+
+                if( getActivity() != null ) {
+                    Toast toast = Toast.makeText(
+                            getActivity(), "Internet error please check and try again",
+                            Toast.LENGTH_SHORT);
+                    toast.setGravity(Gravity.BOTTOM, 0, 0);
                     toast.show();
                 }
                 return;
@@ -801,7 +834,7 @@ public class RangeFragment extends Fragment {
             mMap.addMarker(current_markerOptions);
 
             //Else show all the station markers
-            DrawMarkersOnMap.drawOnMapMaxTenDifferentColor(
+            DrawMarkersOnMap.drawOnMap(
                     (android.support.v7.app.ActionBarActivity) getActivity(),
                     mMap,
                     jsonArray,

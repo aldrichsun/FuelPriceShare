@@ -28,16 +28,16 @@ public class MyExceptionHandler {
             errorMsg="TimeoutError or NoConnectionError";
 
         } else if (error instanceof AuthFailureError) {
-            //TODO
+
             errorMsg="AuthFailureError";
         } else if (error instanceof ServerError) {
-            //TODO
+
             errorMsg="ServerError";
         } else if (error instanceof NetworkError) {
-            //TODO
+
             errorMsg="NetworkError";
         } else if (error instanceof ParseError) {
-            //TODO
+
             errorMsg="ParseError";
 
         }
