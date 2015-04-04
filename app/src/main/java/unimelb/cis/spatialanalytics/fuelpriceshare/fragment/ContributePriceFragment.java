@@ -81,12 +81,11 @@ public class ContributePriceFragment extends Fragment implements DialogInterface
     private Bitmap bitmapUpload;//Captured fuel image to be uploaded
     private String transactionID;//The ID of the action of contributing price.
 
-
     /**
      * Petrol Station and Fuel Information parameters
      */
-
     private FuelData fuelData = new FuelData();
+
     /**
      * Main view panel components
      */
@@ -94,11 +93,9 @@ public class ContributePriceFragment extends Fragment implements DialogInterface
     private ImageView imageViewTakePhoto;//take fuel image icon
     private TextView textViewLabel;//labels for taking an image of fuel price
 
-
     private ActionBar actionBar;
     private Menu menuActionBar;
     private boolean isEditingView = false;
-
 
     /**
      * Click position records
@@ -120,7 +117,6 @@ public class ContributePriceFragment extends Fragment implements DialogInterface
     //The selected petrol station id
     private int selectedStationID;
 
-
     private final String TAG = ContributePriceFragment.class.getSimpleName();
 
     private Activity activity;
@@ -130,6 +126,10 @@ public class ContributePriceFragment extends Fragment implements DialogInterface
     public static boolean isMenuVisible = false;
 
     public ContributePriceFragment() {
+
+        // This is used for processing the case that if there's only one fuel stations nearby when the user
+        // contribute price, we choose the only one station by default (which means the user doesn't need to choose).
+        this.selectedStationID = 0; // by default it is the first fuel station user selects.
     }
 
     @Override
@@ -202,7 +202,6 @@ public class ContributePriceFragment extends Fragment implements DialogInterface
         return rootView;
     }
 
-
     /**
      * Upload the final refined fuel information data to the central server. The information includes:
      * 1) User profile, e.g., id, username, etc.
@@ -219,18 +218,25 @@ public class ContributePriceFragment extends Fragment implements DialogInterface
             json.put(ConfigConstant.KEY_LONGITUDE,fuelData.getLongitude());
           /*
             json.put(ConfigConstant.KEY_FUEL, fuelData.getFuelJsonList());
-            json.put(ConfigConstant.KEY_PETROL_STATION, fuelData.getPetrolStationsJsonList().size() > 0 ? fuelData.getPetrolStationsJsonList().get(selectedStationID) : fuelData.getPetrolStationsJsonList());
+            json.put(ConfigConstant.KEY_PETROL_STATION, fuelData.getPetrolStationsJsonList().size() > 0
+                    ? fuelData.getPetrolStationsJsonList().get(selectedStationID) : fuelData.getPetrolStationsJsonList());
            */
 
+            // Han Li and Yu Sun: The logic is that
+            // i) if there's more than one fuel stations, we show the dialog and upload the user's selected
+            // fuel station
+            // ii) if there is no fuel station nearby, we upload an empty json object and store the contributed
+            // price in another table
+            // iii) if there's only one fuel stations, we upload the only one station by default, and the user
+            // doesn't need to choose.
             json.put(ConfigConstant.KEY_FUEL, fuelData.getFuelJsonArray());
-            json.put(ConfigConstant.KEY_PETROL_STATION, fuelData.getPetrolStationsJsonList().size() > 0 ? fuelData.getPetrolStationsJsonList().get(selectedStationID) : fuelData.getFuelJsonArray());
-
+            json.put(ConfigConstant.KEY_PETROL_STATION, fuelData.getPetrolStationsJsonList().size() > 0
+                    ? fuelData.getPetrolStationsJsonList().get(selectedStationID) : new JSONObject());
 
             /**
              * User Volley API developed by Google to handle the request!
              * make HTTP request to the server to upload the data, and received the response from the server
              */
-
             // Tag used to cancel the request
             String tag_json_obj = TAG;
 
@@ -293,7 +299,6 @@ public class ContributePriceFragment extends Fragment implements DialogInterface
 
     }
 
-
     /**
      * Handle the event of confirmation. If user clicks the "Upload" button, which means he wants to upload the
      * finalized (probably after refine some fuel items) fuel information to the central server.
@@ -302,13 +307,14 @@ public class ContributePriceFragment extends Fragment implements DialogInterface
      * 2) update views presented to the user
      * 3) handle the condition of multiple petrol stations
      */
-
     public void handleUpload() {
         {
+            // If there's more than one fuel stations, we show the dialog and upload the user's selected
+            // fuel station
             if (fuelData.getPetrolStationsJsonList().size() > 1) {
 
                 AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-                builder.setTitle("Which of the following petrol station are you currently at?")
+                builder.setTitle("Please choose a station")
 
                         //choose the fuel station if multiple stations are detected
                         .setSingleChoiceItems(fuelData.convertPetrolStationNameList2CharSequence(), selectedStationID, new DialogInterface.OnClickListener() {
@@ -320,8 +326,6 @@ public class ContributePriceFragment extends Fragment implements DialogInterface
 
                             }
                         })
-
-
                                 // Set the action buttons
                         .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                             @Override
@@ -346,10 +350,15 @@ public class ContributePriceFragment extends Fragment implements DialogInterface
                 dialog.show();
 
             } else {
-                if (fuelData.getPetrolStationsJsonList().size() == 0)
+                // Here is two cases:
+                // ii) if there is no fuel station nearby, we upload an empty json object
+                // iii) if there's only one fuel stations, we upload the only one station by default, i.e.,
+                // set 'this.selectedStationID = 0'
 
+                if (fuelData.getPetrolStationsJsonList().size() == 0)
                     Log.e(TAG, "No petrol station was detected around!");
 
+                this.selectedStationID = 0; // by default it is the first fuel station user selects.
                 updateData2Server();
 
             }
@@ -357,7 +366,6 @@ public class ContributePriceFragment extends Fragment implements DialogInterface
 
         }
     }
-
 
     /**
      * If the user click the "Leave" button or Home "Back" menu, user will exist current editing panel and return back
@@ -421,7 +429,6 @@ public class ContributePriceFragment extends Fragment implements DialogInterface
 
     }
 
-
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
@@ -451,7 +458,6 @@ public class ContributePriceFragment extends Fragment implements DialogInterface
         }
     }
 
-
     /**
      * Take fuel photo to process
      */
@@ -463,10 +469,15 @@ public class ContributePriceFragment extends Fragment implements DialogInterface
 
     }
 
-
     /**
      * Receive all the returning results of children activities. Detailed information please refer to the
      * official android programming document
+     *
+     * Comments from Yu Sun on 04/04/2015
+     * It is this function that uploads the cropped (or entire) image to the server to process, and gets
+     * the server response containing the recognized fuel type and price texts and positions.
+     * Line 'fuelData.parseFuelPriceImageReplyData(response)' parses the server response and stored the
+     * parsed result in its own private variables.
      *
      * @param requestCode
      * @param resultCode
@@ -474,6 +485,7 @@ public class ContributePriceFragment extends Fragment implements DialogInterface
      */
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent intent) {
+
         super.onActivityResult(requestCode, resultCode, intent);
         String imagePath, data, filename;
         Uri uri;//get the uri of the image
@@ -493,15 +505,12 @@ public class ContributePriceFragment extends Fragment implements DialogInterface
                     bitmap = ImageDecoder.rotateImage(bitmap, imageFile.getAbsolutePath());
                     bitmap = ImageDecoder.createScaledBitmap(bitmap, ConfigConstant.IMAGE_TYPE_FUEL);
 
-
                     uri = ImageDecoder.getImageUri(getActivity(), bitmap);
                     //Uri uri = Uri.fromFile(imageFile);
                     cropImage(uri);
                     //imageFile.delete();
 
                     break;
-
-
                 case SELECT_FILE:
                     /**
                      * Capture the image from selecting from library, files or gallery. ANd then crop it.
@@ -552,47 +561,57 @@ public class ContributePriceFragment extends Fragment implements DialogInterface
                             pDialog.setMessage("Processing fuel image......");
                             pDialog.setCancelable(false);
                             pDialog.show();
-                            MultiPartRequest multiPartRequest = new MultiPartRequest(ConfigURL.getFuelPriceImageProcessServlet(), new File(imageUri.getPath()), filename, data, new Response.Listener<JSONObject>() {
 
-                                @Override
-                                public void onResponse(JSONObject response) {
-                                    Log.d(TAG, response.toString());
+                            // Yu Sun 04/04/2015 reformatted for better reading
+                            MultiPartRequest multiPartRequest = new MultiPartRequest(
 
-                                    if (!response.has(ConfigConstant.KEY_ERROR)) {
+                                    ConfigURL.getFuelPriceImageProcessServlet(), // parameter one
+                                    new File(imageUri.getPath()),   // parameter two
+                                    filename,   // parameter three
+                                    data,   // parameter four
+                                    new Response.Listener<JSONObject>() { // parameter five
 
-                                        pDialog.dismiss();
-                                        //Image was successfully uploaded to the server
-                                        fuelData.parseFuelPriceImageReplyData(response);
-                                        isEditingView = true;
-                                        switchViews(true);
-                                        //The view image might be scaled up to fill the entire view. for more detailed info, please refer
-                                        //the website: https://guides.codepath.com/android/Working-with-the-ImageView
-                                        //imageViewFuel.setImageBitmap(bitmapUpload);
+                                        @Override
+                                        public void onResponse(JSONObject response) {
 
-                                        /**
-                                         * Initialize canvas view and update current view
-                                         */
-                                        canvasView = new CustermizedCanvasView(getActivity(), bitmapUpload);
-                                        updateCanvasView();
+                                            Log.d(TAG, response.toString());
+                                            // Yu Sun 04/04/2015 No error
+                                            if (!response.has(ConfigConstant.KEY_ERROR)) {
 
+                                                pDialog.dismiss();
 
-                                    } else {
-                                        pDialog.setMessage(response.toString());
-                                        Log.e(TAG, response.toString());
-                                        pDialog.dismiss();
+                                                //Image was successfully uploaded to the server
+                                                // Yu Sun 04/04/2015 parse the server response
+                                                fuelData.parseFuelPriceImageReplyData(response);
+                                                isEditingView = true;
+                                                switchViews(true);
+                                                //The view image might be scaled up to fill the entire view. for more detailed info, please refer
+                                                //the website: https://guides.codepath.com/android/Working-with-the-ImageView
+                                                //imageViewFuel.setImageBitmap(bitmapUpload);
+
+                                                /**
+                                                 * Initialize canvas view and update current view
+                                                 */
+                                                canvasView = new CustermizedCanvasView(getActivity(), bitmapUpload);
+                                                updateCanvasView();
+                                            } else {
+                                                // Yu Sun 04/04/2015 Error occurs
+                                                pDialog.setMessage(response.toString());
+                                                Log.e(TAG, response.toString());
+                                                pDialog.dismiss();
+                                            }
+                                        }
+                                    },
+                                    new Response.ErrorListener() { // parameter six
+
+                                        @Override
+                                        public void onErrorResponse(VolleyError error) {
+
+                                            pDialog.dismiss();
+                                            MyExceptionHandler.presentError(TAG, "Update profile image failed!", getActivity(), error);
+                                        }
                                     }
-                                }
-                            }, new Response.ErrorListener() {
-
-                                @Override
-                                public void onErrorResponse(VolleyError error) {
-
-                                    pDialog.dismiss();
-                                    MyExceptionHandler.presentError(TAG, "Update profile image failed!", getActivity(), error);
-
-
-                                }
-                            });
+                            );
 
                             /**
                              * Set the timeout
@@ -613,7 +632,6 @@ public class ContributePriceFragment extends Fragment implements DialogInterface
                         }
                     break;
 
-
                 case Crop.RESULT_ERROR:
                     Log.e(TAG, Crop.getError(intent).getMessage());
                     break;
@@ -626,14 +644,12 @@ public class ContributePriceFragment extends Fragment implements DialogInterface
         }
     }
 
-
     /**
      * Crop input image either from camera or files. There are couple cropping options available including asSquare, withAspect, withMaxSize.
      * By default we use the withMaxSize. For more detailed information, please refer to the CropImage Library.
      *
      * @param source URI
      */
-
     private void cropImage(Uri source) {
         Uri outputUri = Uri.fromFile(new File(getActivity().getCacheDir(), "cropped"));
         Bitmap bitmap = null;
@@ -651,7 +667,6 @@ public class ContributePriceFragment extends Fragment implements DialogInterface
 
         // new Crop(source).output(outputUri).withMaxSize(1000, 2000).start(getActivity());
     }
-
 
     /**
      * Update canvas view under two conditions:
@@ -676,7 +691,6 @@ public class ContributePriceFragment extends Fragment implements DialogInterface
      *
      * @param flag if flag is true, it is visible to the user; otherwise hidden.
      */
-
     public void setActionBarMenuVisibility(boolean flag) {
         isMenuVisible = flag;
         menuActionBar.setGroupVisible(R.id.menu_group, flag);
@@ -693,13 +707,11 @@ public class ContributePriceFragment extends Fragment implements DialogInterface
 
     }
 
-
     /**
      * Control the total views of current window.
      *
      * @param flag if true, present fuel image to the user; otherwise set it invisible and only show the take photo icon.
      */
-
     public void switchViews(boolean flag) {
         if (flag) {
             /**
@@ -724,7 +736,6 @@ public class ContributePriceFragment extends Fragment implements DialogInterface
         }
 
     }
-
 
     /**
      * Handle screen (ImageView) click or touch event to determine the touch area, and get the corresponding rectangle that is defined by the data set
@@ -799,7 +810,6 @@ public class ContributePriceFragment extends Fragment implements DialogInterface
 
     }
 
-
     /**
      * present the dialog for editing fuel information
      */
@@ -871,7 +881,6 @@ public class ContributePriceFragment extends Fragment implements DialogInterface
         }
     }
 
-
     /**
      * Set NumberPicker Text color
      *
@@ -879,7 +888,6 @@ public class ContributePriceFragment extends Fragment implements DialogInterface
      * @param color
      * @return
      */
-
     public boolean setNumberPickerTextColor(NumberPicker numberPicker, int color) {
         final int count = numberPicker.getChildCount();
         for (int i = 0; i < count; i++) {
@@ -908,7 +916,6 @@ public class ContributePriceFragment extends Fragment implements DialogInterface
     /**
      * Build floating dialog for editing fuel information
      */
-
     public void showModifyFuelTypeDialog(int index) {
         final Dialog dialog = new Dialog(getActivity(), R.style.DialogCustomTheme);
 
@@ -979,7 +986,6 @@ public class ContributePriceFragment extends Fragment implements DialogInterface
 
     }
 
-
     /**
      * Update canvas view under two conditions:
      * 1) click event was triggered and the click falls into the predefined rectangle area
@@ -1004,7 +1010,6 @@ public class ContributePriceFragment extends Fragment implements DialogInterface
 
     }
 
-
     /**
      * Given a point (coordinate), check whether it falls into the rectangle or not.
      * author: Han Li
@@ -1015,7 +1020,6 @@ public class ContributePriceFragment extends Fragment implements DialogInterface
      * @param bottom bottom of the rectangle
      * @return return true if the coordinate within the rectangle; otherwise return false
      */
-
     public boolean isInsideRectangle(int left, int right, int top, int bottom) {
         if (positionX >= left && positionX <= right && positionY >= top && positionY <= bottom)
             return true;
@@ -1029,7 +1033,6 @@ public class ContributePriceFragment extends Fragment implements DialogInterface
      *
      * @param dialog
      */
-
     @Override
     public void onDismiss(DialogInterface dialog) {
         //update canvas view
@@ -1039,7 +1042,6 @@ public class ContributePriceFragment extends Fragment implements DialogInterface
 
 
     }
-
 
 }
 

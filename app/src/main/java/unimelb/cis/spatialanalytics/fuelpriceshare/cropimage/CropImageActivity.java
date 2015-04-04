@@ -221,10 +221,16 @@ public class CropImageActivity extends MonitoredActivity {
 
             Rect imageRect = new Rect(0, 0, width, height);
 
+            //04/04/2015 Han Li original settings by the crop image API
             // Make the default size about 4/5 of the width or height
-            int cropWidth = Math.min(width, height) * 4 / 5;
+            //int cropWidth = Math.min(width, height) * 4 / 5;
             @SuppressWarnings("SuspiciousNameCombination")
-            int cropHeight = cropWidth;
+            //int cropHeight = cropWidth;
+            // Han Li changed to:
+            //modified by Han to make the initial crop to be the whole image
+            int cropWidth = width;
+            @SuppressWarnings("SuspiciousNameCombination")
+            int cropHeight = height;
 
             if (aspectX != 0 && aspectY != 0) {
                 if (aspectX > aspectY) {

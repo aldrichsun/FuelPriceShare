@@ -112,7 +112,7 @@ public class AutoCompleteAdapter extends ArrayAdapter<String> implements Filtera
                     for(int i = 0; i < history.size(); i++){
 
                         String address = history.get(i);
-                        if( address.startsWith( constraint_string ) ){
+                        if( address.toLowerCase().startsWith( constraint_string.toLowerCase() ) ){
                             newResultList.add( address );
                             ++HISTORY_COUNT;
                             if( HISTORY_COUNT >= MAX_HISTORY_RESULT )

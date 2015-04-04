@@ -38,11 +38,16 @@ public class CustermizedCanvasView extends View {
         this.bitmap = bitmap;
         this.context = context;
 
+        String color = "#eeff41";
+        //String color = "#ffff00";
+
         /**
          * Mainly set up the styles for each paint such as text size, color, etc.
          */
         paint_text = new Paint();
-        paint_text.setColor(Color.BLUE);
+        ////////// Changed by Yuan Li, Han Li and Yu Sun on 04/04/2015 /////////////////
+        //paint_text.setColor(Color.BLUE);
+        paint_text.setColor(Color.parseColor(color));
         /**
          * set text size. TO DO: This setting might be changed later to make the size of text dynamically
          * changed based on the input to make it adjustable.
@@ -53,7 +58,9 @@ public class CustermizedCanvasView extends View {
         paint_text.getFontMetrics(fm);
 
 
-        paint_rect.setColor(Color.BLUE);
+        ////////// Changed by Yuan Li, Han Li and Yu Sun on 04/04/2015 /////////////////
+        //paint_rect.setColor(Color.BLUE);
+        paint_rect.setColor(Color.parseColor(color));
         paint_rect.setStyle(Paint.Style.STROKE);
 
         paint_select.setColor(Color.RED);
