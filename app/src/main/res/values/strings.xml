@@ -34,6 +34,7 @@
     <string name="column_fuel">fuel_name</string>
     <string name="column_price">price</string>
     <string name="column_station_name">name</string>
+    <string name="column_station_brand">brand</string>
     <string name="column_station_short_name">short_name</string>
     <string name="title_activity_path">PathActivity</string>
     <string name="route_button">Route</string>

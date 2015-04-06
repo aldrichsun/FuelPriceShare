@@ -49,6 +49,7 @@ public class DrawMarkersOnMap {
                         // function drawOnMapMaxTenDifferentColor() is called
     private static String preferredFuelType; //this string is initialized only when
                         // function drawOnMapMaxTenDifferentColor() is called
+    private static double DEFAULT_PRICE_VALUE;  // the value of the price if we there's no real fuel price
 
 
     /**
@@ -129,12 +130,30 @@ public class DrawMarkersOnMap {
         else
             myStations = new ArrayList<>();
 
-        for(int i = 0; i < stationList.size() && i < maxNumberOfDrawnStations; i++){
-            //generate markers for this station
-            stationList.get(i).generateMarker(
+        int used_color = 0;
+        for(int i = 0; i < stationList.size() && i < maxNumberOfDrawnStations; i++) {
+
+            mStation station = stationList.get(i);
+            //If the fuel station has no contributed price, we only show its short name with black color.
+            //Otherwise, we show its short name and PRICE with the color in the mColors array
+            if (station.mPrice == DEFAULT_PRICE_VALUE) { // has no contributed price
+                station.mFullMarkerIcon = CustomizeMapMarker.generateBitmapFromText(
+                        actionBarActivity.getApplicationContext(),
+                        station.mShortName,
+                        Color.BLACK);
+            }
+            else{ //
+                station.mFullMarkerIcon = CustomizeMapMarker.generateBitmapFromText(
+                        actionBarActivity.getApplicationContext(),
+                        station.mShortName + ": " + station.mPrice,
+                        Color.parseColor(mColors[used_color++]));
+            }
+            //the dot marker
+            station.mBriefMarkerIcon = CustomizeMapMarker.generateBitmapFromText(
                     actionBarActivity.getApplicationContext(),
-                    Color.parseColor(mColors[i])
-            );
+                    null, // no string, which gives a single dot
+                    Color.RED);
+
             myStations.add( stationList.get(i) );
         }
 
@@ -288,8 +307,8 @@ public class DrawMarkersOnMap {
         public LatLng mLocation;     //The location of the station
         public String mShortName;   //The short name of the station which
                                     // will be shown in the customized marker
-        public String mFullName;    //The full name of the station which
-                                    // will be shown in the info window
+        public String mFullName;    //The full name of the station which is the price of the user's preferred fuel type
+                                    // and will be shown in the info window
         public double mPrice;    // the price of the user preferred fuel type
 
         public Bitmap mFullMarkerIcon; // the marker of the station on the map showing its name and fuel price
@@ -312,18 +331,6 @@ public class DrawMarkersOnMap {
                 return 1;
             return 0;
         }
-
-        public void generateMarker( Context context, int color ){
-
-            this.mFullMarkerIcon = CustomizeMapMarker.generateBitmapFromText(
-                    context,
-                    this.mShortName + ": " + this.mPrice,
-                    color );
-            this.mBriefMarkerIcon = CustomizeMapMarker.generateBitmapFromText(
-                    context,
-                    null, // no string, which gives a single dot
-                    color );
-        }
     }
 
     /**
@@ -334,7 +341,7 @@ public class DrawMarkersOnMap {
      * mStation has field:
      *  --mLocation (LatLng) which will be used to draw the location of the station on the map,
      *  --mShortName (String) which will be shown in the customized marker
-     *  --mFullName (String) which will be shown in the marker's info window
+     *  --mFullName (String) which is the brand of the fuel station and will be shown in the marker's info window
      *  --mPrice (double) which is the price of the user's preferred fuel type, and will be
      *  shown in the customized marker
      *
@@ -361,14 +368,18 @@ public class DrawMarkersOnMap {
                         station.getDouble(actionBarActivity.getString(R.string.column_longitude))
                 );
 
+                // Changed by Yu Sun on 06/04/2015
+                //String stationFullName = station.getString(
+                //        actionBarActivity.getString(R.string.column_station_name));
                 String stationFullName = station.getString(
-                        actionBarActivity.getString(R.string.column_station_name));
+                        actionBarActivity.getString(R.string.column_station_brand));
+
                 String stationShortName = station.getString(
                         actionBarActivity.getString(R.string.column_station_short_name));
                 JSONArray fuelAndPriceList = station.getJSONArray(
                         actionBarActivity.getString(R.string.column_fuel_provided));
 
-                double price = 0.0;
+                double price = DEFAULT_PRICE_VALUE;
                 for (int j = 0; j < fuelAndPriceList.length(); j++) {
 
                     JSONObject fuelAndPrice = fuelAndPriceList.getJSONObject(j);

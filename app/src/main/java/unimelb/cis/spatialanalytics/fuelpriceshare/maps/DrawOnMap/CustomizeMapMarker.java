@@ -36,7 +36,7 @@ public class CustomizeMapMarker {
     public static Bitmap generateBitmapFromText( Context context, String text, int color ){
 
         if( text == null || text.isEmpty() )
-            return generateDotBitmap();
+            return generateDotBitmap( color );
 
 
         Typeface tf = Typeface.create("Helvetica", Typeface.BOLD);
@@ -94,13 +94,13 @@ public class CustomizeMapMarker {
     }
 
     /**
-     * This function generates a bitmap with a single red dot of radius 5.
+     * This function generates a bitmap with a single dot of radius 5 with the given color.
      * @return a bitmap with a single red dot of radius 5.
      */
-    private static Bitmap generateDotBitmap( ){
+    private static Bitmap generateDotBitmap( int color ){
 
         int radius = 5; // the dot radius in pixels
-        int color = Color.RED; //the color of the dot
+        //int color = Color.RED; //the color of the dot
 
         Bitmap bm = Bitmap.createBitmap( 2*radius, 2*radius, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(bm);

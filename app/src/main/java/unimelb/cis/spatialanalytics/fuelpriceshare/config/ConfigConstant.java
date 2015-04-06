@@ -32,6 +32,8 @@ public class ConfigConstant {
     public final static String KEY_PETROL_STATION="fuel_station";
     public static final  String KEY_PETROL_STATION_ID="_id";
     public final static String KEY_PETROL_STATION_NAME="name";
+    // Added by Yu Sun on 06/04/2015
+    public final static String KEY_PETROL_STATION_BRAND = "brand";
 
 
     /**

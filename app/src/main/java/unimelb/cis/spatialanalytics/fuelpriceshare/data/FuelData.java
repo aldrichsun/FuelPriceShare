@@ -8,6 +8,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 
 import unimelb.cis.spatialanalytics.fuelpriceshare.config.ConfigConstant;
 import unimelb.cis.spatialanalytics.fuelpriceshare.maps.myLocation.GPSTracker;
@@ -122,11 +123,26 @@ public class FuelData {
              */
             JSONArray petrolStationJsonArray = replyJson.getJSONArray(ConfigConstant.KEY_PETROL_STATION);
 
+            //////////////////////////////////////////////////////////////////////
+            // Modified by Yu Sun on 06/04/2015 to show the fuel station brand instead of name
+            HashSet<String> station_brand = new HashSet<>();
+
             for (int i = 0; i < petrolStationJsonArray.length(); i++) {
                 petrolStationsJsonList.add(petrolStationJsonArray.getJSONObject(i));
 
-                petrolStationsNameList.add(petrolStationJsonArray.getJSONObject(i).getString(ConfigConstant.KEY_PETROL_STATION_NAME));
+//                petrolStationsNameList.add(petrolStationJsonArray.getJSONObject(i)
+//                        .getString(ConfigConstant.KEY_PETROL_STATION_NAME));
+
+                String brand = petrolStationJsonArray.getJSONObject(i)
+                        .getString(ConfigConstant.KEY_PETROL_STATION_BRAND);
+                if( !station_brand.contains( brand ) ) { // a new brand
+                    petrolStationsNameList.add( brand );
+                    station_brand.add( brand );
+                }
             }
+
+            station_brand.clear();
+            ///////////////////////////////////////////////////////////////////////
 
 
             /*
