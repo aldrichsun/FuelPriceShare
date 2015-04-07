@@ -243,12 +243,12 @@ public class GPSTracker implements LocationListener {
     @Override
     public void onLocationChanged(Location location) {
 
-        // Changed by Yu Sun on 07/04/2015
-        MapFragment.currentLocation = new LatLng(
-                location.getLatitude(),
-                location.getLongitude()
-        );
-        Log.e(TAG, "The current location is " + MapFragment.currentLocation.toString());
+//        // Changed by Yu Sun on 07/04/2015
+//        MapFragment.currentLocation = new LatLng(
+//                location.getLatitude(),
+//                location.getLongitude()
+//        );
+//        Log.e(TAG, "The current location is " + MapFragment.currentLocation.toString());
     }
 
     // TODO implement a more efficient method to get current location

@@ -40,11 +40,13 @@ public class MyLocation {
      * i) the current location
      * ii) null if error ocurs
      */
-    @Deprecated
     public static LatLng getMyLocation(){
         Log.v(LOG_TAG, "The current location is " + MapFragment.currentLocation.toString());
         return MapFragment.currentLocation;
     }
+
+
+
 
     /**
      * Get the current location from the best location service provider.

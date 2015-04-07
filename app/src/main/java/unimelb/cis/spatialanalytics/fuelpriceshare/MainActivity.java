@@ -38,7 +38,7 @@ import unimelb.cis.spatialanalytics.fuelpriceshare.settings.SettingsActivity;
  * Created by Yu Sun on 17/02/2015.
  * We release the prototype 1.0 on 04/03/2015.
  */
-public class MainActivity extends ActionBarActivity {
+public class MainActivity extends ActionBarActivity implements ContributePriceFragment.setDefaultView{
 
     private final String LOG_TAG = MainActivity.class.getSimpleName();
 
@@ -75,6 +75,9 @@ public class MainActivity extends ActionBarActivity {
     private final String LAUNCH_TIME_KEY = "launch_time";
     private final int MAX_TIME_SHOW_DRAWER_AFTER_LAUNCH = 1;
     private SharedPreferences pref;
+
+    // added by Han Li on 07/04/2015
+    public static ContributePriceFragment.setDefaultView setDefaultViewInterFace;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -275,7 +278,10 @@ public class MainActivity extends ActionBarActivity {
                     if (mapFragment.isAdded()) {
                         fragmentTransaction.show(mapFragment);
                     } else {
-                        fragmentTransaction.add(R.id.content_frame, mapFragment);
+                        //fragmentTransaction.add(R.id.content_frame, mapFragment);
+                        //changed by Han : to add flag to the fragment that can be traced later
+                        //back to the MapFragment from ContributePriceFragment
+                        fragmentTransaction.add(R.id.content_frame, mapFragment, String.valueOf(FRAGMENT_MAP));
                     }
                     if (profileFragment.isAdded()) {
                         fragmentTransaction.hide(profileFragment);
@@ -372,6 +378,9 @@ public class MainActivity extends ActionBarActivity {
         super.onPostCreate(savedInstanceState);
         // Sync the toggle state after onRestoreInstanceState has occurred.
         mDrawerToggle.syncState();
+
+        // Added by Han Li on 07/04/2015
+        setDefaultViewInterFace=this;
     }
 
     @Override
@@ -418,6 +427,12 @@ public class MainActivity extends ActionBarActivity {
 
         // added by Yu Sun 06/04/2015
         DrawMarkersOnMap.clearStations();
+    }
+
+    @Override
+    public void setDefaultView(int fragmentId) {
+        selectItem(fragmentId);
+
     }
 
 //    @Override

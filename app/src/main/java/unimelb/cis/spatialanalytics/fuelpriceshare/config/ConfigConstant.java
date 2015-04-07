@@ -10,7 +10,9 @@ public class ConfigConstant {
      * Fuel Settings
      */
     public static final String KEY_FUEL_PRICE = "price";
-    public static final String KEY_FUEL_BRAND = "fuel";
+    public static final String KEY_FUEL_NAME = "fuel";
+
+    public static final String KEY_BRAND="brand";
 
     //Rectangle
     public static final String KEY_RECT_LEFT = "left";
@@ -34,6 +36,11 @@ public class ConfigConstant {
     public final static String KEY_PETROL_STATION_NAME="name";
     // Added by Yu Sun on 06/04/2015
     public final static String KEY_PETROL_STATION_BRAND = "brand";
+    public static final String KEY_FUEL_PROVIDED = "fuel_provided";
+    public static final String KEY_FUEL_PAIR_ID="pairID";
+    public static final String KEY_FUEL_PROVIDED_FUEL_NAME="fuel_name";
+    public static final String KEY_FUEL_PROVIDED_PRICE="price";
+
 
 
     /**

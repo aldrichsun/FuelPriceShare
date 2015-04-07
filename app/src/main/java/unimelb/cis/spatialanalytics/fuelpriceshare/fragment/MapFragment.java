@@ -174,22 +174,20 @@ public class MapFragment extends Fragment{
 
         mMap.setOnMyLocationChangeListener( myLocationChangeListener );
         //Location myLocation = MyLocation.getMyLocation();
-        GPSTracker gps = new GPSTracker( getActivity() );
-        Location myLocation = gps.getLocation();
-        isCurrentLocationEnabled = gps.canGetLocation();
+        //GPSTracker gps = new GPSTracker( getActivity() );
+        //Location myLocation = gps.getLocation();
+        //isCurrentLocationEnabled = gps.canGetLocation();
+        isCurrentLocationEnabled = true;
         currentLocationName = getString(R.string.Your_location);
 
-        if( myLocation != null ){
-
-            currentLocation = null;
+        if( currentLocation != null ){
             //currentLocation = new LatLng(myLocation.getLatitude(), myLocation.getLongitude());
             //Log.e(LOG_TAG, "The current location is: " + currentLocation.toString());
-
-            destinLatLng = new LatLng(myLocation.getLatitude(), myLocation.getLongitude());
+            destinLatLng = new LatLng( currentLocation.latitude, currentLocation.longitude );
         }
         else {
-            //destinLatLng = new LatLng(-37.7963, 144.9614); // Melbourne Uni
-            destinLatLng = new LatLng(0.0, 0.0);
+            destinLatLng = new LatLng(-37.7963, 144.9614); // Melbourne Uni
+            //destinLatLng = new LatLng(0.0, 0.0);
         }
         ////mMap.addMarker(new MarkerOptions().position(latLng).title("Melbourne Uni"));
         CameraPosition initialCameraPosition = new CameraPosition.Builder()

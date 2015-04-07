@@ -38,6 +38,7 @@ import com.android.volley.Response;
 import com.android.volley.RetryPolicy;
 import com.android.volley.VolleyError;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -47,6 +48,7 @@ import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
 
+import unimelb.cis.spatialanalytics.fuelpriceshare.MainActivity;
 import unimelb.cis.spatialanalytics.fuelpriceshare.R;
 import unimelb.cis.spatialanalytics.fuelpriceshare.config.ConfigConstant;
 import unimelb.cis.spatialanalytics.fuelpriceshare.config.ConfigURL;
@@ -80,6 +82,8 @@ public class ContributePriceFragment extends Fragment implements DialogInterface
     private final int SELECT_FILE = ConfigConstant.SELECT_FILE;//Image captured by selecting call back code
     private Bitmap bitmapUpload;//Captured fuel image to be uploaded
     private String transactionID;//The ID of the action of contributing price.
+    private final int FRAGMENT_MAP = 0;
+
 
     /**
      * Petrol Station and Fuel Information parameters
@@ -124,6 +128,7 @@ public class ContributePriceFragment extends Fragment implements DialogInterface
     private String[] actionBarTitles = {"Take Fuel Price Photo", "Fuel Editing Panel", "In Editing Mode"};
 
     public static boolean isMenuVisible = false;
+
 
     public ContributePriceFragment() {
 
@@ -202,6 +207,7 @@ public class ContributePriceFragment extends Fragment implements DialogInterface
         return rootView;
     }
 
+
     /**
      * Upload the final refined fuel information data to the central server. The information includes:
      * 1) User profile, e.g., id, username, etc.
@@ -214,8 +220,61 @@ public class ContributePriceFragment extends Fragment implements DialogInterface
         try {
             json.put(ConfigConstant.KEY_CONTRIBUTE_PRICE_TRANSACTION_ID, transactionID);
             json.put(ConfigConstant.KEY_USER, Users.id);
-            json.put(ConfigConstant.KEY_LATITUDE,fuelData.getLatitude());
-            json.put(ConfigConstant.KEY_LONGITUDE,fuelData.getLongitude());
+            json.put(ConfigConstant.KEY_LATITUDE, fuelData.getLatitude());
+            json.put(ConfigConstant.KEY_LONGITUDE, fuelData.getLongitude());
+
+            /*
+            pairing fuel price and type to update the fuel price information
+             */
+
+            JSONArray fuelJSONArray = fuelData.getFuelJsonArray();
+            Map<Integer, Double> fuelPairsPrice = new HashMap<>();
+            Map<Integer, String> fuelPairsType = new HashMap<>();
+
+            for (int i = 0; i < fuelJSONArray.length(); i++) {
+                JSONObject jsonObject = fuelJSONArray.getJSONObject(i);
+                int pairID = jsonObject.getInt(ConfigConstant.KEY_FUEL_PAIR_ID);
+                if (jsonObject.has(ConfigConstant.KEY_FUEL_PRICE)) {
+                    double price = jsonObject.getDouble(ConfigConstant.KEY_FUEL_PRICE);
+                    fuelPairsPrice.put(pairID, price);
+                } else {
+                    String type = jsonObject.getString(ConfigConstant.KEY_FUEL_NAME);
+                    fuelPairsType.put(pairID, type);
+                }
+            }
+
+            /*
+            handle the case that, the size of price and type of the fuel is not equal
+            this is only a simple solution. In the future, more complex cases may occur,
+            and make some changes if necessary.
+             */
+            int lenType=fuelPairsType.size();
+            int lenPrice=fuelPairsPrice.size();
+            if(lenType>lenPrice)
+            {
+                for(int i=lenPrice;i<lenType;i++)
+                {
+                    fuelPairsType.remove(i);
+                }
+            }else if(lenType<lenPrice)
+            {
+                for(int i=lenType;i<lenPrice;i++)
+                {
+                    fuelPairsPrice.remove(i);
+                }
+
+            }
+
+            //fuel_provided filed to petrol station in JSON
+            JSONArray jsonFuelProvidedArray = new JSONArray();
+            for (int i = 0; i < lenType && i<lenPrice; i++) {
+                JSONObject jsonObject = new JSONObject();
+                jsonObject.put(ConfigConstant.KEY_FUEL_PROVIDED_FUEL_NAME, fuelPairsType.get(i));
+                jsonObject.put(ConfigConstant.KEY_FUEL_PROVIDED_PRICE, fuelPairsPrice.get(i));
+                jsonFuelProvidedArray.put(jsonObject);
+
+            }
+
           /*
             json.put(ConfigConstant.KEY_FUEL, fuelData.getFuelJsonList());
             json.put(ConfigConstant.KEY_PETROL_STATION, fuelData.getPetrolStationsJsonList().size() > 0
@@ -229,9 +288,72 @@ public class ContributePriceFragment extends Fragment implements DialogInterface
             // price in another table
             // iii) if there's only one fuel stations, we upload the only one station by default, and the user
             // doesn't need to choose.
-            json.put(ConfigConstant.KEY_FUEL, fuelData.getFuelJsonArray());
-            json.put(ConfigConstant.KEY_PETROL_STATION, fuelData.getPetrolStationsJsonList().size() > 0
-                    ? fuelData.getPetrolStationsJsonList().get(selectedStationID) : new JSONObject());
+            //json.put(ConfigConstant.KEY_FUEL, fuelData.getFuelJsonArray());
+
+
+            if(fuelData.getPetrolStationsJsonList().size()==0)
+            {
+                Log.e(TAG,"fuelData.getPetrolStationsJsonList().size() == 0");
+                return;
+            }
+
+            JSONObject petrolStationJSON=fuelData.getPetrolStationsJsonList().get(selectedStationID);
+
+         /*
+         * *//*
+            if the new refined result doesn't contain the fuel type information in the old version,
+            then keep the original (old) information into the new one.
+            This process can be done in the server.
+             *//*
+            JSONArray jsonArrayTemp=new JSONArray();
+            if(petrolStationJSON.has(ConfigConstant.KEY_FUEL_PROVIDED))
+            {
+                //original fuel information (old version)
+                JSONArray jsonArray=petrolStationJSON.getJSONArray(ConfigConstant.KEY_FUEL_PROVIDED);
+                for(int i=0;i<jsonArray.length();i++)
+                {
+                    JSONObject jsonObject=jsonArray.getJSONObject(i);
+                    String name=jsonObject.getString(ConfigConstant.KEY_FUEL_PROVIDED_FUEL_NAME);
+                    boolean check=true;
+                    for(int j=0;j<jsonFuelProvidedArray.length();j++)
+                    {
+                        JSONObject jsonObject2=jsonArray.getJSONObject(i);
+                        String name2=jsonObject2.getString(ConfigConstant.KEY_FUEL_PROVIDED_FUEL_NAME);
+                        if(name.equals(name2))
+                        {
+                            //may validate the result in the future in case wrongly input
+                            //e.g., compare the two time inputs. If the difference is over a
+                            //thresh, it is likely wrong.
+                            check = false;
+                            break;
+                        }
+
+                    }
+                    if(check)
+                    {
+                        jsonArrayTemp.put(jsonObject);
+                        Log.i(TAG,"keep the original fuel information to the new one");
+
+                    }
+
+                }
+            }
+
+            for(int i=0;i<jsonArrayTemp.length();i++)
+            {
+                JSONObject jsonObject=jsonArrayTemp.getJSONObject(i);
+                jsonFuelProvidedArray.put(jsonObject);
+            }
+            //petrolStationJSON.put(ConfigConstant.KEY_FUEL_PROVIDED,jsonFuelProvidedArray);//might removed
+
+
+*/
+
+            //update the fuel information and try the best to keep some of the original price
+
+            json.put(ConfigConstant.KEY_FUEL_PROVIDED,jsonFuelProvidedArray);
+
+            json.put(ConfigConstant.KEY_PETROL_STATION,petrolStationJSON);
 
             /**
              * User Volley API developed by Google to handle the request!
@@ -254,6 +376,7 @@ public class ContributePriceFragment extends Fragment implements DialogInterface
 
                 @Override
                 public void onResponse(JSONObject response) {
+                    pDialog.dismiss();
                     Log.d(TAG, response.toString());
                     if (response.has(ConfigConstant.KEY_ERROR)) {
                         Log.e(TAG, "Upload Failed!" + response.toString());
@@ -273,9 +396,36 @@ public class ContributePriceFragment extends Fragment implements DialogInterface
                             Toast toast = Toast.makeText(getActivity(), "Upload Success! +10 credits", Toast.LENGTH_SHORT);
                             toast.setGravity(Gravity.BOTTOM, 0, 0);
                             toast.show();
+
+
+
+
+                            /*
+                            after successfully upload the fuel price information to the server, switch back to MapFragment
+                             */
+                            MapFragment fragment;
+                            Fragment temp;
+                            if (getFragmentManager() != null)
+                                temp = getFragmentManager().findFragmentByTag(String.valueOf(FRAGMENT_MAP));
+                            else {
+                                Log.e(TAG, "getFragmentManager() is null");
+                                return;
+                            }
+
+                            if (temp == null) {
+                                Log.e(TAG, "MapFragment hasn't been initialized yet");
+
+                                return;
+
+                            } else
+                                fragment = (MapFragment) temp;
+
+                            MainActivity.setDefaultViewInterFace.setDefaultView(FRAGMENT_MAP);
+
+
                         }
                     }
-                    pDialog.dismiss();
+
                 }
             }, new Response.ErrorListener() {
 
@@ -464,7 +614,8 @@ public class ContributePriceFragment extends Fragment implements DialogInterface
     public void takePhoto(View view) {
 
         imagePicker = new ImagePicker(getActivity(), "Take a photo");
-        imagePicker.selectImageBoth();
+        imagePicker.selectImageBoth();//enable both methods of capture an fuel image either local file or camera
+       // imagePicker.selectImageCamera();
 
 
     }
@@ -472,7 +623,7 @@ public class ContributePriceFragment extends Fragment implements DialogInterface
     /**
      * Receive all the returning results of children activities. Detailed information please refer to the
      * official android programming document
-     *
+     * <p/>
      * Comments from Yu Sun on 04/04/2015
      * It is this function that uploads the cropped (or entire) image to the server to process, and gets
      * the server response containing the recognized fuel type and price texts and positions.
@@ -583,6 +734,7 @@ public class ContributePriceFragment extends Fragment implements DialogInterface
                                                 //Image was successfully uploaded to the server
                                                 // Yu Sun 04/04/2015 parse the server response
                                                 fuelData.parseFuelPriceImageReplyData(response);
+                                                fuelData.sortBrandList();
                                                 isEditingView = true;
                                                 switchViews(true);
                                                 //The view image might be scaled up to fill the entire view. for more detailed info, please refer
@@ -771,9 +923,9 @@ public class ContributePriceFragment extends Fragment implements DialogInterface
                     //hide the bottom menu in modification action
                     setActionBarMenuVisibility(false);
 
-                    if (json.has(ConfigConstant.KEY_FUEL_BRAND)) {
+                    if (json.has(ConfigConstant.KEY_FUEL_NAME)) {
 
-                        String str = json.getString(ConfigConstant.KEY_FUEL_BRAND);
+                        String str = json.getString(ConfigConstant.KEY_FUEL_NAME);
                         json.put(ConfigConstant.FLAG_IS_SELECTED, true);
                         updateCanvasView(false);
                         selectedID = i;
@@ -967,7 +1119,7 @@ public class ContributePriceFragment extends Fragment implements DialogInterface
                  */
 
                 try {
-                    fuelData.getFuelJsonList().get(selectedID).put(ConfigConstant.KEY_FUEL_BRAND, fuelData.getAllFuelTypeList().get(numberPicker.getValue()));
+                    fuelData.getFuelJsonList().get(selectedID).put(ConfigConstant.KEY_FUEL_NAME, fuelData.getAllFuelTypeList().get(numberPicker.getValue()));
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -1043,6 +1195,13 @@ public class ContributePriceFragment extends Fragment implements DialogInterface
 
     }
 
+
+    /**
+     * To switch back default MapFragment
+     */
+    public interface setDefaultView {
+
+        public void setDefaultView(int fragmentId);
+
+    }
 }
-
-

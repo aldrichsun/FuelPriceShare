@@ -70,14 +70,14 @@ public class CustermizedCanvasView extends View {
 
     }
 
-    public void setBitmap(Bitmap bitmap)
-    {
+    public void setBitmap(Bitmap bitmap) {
         this.bitmap = bitmap;
     }
 
     /**
      * Draw all the fuel information onto the given input bitmap, known as the fuel price image; and then store
      * the drawing into a new Bitmap object called newBitmap, and then return it back.
+     *
      * @param fuelJsonArray fuel information stored in ArrayList<JSONObject>
      * @return new drawing bitmap of the current view
      */
@@ -119,8 +119,8 @@ public class CustermizedCanvasView extends View {
             {
                 JSONObject json = fuelJsonArray.get(i);
 
-                if (json.has(ConfigConstant.KEY_FUEL_BRAND))
-                    str = json.getString(ConfigConstant.KEY_FUEL_BRAND);
+                if (json.has(ConfigConstant.KEY_FUEL_NAME))
+                    str = json.getString(ConfigConstant.KEY_FUEL_NAME);
                 else
                     str = json.getString(ConfigConstant.KEY_FUEL_PRICE);
 

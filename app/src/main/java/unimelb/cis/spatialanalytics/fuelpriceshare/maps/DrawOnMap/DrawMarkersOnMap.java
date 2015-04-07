@@ -49,7 +49,7 @@ public class DrawMarkersOnMap {
                         // function drawOnMapMaxTenDifferentColor() is called
     private static String preferredFuelType; //this string is initialized only when
                         // function drawOnMapMaxTenDifferentColor() is called
-    private static double DEFAULT_PRICE_VALUE;  // the value of the price if we there's no real fuel price
+    private static double DEFAULT_PRICE_VALUE = Double.MAX_VALUE;  // the value of the price if we there's no real fuel price
 
 
     /**
@@ -140,7 +140,7 @@ public class DrawMarkersOnMap {
                 station.mFullMarkerIcon = CustomizeMapMarker.generateBitmapFromText(
                         actionBarActivity.getApplicationContext(),
                         station.mShortName,
-                        Color.BLACK);
+                        Color.BLUE);
             }
             else{ //
                 station.mFullMarkerIcon = CustomizeMapMarker.generateBitmapFromText(
@@ -195,11 +195,18 @@ public class DrawMarkersOnMap {
         for (int i = 0; i < myStations.size(); i++) {
 
             mStation station = stationList.get(i);
+
+            String snippet_string = preferredFuelType + ": ";
+            if( station.mPrice == DEFAULT_PRICE_VALUE )
+                snippet_string += "unknown";
+            else
+                snippet_string += station.mPrice;
+
             // Add a corresponding marker in the map
             MarkerOptions markerOptions = new MarkerOptions()
                     .position(station.mLocation)
                     .title(station.mFullName)
-                    .snippet(preferredFuelType + ": " + station.mPrice)
+                    .snippet( snippet_string )
 //                            .icon(BitmapDescriptorFactory.fromBitmap(
 //                                    CustomizeMapMarker.writeTextOnDrawable(
 //                                            actionBarActivity,
@@ -267,11 +274,18 @@ public class DrawMarkersOnMap {
         for(int i = 0; i < myStations.size(); i++) {
 
             mStation station = myStations.get(i);
+
+            String snippet_string = preferredFuelType + ": ";
+            if( station.mPrice == DEFAULT_PRICE_VALUE )
+                snippet_string += "unknown";
+            else
+                snippet_string += station.mPrice;
+
             // Add a corresponding marker in the map
             MarkerOptions markerOptions = new MarkerOptions()
                     .position(station.mLocation)
                     .title(station.mFullName)
-                    .snippet(preferredFuelType + ": " + station.mPrice)
+                    .snippet( snippet_string )
                     .icon(BitmapDescriptorFactory.fromBitmap(
                             station.mShowFullMarker ? station.mFullMarkerIcon : station.mBriefMarkerIcon
                     ));
