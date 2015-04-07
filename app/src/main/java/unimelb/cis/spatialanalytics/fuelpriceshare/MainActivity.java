@@ -29,6 +29,7 @@ import unimelb.cis.spatialanalytics.fuelpriceshare.fragment.MapFragment;
 import unimelb.cis.spatialanalytics.fuelpriceshare.fragment.PathFragment;
 import unimelb.cis.spatialanalytics.fuelpriceshare.fragment.ProfileFragment;
 import unimelb.cis.spatialanalytics.fuelpriceshare.fragment.RangeFragment;
+import unimelb.cis.spatialanalytics.fuelpriceshare.maps.DrawOnMap.DrawMarkersOnMap;
 import unimelb.cis.spatialanalytics.fuelpriceshare.maps.myLocation.GPSTracker;
 import unimelb.cis.spatialanalytics.fuelpriceshare.maps.myLocation.MyLocation;
 import unimelb.cis.spatialanalytics.fuelpriceshare.settings.SettingsActivity;
@@ -414,6 +415,9 @@ public class MainActivity extends ActionBarActivity {
                 PRESENT_FRAGMENT_ID_KEY, PRESENT_FRAGMENT_ID
         ).commit();
         pref.edit().apply();
+
+        // added by Yu Sun 06/04/2015
+        DrawMarkersOnMap.clearStations();
     }
 
 //    @Override

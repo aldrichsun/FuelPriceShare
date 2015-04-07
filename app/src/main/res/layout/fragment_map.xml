@@ -29,12 +29,12 @@
                 android:layout_width="fill_parent"
                 android:layout_height="48dp"
                 android:orientation="horizontal"
-                android:layout_marginLeft="@dimen/activity_vertical_margin"
-                android:layout_marginRight="@dimen/activity_vertical_margin">
+                android:layout_marginLeft="0dp"
+                android:layout_marginRight="0dp">
 
                 <com.gc.materialdesign.views.ButtonRectangle
                     android:id="@+id/locate_destination_button"
-                    android:layout_width="wrap_content"
+                    android:layout_width="64dp"
                     android:layout_height="48dp"
                     android:background="@color/orange"
                     android:text="@string/button_find_address"

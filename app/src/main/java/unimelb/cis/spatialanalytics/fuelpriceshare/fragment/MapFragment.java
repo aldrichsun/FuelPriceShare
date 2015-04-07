@@ -75,7 +75,8 @@ public class MapFragment extends Fragment{
     private static final String LOG_TAG = MapFragment.class.getSimpleName();
 
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
-    private LatLng currentLocation; // The user's current location.
+    public static LatLng currentLocation; // The user's current location.
+
     private String currentLocationName; // "Current location" R.string.Your_location.
     private Marker clickedMarer = null; // The marker clicked by the user.
     private LatLng destinLatLng = null; // The geocoded destination locaiton.
@@ -170,6 +171,8 @@ public class MapFragment extends Fragment{
 
         /////////////// Set up the initial focus of the map, which is the user current location ////////////////
         mMap.setMyLocationEnabled(true);
+
+        mMap.setOnMyLocationChangeListener( myLocationChangeListener );
         //Location myLocation = MyLocation.getMyLocation();
         GPSTracker gps = new GPSTracker( getActivity() );
         Location myLocation = gps.getLocation();
@@ -178,8 +181,10 @@ public class MapFragment extends Fragment{
 
         if( myLocation != null ){
 
-            currentLocation = new LatLng(myLocation.getLatitude(), myLocation.getLongitude());
+            currentLocation = null;
+            //currentLocation = new LatLng(myLocation.getLatitude(), myLocation.getLongitude());
             //Log.e(LOG_TAG, "The current location is: " + currentLocation.toString());
+
             destinLatLng = new LatLng(myLocation.getLatitude(), myLocation.getLongitude());
         }
         else {
@@ -952,6 +957,14 @@ public class MapFragment extends Fragment{
         }
     }
 
+    private GoogleMap.OnMyLocationChangeListener myLocationChangeListener
+            = new GoogleMap.OnMyLocationChangeListener() {
+        @Override
+        public void onMyLocationChange(Location location) {
+            currentLocation = new LatLng(location.getLatitude(), location.getLongitude());
+        }
+    };
+
     //////////////////////////////// AsyncTasks ////////////////////////////////////////
     /**
      * The function of the class is as follows:
@@ -986,14 +999,8 @@ public class MapFragment extends Fragment{
                     );
             this.range_radius = Double.valueOf(range_radius);
 
-            //Location location = MyLocation.getMyLocation();
+            // current location error flag
             curLocationError = false;
-            GPSTracker gpsTracker = new GPSTracker( getActivity() );
-            Location location = gpsTracker.getLocation();
-            isCurrentLocationEnabled = gpsTracker.canGetLocation();
-            if( location != null )
-                currentLocation = new LatLng(location.getLatitude(), location.getLongitude());
-
             // the geo-coding error flag
             geocodeError = false;
 
@@ -1108,33 +1115,6 @@ public class MapFragment extends Fragment{
                 return;
             }
 
-            // Now, at least we can move the camera to the input destination and set the clicked marker
-
-            // Clears all the existing markers on the map
-            mMap.clear();
-            DrawMarkersOnMap.clearStations();
-
-            // Add the destination marker
-            MarkerOptions markerOptions = new MarkerOptions();
-            markerOptions.position(destinLatLng);
-            markerOptions.title(destinAddressText);
-
-            // by default, we make the user 'click' the destination marker
-            clickedMarer = mMap.addMarker(markerOptions);
-
-            // Show the direction floating action button (fab)
-            if (pathFuelJumpButton.isHidden()) {
-                // first hide the way point jump button
-                if (!wayPointJumpButton.isHidden()) {
-                    wayPointJumpButton.setHideAnimation(ActionButton.Animations.JUMP_TO_DOWN);
-                    wayPointJumpButton.hide();
-                }
-                pathFuelJumpButton.setShowAnimation(ActionButton.Animations.JUMP_FROM_RIGHT);
-                pathFuelJumpButton.show();
-            }
-            // re-initialize the operation series
-            showResult = false;
-
             ////////////// SHOW THE QUERY RESULT ///////////////////
             ///////////////////////// query errors /////////////////////////
             if( jsonObj == null ){
@@ -1169,18 +1149,45 @@ public class MapFragment extends Fragment{
                 return;
             }
             /////////////////////////////////////////////////////////////////
+
+            // Now, at least we can move the camera to the input destination and set the clicked marker
+            // Clears all the existing markers on the map
+            mMap.clear();
+            DrawMarkersOnMap.clearStations();
+
+            // Add the destination marker
+            MarkerOptions markerOptions = new MarkerOptions();
+            markerOptions.position(destinLatLng);
+            markerOptions.title(destinAddressText);
+
+            // by default, we make the user 'click' the destination marker
+            clickedMarer = mMap.addMarker(markerOptions);
+
+            CameraPosition cameraPosition = new CameraPosition.Builder()
+                    .target(destinLatLng)
+                    .zoom(14)
+                    .build();
+            mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+
+            // Show the direction floating action button (fab)
+            if (pathFuelJumpButton.isHidden()) {
+                // first hide the way point jump button
+                if (!wayPointJumpButton.isHidden()) {
+                    wayPointJumpButton.setHideAnimation(ActionButton.Animations.JUMP_TO_DOWN);
+                    wayPointJumpButton.hide();
+                }
+                pathFuelJumpButton.setShowAnimation(ActionButton.Animations.JUMP_FROM_RIGHT);
+                pathFuelJumpButton.show();
+            }
+            // re-initialize the operation series
+            showResult = false;
+
             JSONArray jsonArray = null;
             try {
                 jsonArray = jsonObj.getJSONArray( ConfigConstant.KEY_PETROL_STATION );
             } catch (JSONException e) {
+
                 Log.e(LOG_TAG, "Error when parsing json array " + jsonObj.toString(), e);
-
-                CameraPosition cameraPosition = new CameraPosition.Builder()
-                        .target(destinLatLng)
-                        .zoom(14)
-                        .build();
-                mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
-
                 if( getActivity() != null ) {
                     Toast toast = Toast.makeText(
                             getActivity(), "Internet error please check and try again",
@@ -1192,12 +1199,6 @@ public class MapFragment extends Fragment{
             }
 
             if( jsonArray.length() <= 0 ){
-
-                CameraPosition cameraPosition = new CameraPosition.Builder()
-                        .target(destinLatLng)
-                        .zoom(14)
-                        .build();
-                mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
 
                 if( getActivity() != null ) {
                     Toast toast = Toast.makeText(getActivity(), "No stations within " +
@@ -1271,13 +1272,7 @@ public class MapFragment extends Fragment{
                             getString(R.string.pref_default_path_distance)
                     );
             this.path_distance = Double.valueOf(path_dist);
-            // update the current location
-            //Location location = MyLocation.getMyLocation();
-            GPSTracker gpsTracker = new GPSTracker( getActivity() );
-            Location location = gpsTracker.getLocation();
-            isCurrentLocationEnabled = gpsTracker.canGetLocation();
-            if( location != null )
-                currentLocation = new LatLng(location.getLatitude(), location.getLongitude());
+
             // progress dialog
             progressDialog = new ProgressDialog(getActivity());
             progressDialog.setTitle("Please wait...");
@@ -1609,29 +1604,12 @@ public class MapFragment extends Fragment{
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-
-            // update the current location
-            //Location location = MyLocation.getMyLocation();
-            GPSTracker gpsTracker = new GPSTracker( getActivity() );
-            Location location = gpsTracker.getLocation();
-            isCurrentLocationEnabled = gpsTracker.canGetLocation();
-            if( location != null )
-                currentLocation = new LatLng(location.getLatitude(), location.getLongitude());
-
             // progress dialog
             progressDialog = new ProgressDialog(getActivity());
             progressDialog.setTitle("Please wait...");
             progressDialog.setMessage("Retrieving the detour route...");
             progressDialog.setCancelable(false);
             progressDialog.show();
-//
-//            // Show the auto complete address with a Toast at the bottom of the screen
-//            if( getActivity() != null ) {
-//                Toast toast = Toast.makeText(getActivity(), "Retrieving the route, please wait...",
-//                        Toast.LENGTH_SHORT);
-//                toast.setGravity(Gravity.CENTER, 0, 0);
-//                toast.show();
-//            }
         }
 
         /**
@@ -2009,7 +1987,7 @@ public class MapFragment extends Fragment{
         protected Boolean doInBackground(String... params) {
 
             String address = params[0];
-            if( address.equals( lastAddress ) || address.equals( currentLocationName )
+            if( address.equals( lastAddress ) //|| address.equals( currentLocationName )
                 || address.equals( wayPointName) || address.equals( destinAddressText ) ){
 
                 return false;

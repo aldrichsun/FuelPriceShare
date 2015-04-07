@@ -17,25 +17,27 @@ import android.os.Bundle;
 import android.provider.Settings;
 import android.util.Log;
 
+import com.google.android.gms.maps.model.LatLng;
+
+import unimelb.cis.spatialanalytics.fuelpriceshare.fragment.MapFragment;
+
 /**
  * Yu Sun 04/03/2015:
  * For simple implementation, currently we don't override the location listener
  * update method, but get a new GPSTracker class and initialize a new location manager
  * to get the current location every time we need it.
  */
+@Deprecated
 public class GPSTracker implements LocationListener {
 //public class GPSTracker {
 
     private String TAG = GPSTracker.class.getSimpleName();
-
     private final Context mContext;
 
     // flag for GPS status
     boolean isGPSEnabled = false;
-
     // flag for network status
     boolean isNetworkEnabled = false;
-
     // flag for GPS status
     boolean canGetLocation = false;
 
@@ -45,10 +47,8 @@ public class GPSTracker implements LocationListener {
 
     // The minimum distance to change Updates in meters
     private static final long MIN_DISTANCE_CHANGE_FOR_UPDATES = 10; // 10 meters
-
     // The minimum time between updates in milliseconds
     private static final long MIN_TIME_BW_UPDATES = 1000 * 60 * 1; // 1 minute
-
     // Declaring a Location Manager
     protected LocationManager locationManager;
 
@@ -93,6 +93,7 @@ public class GPSTracker implements LocationListener {
 
     /**
      * Modified by Yu Sun on 04/03/2015 by removing the alert dialog
+     * Changed by Yu Sun on 06/04/2015 by adding the alert dialog
      * @return
      */
     public Location getLocation() {
@@ -100,11 +101,9 @@ public class GPSTracker implements LocationListener {
         try {
             locationManager = (LocationManager) mContext
                     .getSystemService(Context.LOCATION_SERVICE);
-
             // getting GPS status
             isGPSEnabled = locationManager
                     .isProviderEnabled(LocationManager.GPS_PROVIDER);
-
             // getting network status
             isNetworkEnabled = locationManager
                     .isProviderEnabled(LocationManager.NETWORK_PROVIDER);
@@ -117,7 +116,8 @@ public class GPSTracker implements LocationListener {
                 String provider = locationManager.getBestProvider(criteria, true);
                 location = locationManager.getLastKnownLocation(provider);
 
-                canGetLocation = false;
+                showSettingsAlert();//enable the GPS
+                //canGetLocation = false;
 
             } else {
 
@@ -220,39 +220,38 @@ public class GPSTracker implements LocationListener {
         Log.e(TAG,"GPS is disabled!");
         Log.e(TAG,"canGetLocation is : "+canGetLocation);
         final AlertDialog.Builder alertDialog = new AlertDialog.Builder(mContext);
-
         // Setting Dialog Title
         alertDialog.setTitle("GPS is settings");
-
         // Setting Dialog Message
         alertDialog.setMessage("GPS is not enabled. Do you want to go to settings menu?");
-
         // On pressing Settings button
         alertDialog.setPositiveButton("Settings", new DialogInterface.OnClickListener() {
-
             public void onClick(DialogInterface dialog, int which) {
-
                 Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
                 mContext.startActivity(intent);
             }
         });
-
         // on pressing cancel button
         alertDialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
-                dialog.cancel();
-            }
+                dialog.cancel();}
         });
-
         // Showing Alert Message
         alertDialog.show();
     }
 
-    // TODO implement a more efficient method to get current location
     @Override
     public void onLocationChanged(Location location) {
+
+        // Changed by Yu Sun on 07/04/2015
+        MapFragment.currentLocation = new LatLng(
+                location.getLatitude(),
+                location.getLongitude()
+        );
+        Log.e(TAG, "The current location is " + MapFragment.currentLocation.toString());
     }
 
+    // TODO implement a more efficient method to get current location
     @Override
     public void onProviderDisabled(String provider) {
     }
