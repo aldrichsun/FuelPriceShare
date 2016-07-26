@@ -1,21 +1,14 @@
 # FuelPriceShare
 FuelPriceShare Android app mobile end code
 
-This server side code contains servlets, whose functions are as follows.
-1. LoginServlet: in charge of log in
+This android app enables users to
 
-2. RegisterServlet: for registration in the system
+1) Find fuel stations and fuel prices close to any location;
 
-3. RangeQueryServlet: given a location (lat, lng), this query returns the fuel stations within a distance range
+2) Obtain route to a chosen location, and find fuel stations close to the path. Users can also choose to detour via any found station and get the updated path.
 
-4. PathQueryServlet: to find the fuel stations along a direction path
+The app also records the credit points of each user. Whenever users issue a query, they lose one point. Whenever they contribute updated prices for any fuel station, they gain ten points. In this way, we try to encourage users to contribute the latest fuel prices, and hence use crowdsourcing methods to make everyone happy.
 
-5. LocationHistoryServlet: process (stores and returns) the user's search history, which forms part of the search auto-complete
+The app has many other functions, such as a) recording users’ search history and dynamically updating them when users issue the next query, b) setting preferred fuel and default search radius, c) taking/uploading profile photos, etc.
 
-6. UploadImageServlet: handle image upload request
-
-7. FuelPriceImageProcessServlet: receive the uploaded fuel price image, and process it to extract the fuel infomation including price and type, and retrieve petro station the user currently located at
-
-8. UploadRefinedResultServlet: receive the refined fuel result from the user
-
-9. CouchDBHandlerServlet and CrudServlet: response to the requests to create, retrieve, update and delete data in the underlying database
+We also deploy many error handling methods to make sure that the app runs robustly.
