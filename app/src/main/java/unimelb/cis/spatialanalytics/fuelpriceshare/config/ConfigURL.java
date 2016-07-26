@@ -11,11 +11,11 @@ public class ConfigURL {
 //    private static String ip = "http://128.250.26.229";//server IP address
 //    private static String tomPort = "8080";//Tomcat port number
 
-    private static String ip = "http://spatialanalytics.cis.unimelb.edu.au";
-    private static String tomPort = "8082";
+//    private static String ip = "http://spatialanalytics.cis.unimelb.edu.au";
+//    private static String tomPort = "8082";
 
-    //private static String ip = "http://128.250.26.52";
-    //private static String tomPort = "8080";
+    private static String ip = "http://10.100.230.171"; //"http://128.250.26.52";
+    private static String tomPort = "8080";
 
     private static String serverProject = "FuelPriceShareServer";//server project name
 

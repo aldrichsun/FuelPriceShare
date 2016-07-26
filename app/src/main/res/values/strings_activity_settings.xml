@@ -6,7 +6,7 @@
     <string name="pref_header_general">General</string>
 
     <string name="pref_key_range_distance">range_distance_list</string>
-    <string name="pref_default_range_distance">3.0</string>
+    <string name="pref_default_range_distance">1.0</string>
     <string name="pref_title_range_distance">Search radius</string>
 
     <string-array name="pref_range_distance_list_titles">

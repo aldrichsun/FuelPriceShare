@@ -184,17 +184,22 @@ public class MapFragment extends Fragment{
             //currentLocation = new LatLng(myLocation.getLatitude(), myLocation.getLongitude());
             //Log.e(LOG_TAG, "The current location is: " + currentLocation.toString());
             destinLatLng = new LatLng( currentLocation.latitude, currentLocation.longitude );
+            CameraPosition initialCameraPosition = new CameraPosition.Builder()
+                    .target(destinLatLng)
+                    .zoom(14)
+                    .build();
+            mMap.animateCamera(CameraUpdateFactory.newCameraPosition(initialCameraPosition));
         }
         else {
-            destinLatLng = new LatLng(-37.7963, 144.9614); // Melbourne Uni
+            destinLatLng = new LatLng(-25.923564, 134.522963); // Australia
             //destinLatLng = new LatLng(0.0, 0.0);
+            CameraPosition initialCameraPosition = new CameraPosition.Builder()
+                    .target(destinLatLng)
+                    .zoom(3)
+                    .build();
+            mMap.animateCamera(CameraUpdateFactory.newCameraPosition(initialCameraPosition));
         }
         ////mMap.addMarker(new MarkerOptions().position(latLng).title("Melbourne Uni"));
-        CameraPosition initialCameraPosition = new CameraPosition.Builder()
-                .target(destinLatLng)
-                .zoom(14)
-                .build();
-        mMap.animateCamera(CameraUpdateFactory.newCameraPosition(initialCameraPosition));
 
         ////////////////////// Zoom level change listener /////////////////////////////
         // Created by Nurlan Kenzhebekov on 19/03/2015.
