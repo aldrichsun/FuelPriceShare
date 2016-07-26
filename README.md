@@ -12,3 +12,7 @@ The app also records the credit points of each user. Whenever users issue a quer
 The app has many other functions, such as a) recording users’ search history and dynamically updating them when users issue the next query, b) setting preferred fuel and default search radius, c) taking/uploading profile photos, etc.
 
 We also deploy many error handling methods to make sure that the app runs robustly.
+
+Main contributors to this app are:
+
+Yu Sun, Han Li, Nurlan Kenzhebekov, He Zhao, Andy Yuan Xue, Yuan Li, and Rui Zhang.
